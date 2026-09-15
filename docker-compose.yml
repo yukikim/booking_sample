@@ -1,0 +1,25 @@
+# ローカル開発用 PostgreSQL。Next.js はホスト側で npm run dev を実行します。
+# 起動: docker compose up -d --wait
+# 停止: docker compose down （データは名前付きボリュームに保持）
+# .env の DATABASE_URL と DIRECT_URL に同じ接続文字列を設定します:
+# postgresql://booking:booking_local_password@127.0.0.1:5432/booking_sample?schema=public
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking_local_password
+      POSTGRES_DB: booking_sample
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
