@@ -1,23 +1,11 @@
 import { loadEnvConfig } from "@next/env";
+import { assertLocalDatabase } from "./lib/local-database";
 
 async function main() {
   // Match `next dev`, including .env.local overrides. Never print env values.
   loadEnvConfig(process.cwd(), true);
 
-  const value = process.env.DATABASE_URL;
-  if (!value) throw new Error("Missing database configuration.");
-  const url = new URL(value);
-  if (
-    !["postgresql:", "postgres:"].includes(url.protocol) ||
-    !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname) ||
-    (url.port || "5432") !== "5432" ||
-    url.pathname !== "/booking_sample" ||
-    [...url.searchParams.keys()].some((key) => key !== "schema") ||
-    (url.searchParams.has("schema") &&
-      url.searchParams.get("schema") !== "public")
-  ) {
-    throw new Error("Only the local Compose database is allowed.");
-  }
+  assertLocalDatabase(process.env.DATABASE_URL);
 
   const { getPrisma } = await import("../src/lib/prisma");
   const prisma = getPrisma();

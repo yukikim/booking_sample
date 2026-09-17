@@ -11,7 +11,12 @@
     "db:down": "docker compose down",
     "db:generate": "prisma generate --config prisma7.config.ts",
     "db:validate": "prisma validate --config prisma7.config.ts",
-    "db:check": "node --conditions=react-server --import tsx scripts/check-db.ts"
+    "db:check": "node --conditions=react-server --import tsx scripts/check-db.ts",
+    "typecheck": "next typegen && tsc --noEmit --incremental false",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:watch": "node --import tsx --test --watch tests/*.test.ts",
+    "check": "npm run db:validate && npm run db:generate && npm run lint && npm run typecheck && npm test",
+    "audit:dependencies": "npm audit --audit-level=high"
   },
   "dependencies": {
     "@next/env": "16.3.5",
@@ -36,5 +41,8 @@
     "tailwindcss": "^4",
     "tsx": "4.23.13",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22.23.1 <23"
   }
 }
