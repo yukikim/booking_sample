@@ -2,7 +2,7 @@
 
 更新日：2026-09-17
 
-状態：Task 2.1.1〜2.1.3の環境・検証手順整備完了。GitHub上のCI実行と依存監査の解消は未完了。次はTask 2.1.4。
+状態：Task 2.1.1〜2.1.3の環境・検証手順整備完了。依存監査は限定overrideで解消済み（ローカル0件）。修正後のGitHub CI再実行は未確認。次はTask 2.1.4。
 
 ## 1. 文書の範囲
 
@@ -159,7 +159,7 @@ DB統合での予約整合性、アプリHTTP経由の接続、ブラウザ、�
 | --- | --- | --- |
 | 2.1.1 | 確認完了 | 設定・実行版・依存版と現状の静的検証を第2章へ記録 |
 | 2.1.2 | 完了 | 第3章に実装と実接続結果を記録 |
-| 2.1.3 | 手順・CI設定整備完了 | 第6章にローカル再現結果を記録。GitHub実行・依存監査解消は未完了 |
+| 2.1.3 | 手順・CI設定整備完了 | 第6章にローカル再現結果を記録。修正後のGitHub実行は未確認。監査解消は第7章 |
 | 2.1.4 | 未着手 | README第2・10章からセットアップを再現できること |
 | Story 2.2 | 未着手 | 採用設計に沿うモデル・制約・migration・seed、DB統合検証 |
 
@@ -203,7 +203,7 @@ npm run build
 npm run audit:dependencies
 ```
 
-最後の監査は現在の既知指摘によって失敗する。これはテスト失敗やDB接続失敗とは別に対応する。`npm audit fix --force`はこの手順に含めない。
+監査は第7章の修正後、ローカルでは0件で成功した。将来の指摘による失敗は、テスト失敗やDB接続失敗とは別に対応する。`npm audit fix --force`はこの手順に含めない。
 
 ### 6.3 接続先ガードの回帰テスト
 
@@ -223,11 +223,11 @@ CLIの正常系は`db:check`で実DBに対して確認する。拒否テスト�
 | job | 実行内容 |
 | --- | --- |
 | checks | checkout→Node設定→npm ci→check→db:check→build |
-| dependency-audit | checkout→Node設定→依存監査。既知highがある間は失敗する |
+| dependency-audit | checkout→Node設定→依存監査。high以上の指摘がある場合は失敗する |
 
 checksではPostgreSQL 17サービスを用意し、CI専用のローカル接続変数を設定する。実運用のDB・秘密情報は使わない。ヘルスチェック後に疎通を実行し、migrationはまだ実行しない。
 
-contents権限はreadのみ、checkoutの資格情報永続化を無効化。同じ参照先の新実行で前の実行を中止する。タイムアウトはchecks 20分、監査10分。既知監査をcontinue-on-errorで成功扱いにしないため、現状ではワークフロー全体は監査jobで失敗する見込み。
+contents権限はreadのみ、checkoutの資格情報永続化を無効化。同じ参照先の新実行で前の実行を中止する。タイムアウトはchecks 20分、監査10分。監査をcontinue-on-errorで成功扱いにしない。初回CIではhigh 4件で失敗したが、第7章で修正し、ローカル監査は成功した。修正後のGitHub上の再実行は未確認。
 
 [checkout](https://github.com/actions/checkout)・[setup-node](https://github.com/actions/setup-node)の公式手順を確認し、v7を使用した。Next.jsの型生成は同梱CLIガイドの`next typegen`に従った。
 
@@ -251,7 +251,7 @@ YAMLの構文解析は成功したが、GitHub上の実行・ブランチ保護�
 
 ブラウザ表示・本番デプロイ・予約機能・GitHubホスト上のCIは未検証。新規インストール時にESLint 9.39.5のサポート終了警告も表示されたため、Next.jsのESLint設定との互換性を確認して別途更新対象とする。
 
-### 6.6 依存監査の内訳と判断
+### 6.6 初回の依存監査と判断（第7章で対応済み）
 
 2026-09-17にnpm auditと配布バージョンを再確認した。
 
@@ -265,10 +265,52 @@ YAMLの構文解析は成功したが、GitHub上の実行・ブランチ保護�
 
 auditの自動修正候補はPrisma 6.19.3へのmajor変更、配布のlatestは8.0.0-rc.15だった。今回の7.10.0設計からの降格・RCへの移行は実行しない。deepmerge-tsのmajor overrideも互換性確認なしでは適用しない。
 
-今後、Prisma側の対応版または限定overrideを選び、CLI設定読込・Client生成・DB操作・buildの互換性を確認して解消する。CI監査jobは解消まで赤のまま残す。現在の設定整備完了を、公開準備・依存監査合格と混同しない。
+初回は対応を保留したが、CI失敗の報告を受け第7章の限定overrideを実施した。この節の指摘件数は修正前の記録。監査jobの判定基準は変更していない。
 
 参照：[deepmerge-ts advisory](https://github.com/advisories/GHSA-ggr8-5vv4-36mx)、[MySQL2認証](https://github.com/advisories/GHSA-3f6p-5ww8-9rcr)、[MySQL2圧縮](https://github.com/advisories/GHSA-rgwj-5xj2-c3m3)。
 
 ### 6.7 次の進め方
 
-次はTask 2.1.4でREADME第2・10章のセットアップ・検証手順を統合する。Task 2.1.3は手順・テスト・CIファイルの整備とローカル再現を完了として記録し、GitHub実行確認と依存監査解消は明示した残課題として継続する。
+次はTask 2.1.4でREADME第2・10章のセットアップ・検証手順を統合する。Task 2.1.3は手順・テスト・CIファイルの整備とローカル再現を完了として記録し、修正後のGitHub実行確認は残課題として継続する。依存監査の解消結果は第7章を参照する。
+
+
+## 7. dependency-auditの失敗への対応
+
+2026-09-17、利用者からGitHub CIのdependency-auditがhigh 4件で失敗した報告を受け、依存を修正した。監査レベルやCIの失敗判定は緩めていない。
+
+### 7.1 変更内容
+
+| 対象 | 変更前 | 変更後 |
+| --- | --- | --- |
+| Prisma CLI | ^7.10.0（実体7.10.0） | 7.10.0に正確に固定 |
+| @prisma/config@7.10.0配下のdeepmerge-ts | 7.1.5 | overrideで8.0.2 |
+| prisma@7.10.0配下のmysql2 | 3.15.3 | overrideで3.24.4 |
+
+package.jsonとpackage-lock.jsonを更新。Prisma 6への降格、Prisma 8 RCへの移行、全依存を対象にしたoverrideは行っていない。Prisma Client・pgアダプターの実体は7.10.0を維持する。
+
+npmは直接依存の指定と競合するoverrideを拒否するため、CLIの直接指定を現行の7.10.0へ固定した。overrideも親の版を限定し、将来のPrisma更新へ無条件で持ち越さない。
+
+### 7.2 互換性確認の範囲
+
+deepmerge-ts 8はmajor更新。[公式リリースノート](https://github.com/RebeccaStevens/deepmerge-ts/releases/tag/v8.0.0)ではMap値の深いマージや型名・deepmergeIntoの挙動変更がある。インストール済み@prisma/configの実装がdeepmergeを設定ローダーへ渡すことを確認した。現在のprisma7.config.tsは通常のオブジェクトで、Map・カスタム型・deepmergeIntoを使用していない。
+
+Prismaから解決されるdeepmergeの通常設定マージと、循環入力によるスタック枯渇が発生しないことを確認した。加えて実際のCLI設定読込・schema検証・Client生成を実行した。今後、設定の表現を拡張する場合は再検証する。
+
+MySQL2はアプリのPostgreSQL接続では使わないが、CLIの依存として修正版へ更新した。MySQLサーバーとの通信を検証したわけではない。DBの業務モデル・migrationは未作成のため、今回migrationの適用・巻戻しは行っていない。
+
+### 7.3 検証結果
+
+- `npm ci`：更新したlockfileからクリーンインストール成功。
+- `npm run audit:dependencies`：終了コード0、found 0 vulnerabilities。
+- `npm ls prisma @prisma/config deepmerge-ts mysql2`：7.10.0／7.10.0／8.0.2／3.24.4、override適用を確認。
+- `npm run check`：Prisma検証・生成、lint、型チェック、14テストが成功。
+- `npm run db:check`：既存ローカルPostgreSQLへのSELECT 1成功。データ更新なし。
+- `npm run build`：隔離コピーでクリーンインストール後に成功。`/`と`/_not-found`を静的生成。
+
+作業ディレクトリでのbuildはTurbopackの処理中にポートの権限制限で停止した。node_modules・.next・実際の.envを持ち込まない一時ディレクトリへコピーし、.env.exampleを使ってnpm ciとbuildを再実行して成功した。
+
+修正後のGitHub CIは、この差分をcommit・pushして新しい実行で確認する必要がある。古いcommitの失敗ジョブを再実行するだけでは新しいlockfileは使われない。今回commit・push・GitHub再実行は行っていない。
+
+### 7.4 overrideの管理
+
+Prisma更新時は上流の依存修正状況を調べ、修正済みならoverrideを除去してlockfileを再生成する。npm ci・監査・check・DB疎通・buildを再確認する。監査を通す目的でPrismaのmajorを自動変更しない。現時点の0件は将来の脆弱性不存在を保証しないため、既存のCI監査を継続する。
