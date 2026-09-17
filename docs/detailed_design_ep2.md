@@ -2,7 +2,7 @@
 
 更新日：2026-09-17
 
-状態：Task 2.1.1確認完了。Task 2.1.2以降は未完了。
+状態：Task 2.1.1・2.1.2完了。Task 2.1.3以降は未完了。
 
 ## 1. 文書の範囲
 
@@ -76,25 +76,89 @@ Next.js同梱ガイド`node_modules/next/dist/docs/01-app/01-getting-started/01-
 - Prismaモデル追加・Client再生成・マイグレーション・初期データ。
 - 自動テスト基盤・CI。
 
-## 3. Task 2.1.2：次のハンズオン設計
+## 3. Task 2.1.2：ローカルDBとPrisma接続（実装・疎通確認済み）
 
-次の到達点は「ローカルPostgreSQLへアプリ側の接続処理から疎通できる」こと。まだ実施していない手順を以下に整理する。
+### 3.1 接続構成
 
-1. 既存環境変数の値を出力せず、接続先がローカルComposeと一致するか確認する。外部DBを向いている場合は流用せず、ローカル用の設定を分離する。
-2. `.env.example`を作り、ローカル専用の`DATABASE_URL`・`DIRECT_URL`を記載する。既存`.env`をコピー操作で上書きしない。`.gitignore`でサンプルだけを追跡対象にする。
-3. `docker compose ps -a`等で既存の停止コンテナ・永続ボリュームも確認してから、`docker compose up -d --wait db`で起動する。ポート競合があれば既存サービスを勝手に停止しない。
-4. Next.js側では`DATABASE_URL`、CLIでは`DIRECT_URL`を使う責務を明記する。dotenvとNext.jsの環境変数読込順序も確認する。
-5. Prismaのpgアダプターを使うサーバー専用接続処理を設計・作成し、接続を共有する。Client生成とモデル未定義時の動作は実際の版で確認する。
-6. データを変更しない疎通で接続を検証し、資格情報を含まない成功／失敗結果を記録する。業務モデルのmigrationはStory 2.2で行う。
+Next.jsのNode.jsサーバー → `getPrisma()` → `PrismaPg` → ローカルPostgreSQL。アプリは`DATABASE_URL`、Prisma CLIは`DIRECT_URL`を参照する。今回、両変数が既存Composeのローカルhost・port・DB名・資格情報に一致することを、値を出力せず確認した。既存`.env`は変更していない。
 
-コンテナ停止は`docker compose down`でデータを保持する。`down -v`やDB resetを通常のセットアップ手順に含めない。
+作業開始時、前回とは異なり`booking_sample-db-1`が既にhealthyだった。既存の`booking_sample_postgres_data`を維持し、`db:up`による再現手順でもhealthyを確認した。新規DB・テーブルの作成やmigrationは行っていない。
+
+### 3.2 追加・変更ファイル
+
+| ファイル | 責務 |
+| --- | --- |
+| `.env.example` | Compose専用の開発用接続例。公開可能なローカル専用資格情報のみ |
+| `.gitignore` | `.env*`を引き続き無視し、`.env.example`のみ例外化 |
+| `src/lib/prisma.ts` | server-onlyな遅延生成関数`getPrisma()`。pgアダプターとClientを共有 |
+| `scripts/check-db.ts` | Next.jsと同じ環境読込後、ローカル接続先を検証し`SELECT 1`を実行 |
+| `package.json` / `package-lock.json` | 実行スクリプトと必要依存を追加 |
+
+追加依存は`server-only` 0.0.1、`@next/env` 16.3.5、開発依存`tsx` 4.23.13。正確な版を指定した。Prisma・Next.js等の既存指定は変更していない。
+
+### 3.3 Clientのライフサイクル
+
+- `server-only`でClient Componentからのimportを禁止する。
+- 初回の`getPrisma()`呼出しで`DATABASE_URL`を確認しClientを作る。モジュールを読むだけでは接続を作らない。
+- 開発時はglobalThisに保持し、ホットリロードでプールが増え続けることを避ける。本番はモジュール内で共有する。
+- pgプール上限はプロセスあたり5、接続・クエリのタイムアウトは5秒を初期値とする。サービス全体の上限ではなく、本番の同時インスタンス数を含む調整はデプロイ時に行う。
+- SQL・パラメータ・接続情報を自動ログ出力しない。疎通コマンドは例外原文を表示せず、固定のエラーメッセージで終了する。
+- Web要求ごとには切断しない。疎通CLIだけは終了前に`$disconnect()`する。
+
+### 3.4 環境変数の読込
+
+Next.jsはprocess.env、環境別local、`.env.local`、環境別ファイル、`.env`の順で既存値を優先する。`db:check`は`@next/env`で開発時と同じ読込を行う（NODE_ENV=testではNext.jsのtest規則が適用される）。`DATABASE_URL`に`NEXT_PUBLIC_`を付けない。
+
+Prisma CLIは現在の`prisma7.config.ts`内のdotenvにより`.env`を読む。既にexport済みの環境変数を優先し、`.env.local`は自動では読まない。このため`.env.local`を追加した場合、アプリとCLIが別DBへ向く可能性があり、両変数の接続先を意識して管理する。
+
+`db:check`は接続前にlocalhost系・5432番・booking_sampleというDB名を検証し、クエリパラメータは`schema=public`以外を拒否する。外部DBやパラメータによる接続先上書きを疎通コマンドに流用しない。この制約はローカル用コマンドだけに適用し、アプリの本番接続をlocalhostへ固定するものではない。
+
+### 3.5 ハンズオン手順
+
+リポジトリルートで実行する。依存インストール済みの今回の環境では1〜2は不要。
+
+1. 新規取得時は`npm ci`でlockfileに従って依存を入れる（クリーン環境の再現確認はTask 2.1.3）。
+2. `.env`が存在しない場合だけ`.env.example`を`.env`へコピーする。存在する場合は上書きせず接続先を確認する。
+3. 次を順に実行する。
+
+```bash
+npm run db:up
+npm run db:generate
+npm run db:validate
+npm run db:check
+```
+
+期待する最終表示：`Local PostgreSQL: SELECT 1 succeeded (shared Prisma Client).`
+
+`db:generate`・`db:validate`は`--config prisma7.config.ts`を明示する。モデル未定義でも今回のPrisma 7.10.0ではClient生成とraw queryが成功した。確認用の仮モデルは追加しない。
+
+`db:check`の内部コマンドは`node --conditions=react-server --import tsx scripts/check-db.ts`。CLIでもサーバー用条件で`server-only`モジュールを読み、実際のアプリ用接続関数を使って検証する。公開のDB確認APIは追加しない。
+
+停止する場合は`npm run db:down`。名前付きボリュームを削除しないためデータは保持される。今回、既に稼働していたDBは停止せず継続稼働させている。`down -v`やresetは通常手順に含めない。
+
+### 3.6 検証結果・残課題
+
+| 確認 | 結果 |
+| --- | --- |
+| `npm run db:up` | 既存サービスhealthy |
+| `npm run db:generate` | Prisma 7.10.0 Client生成成功。生成物に差分なし |
+| `npm run db:validate` | schema valid |
+| `npm run db:check` | 同一Client共有とSELECT 1成功。データ更新なし |
+| 外部hostへDATABASE_URLを一時上書きしたCLI実行 | 接続前に終了コード1。URL・資格情報は出力されない |
+| react-server条件なしで接続モジュールをimport | server-onlyの境界エラーで拒否 |
+| `npm run lint` / `tsc --noEmit --incremental false` | 両方終了コード0 |
+| `git diff --check` | 成功 |
+
+依存追加時のnpm auditでhigh 4件を検出。内訳はPrisma CLIおよび推移依存`@prisma/config`・`deepmerge-ts`・`mysql2`。今回の接続成功と脆弱性解消は別であり、自動の破壊的更新は行っていない。Task 2.1.3で修正版・影響範囲を確認する課題として残す。
+
+DB統合での予約整合性、アプリHTTP経由の接続、ブラウザ、ビルド、CI、クリーンインストールは未確認。今回の実接続結果はローカル環境の疎通だけを示す。
 
 ## 4. 後続Taskと完了条件
 
 | Task | 状態 | 完了に必要な成果物・検証 |
 | --- | --- | --- |
 | 2.1.1 | 確認完了 | 設定・実行版・依存版と現状の静的検証を第2章へ記録 |
-| 2.1.2 | 未着手（手順案あり） | 環境変数サンプル、DB起動、サーバー接続処理、実接続確認 |
+| 2.1.2 | 完了 | 第3章に実装と実接続結果を記録 |
 | 2.1.3 | 未着手 | lint・型生成／型チェック・テスト・buildの手順、CI、実行結果 |
 | 2.1.4 | 未着手 | README第2・10章からセットアップを再現できること |
 | Story 2.2 | 未着手 | 採用設計に沿うモデル・制約・migration・seed、DB統合検証 |
@@ -104,3 +168,4 @@ Next.js同梱ガイド`node_modules/next/dist/docs/01-app/01-getting-started/01-
 | 日付 | 内容 | 結果 |
 | --- | --- | --- |
 | 2026-09-17 | Epic 2専用設計書を作成。Task 2.1.1の設定・バージョン・静的検証 | lint・型チェック・schema検証成功。実行中Composeコンテナなし。DB接続・起動・buildは未実施 |
+| 2026-09-17 | Task 2.1.2実装 | サンプル・接続処理・CLI追加。既存DBのhealthy、SELECT 1、拒否系、lint・型チェックを確認。audit high 4件は後続課題 |
