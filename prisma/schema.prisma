@@ -1,7 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Task 2.2.1: base models. No migration has been applied yet.
+// Snapshots, slot constraints and operational history follow in Tasks 2.2.2–2.2.6.
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +8,180 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum MemberStatus {
+  PENDING_EMAIL
+  PENDING_REVIEW
+  REJECTED
+  ACTIVE
+  WITHDRAWN
+  RESTORE_PENDING
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PrincipalType {
+  MEMBER
+  STAFF
+  ADMIN
+}
+
+model Member {
+  id               String       @id @default(uuid()) @db.Uuid
+  email            String       @db.VarChar(254)
+  emailKey         String       @unique @db.VarChar(254)
+  lastName         String       @db.VarChar(100)
+  firstName        String       @db.VarChar(100)
+  // Normalization can expand the display name; do not truncate these keys.
+  lastNameKey      String       @db.Text
+  firstNameKey     String       @db.Text
+  phoneNumber      String       @db.VarChar(11)
+  postalCode       String       @db.VarChar(7)
+  ageBand          Int          @db.SmallInt
+  passwordHash     String       @db.Text
+  status           MemberStatus @default(PENDING_EMAIL)
+  isDeleted        Boolean      @default(false)
+  emailVerifiedAt  DateTime?    @db.Timestamptz(3)
+  // Preserve first activation when withdrawing; only former members may restore.
+  firstActivatedAt DateTime?    @db.Timestamptz(3)
+  authVersion      Int          @default(1)
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
+
+  reservations Reservation[]
+  sessions     AppSession[]
+}
+
+// Staff credentials are independent of Member and of environment-based admins.
+model StaffAccount {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @db.VarChar(254)
+  emailKey     String   @unique @db.VarChar(254)
+  displayName  String   @db.VarChar(100)
+  passwordHash String   @db.Text
+  isActive     Boolean  @default(true)
+  authVersion  Int      @default(1)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  sessions AppSession[]
+}
+
+// Seed supplies a stable ID. Credentials and ADMIN_AUTH_VERSION stay in env.
+// A StaffAccount cannot become an admin by changing a role column.
+model AdminAccount {
+  id          String   @id @db.Uuid
+  displayName String   @db.VarChar(100)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  sessions AppSession[]
+}
+
+// Application revocation record for JWT auth; not an Auth.js adapter Session.
+// Task 2.2.4 adds a CHECK: exactly one owner matching principalType.
+model AppSession {
+  id            String        @id @default(uuid()) @db.Uuid
+  principalType PrincipalType
+  memberId      String?       @db.Uuid
+  staffId       String?       @db.Uuid
+  adminId       String?       @db.Uuid
+  authVersion   Int
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  expiresAt     DateTime      @db.Timestamptz(3)
+  revokedAt     DateTime?     @db.Timestamptz(3)
+
+  member Member?       @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  staff  StaffAccount? @relation(fields: [staffId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  admin  AdminAccount? @relation(fields: [adminId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+model Room {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(100)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  reservations Reservation[]
+}
+
+// A therapist is an assignable resource, not automatically a login account.
+model Therapist {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(100)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  reservations Reservation[]
+}
+
+model Treatment {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String   @db.VarChar(100)
+  durationMinutes Int
+  priceYen        Int
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  reservations Reservation[]
+}
+
+model Option {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String   @db.VarChar(100)
+  durationMinutes Int
+  priceYen        Int
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  reservationOptions ReservationOption[]
+}
+
+model Reservation {
+  id                   String            @id @default(uuid()) @db.Uuid
+  memberId             String            @db.Uuid
+  treatmentId          String            @db.Uuid
+  roomId               String            @db.Uuid
+  therapistId          String            @db.Uuid
+  status               ReservationStatus @default(CONFIRMED)
+  // Asia/Tokyo calendar date; time instants below are stored as timestamptz.
+  businessDate         DateTime          @db.Date
+  startsAt             DateTime          @db.Timestamptz(3)
+  treatmentEndsAt      DateTime          @db.Timestamptz(3)
+  occupiesUntil        DateTime          @db.Timestamptz(3)
+  totalDurationMinutes Int
+  totalPriceYen        Int
+  slotCount            Int
+  notes                String?           @db.VarChar(1000)
+  version              Int               @default(1)
+  createdAt            DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime          @updatedAt @db.Timestamptz(3)
+
+  member    Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  treatment Treatment           @relation(fields: [treatmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  room      Room                @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  therapist Therapist           @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  options   ReservationOption[]
+}
+
+// Snapshot fields are added in Task 2.2.2 before the first migration.
+model ReservationOption {
+  reservationId String @db.Uuid
+  optionId      String @db.Uuid
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  option      Option      @relation(fields: [optionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([reservationId, optionId])
 }

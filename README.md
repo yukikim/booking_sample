@@ -2,7 +2,7 @@
 
 Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼーションサロン向けの会員制Web予約アプリです。入会したお客様による予約受付と、店舗側の予約・施術メニュー・設備・施術者の管理を行います。
 
-**開発開始前の要件・設計方針をまとめたREADMEです。記載した機能は実装予定であり、実装済みを示すものではありません。**
+**要件・設計方針と開発手順をまとめたREADMEです。業務機能は実装予定です。開発環境の手順は第10章、作業の進捗は第15章を参照してください。**
 
 ## 1. 目的
 
@@ -27,6 +27,23 @@ Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼー
 | データベースのホスティング | Neon |
 
 利用者のブラウザからNext.jsのサーバー処理を経由し、PrismaでNeon上のPostgreSQLへアクセスする構成を想定します。既存パッケージのバージョン指定は`package.json`、解決済みバージョンは`package-lock.json`で管理します。NextAuthの採用バージョンと認証構成は導入時に確定します。
+
+### 現在の開発環境
+
+| 項目 | 使用する版・設定 |
+| --- | --- |
+| Node.js | `.nvmrc`の22.23.1を開発・CIの基準とする。`engines`は22.23.1以上・23未満 |
+| npm | 10.9.8で再現確認。依存は`npm ci`でlockfileから導入 |
+| Next.js / React | 16.3.5 / 19.2.8 |
+| TypeScript / Tailwind CSS | lockfileで5.9.3 / 4.3.3 |
+| Prisma CLI・Client・pgアダプター | lockfileで7.10.0。CLI設定は`prisma7.config.ts` |
+| ローカルDB | Docker Composeの`postgres:17-alpine`。ホスト側の`127.0.0.1:5432`へ公開 |
+| 検証 | ESLint、TypeScript、Node.js標準テスト、DB疎通、本番ビルド、npm audit |
+| CI | `.github/workflows/ci.yml`。検証・ビルドと依存監査を別jobで実行 |
+
+Next.jsはホスト側で動かし、PostgreSQLだけをコンテナで動かします。ローカル開発にVercel・Neon・SMTPのアカウントは不要です。会員・予約・認証主体等の基本モデルはPrismaスキーマに定義済みですが、DBへの適用、認証・メール配信・予約画面は未実装です。
+
+Prisma CLIの推移依存には、監査指摘に対応した版限定の`overrides`があります。更新時の扱いは[Epic 2詳細設計第7章](docs/detailed_design_ep2.md#7-dependency-auditの失敗への対応)を参照してください。
 
 ## 3. 利用者
 
@@ -326,12 +343,14 @@ Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼー
 
 ## 9. データモデル案
 
-以下は初期設計案です。Prisma Schemaの詳細は実装時に確定します。
+以下は全体のモデル案です。Task 2.2.1で会員・予約・マスタ・認証主体の基本モデルを`prisma/schema.prisma`へ定義しました。スナップショット、占有枠、運用履歴、設定履歴等は後続Taskで追加します。DBへの適用は未実施です。実装範囲・型・残る制約は[Epic 2詳細設計第9章](docs/detailed_design_ep2.md#9-task-221基本モデル認証主体型の定義)を参照してください。
 
 | モデル | 主な役割 |
 | --- | --- |
 | Member | 姓・名、メールアドレス、電話番号、郵便番号、年代、メール確認状態、会員状態、削除フラグ、退会種別・理由・日時、強制退会理由、認証主体との関連 |
-| StaffAccount | スタッフの認証情報・管理者／スタッフ区分・有効状態（管理者の環境変数認証との対応は詳細設計） |
+| StaffAccount | スタッフ専用の認証情報・有効状態・認証版 |
+| AdminAccount | 管理者の固定監査用ID・有効状態。資格情報・認証版は環境変数 |
+| AppSession | JWTと照合するアプリ独自の主体・認証版・絶対期限・失効記録 |
 | StaffPermission | スタッフID・操作権限、付与・解除の操作者と日時 |
 | AuthToken | 入会確認・復旧確認・パスワード再設定用のトークン検証情報、有効期限、使用・失効状態（概念モデル） |
 | Room | 部屋の名称・有効状態 |
@@ -350,22 +369,116 @@ Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼー
 
 設計上は、予約時点のメニュー・オプションの名称、時間、料金を保存し、後日のマスタ編集で過去の予約内容が変わらないようにします。
 
-会員と予約は1対多で関連付け、会員に紐付かない予約を作成できないようにします。認証アカウント・セッション等の物理モデルはNextAuthの採用構成に合わせて確定します。会員・スタッフのDB上のパスワードはハッシュとして保存し、確認・再設定トークンは有効期限付き・一度限りの利用とする設計です。退会後も会員情報と予約履歴を保持し、論理削除から復旧できる関連を維持します。復旧は24時間有効の確認メールからの確認完了後に行い、取消済み予約は復活させません。退会済みを含むメールの一意制約と氏名の照合用項目を設けます。氏名だけに一意制約を置くかは未確定とし、第11章で整理します。
+会員と予約は1対多で関連付け、予約の会員IDを必須に定義しました。認証はCredentials＋JWTと独自のAppSessionを前提とし、NextAuthの導入・動作確認はStory 3.1／3.3で行います。会員・スタッフのDB上のパスワードはハッシュとして保存し、確認・再設定トークンは有効期限付き・一度限りの利用とする設計です。退会後も会員情報と予約履歴を保持し、論理削除から復旧できる関連を維持します。復旧は24時間有効の確認メールからの確認完了後に行い、取消済み予約は復活させません。退会済みを含むメール照合キーの一意制約と氏名の照合用項目を定義し、氏名だけには一意制約を置きません。状態の整合性やセッション主体の排他等、追加SQLが必要なCHECK制約はmigration作成時に組み込みます。
 
 ## 10. 開発・デプロイ方針
 
-- Next.js・TypeScript・Tailwind CSSでアプリを初期化する。
-- Prismaのスキーマとマイグレーションを管理する。
-- 開発用と本番用のデータベースを分離する。
-- DB接続情報などの秘密情報は環境変数で管理し、リポジトリに含めない。
-- Vercel上にアプリをデプロイし、Neon上のPostgreSQLに接続する。
-- 本番へのマイグレーション適用方法・実行タイミングを決定する。
+### 初回セットアップ
 
-Next.jsのひな形、開発・ビルド・起動・lintスクリプト、Prisma初期設定は存在します。予約用データモデルは未定義で、NextAuthは未導入です。具体的なセットアップ・テスト・デプロイ手順は、動作確認後にこのREADMEへ追加します。
+リポジトリを取得し、`package.json`のあるルートディレクトリで実行します。以下はmacOS・Linux・WSLのシェル向けです。Node.jsとnpm、起動済みのDocker Engine（Docker Desktop等）、Composeの`--wait`に対応する`docker compose`が必要です。npmパッケージ・コンテナイメージ・Google Fontsを取得できるネットワークを用意します。
 
-初期リリースには入会・復旧確認、パスワード再設定、店舗都合の変更案内メールの配信基盤を含めます。管理者認証情報・認証用秘密鍵・メール配信の接続情報はサーバー専用の環境変数で扱い、リポジトリ・ブラウザ・ログへ出力しません。配信失敗時の再試行と運用担当者による確認方法も整えます。
+1. `.nvmrc`のNode.jsを選択します。nvmを利用している場合は`nvm install` → `nvm use`。別のバージョン管理ツールを使う場合も22.23.1を指定します。
+2. 実行環境を確認します。
 
-ローカルDBの準備・疎通は[Epic 2詳細設計第3章](docs/detailed_design_ep2.md#3-task-212ローカルdbとprisma接続実装疎通確認済み)を参照してください。`npm run db:up` → `npm run db:generate` → `npm run db:validate` → `npm run db:check`で確認できます。既存`.env`は上書きせず、初回のみ`.env.example`を利用します。
+```bash
+node --version
+npm --version
+docker compose version
+```
+
+3. 初回だけ環境変数ファイルを用意し、依存をインストールします。次のコピーは既存`.env`を上書きしません。
+
+```bash
+if [ ! -e .env ]; then cp .env.example .env; fi
+npm ci
+```
+
+既存`.env`がある場合は、下表の2変数を`.env.example`のローカル接続先と照合してください。例の資格情報はローカルCompose専用です。本番に流用せず、実際の`.env`はコミットしません。
+
+| 変数 | 参照元 | ローカル設定 |
+| --- | --- | --- |
+| `DATABASE_URL` | アプリの`getPrisma()`・`db:check` | `.env.example`のPostgreSQL接続URL |
+| `DIRECT_URL` | Prisma CLIの`prisma7.config.ts` | ローカルでは`DATABASE_URL`と同じURL |
+
+アプリと`db:check`はNext.jsの環境変数読込規則を使い、シェルに設定済みの変数や`.env.local`等が`.env`より優先されます。Prisma CLIはdotenvで`.env`を読み、設定済みのシェル変数を優先しますが、`.env.local`は自動で読みません。接続先が異ならないよう両変数を管理し、`NEXT_PUBLIC_`は付けません。
+
+4. DBを起動し、静的チェック・Client生成・テスト・DB疎通を確認します。各コマンドが成功してから次へ進みます。
+
+```bash
+npm run db:up
+npm run check
+npm run db:check
+```
+
+`db:up`はDBのhealthyを待ちます。`check`はschema検証 → Client生成 → lint → 型生成・型チェック → テストの順で実行します。`db:check`の成功表示は`Local PostgreSQL: SELECT 1 succeeded (shared Prisma Client).`です。基本モデルは定義済みですが、migration・seedはまだないため、この手順ではテーブル作成や初期データ投入を行いません。DBへの適用手順はTask 2.2.4で追加します。
+
+### 開発時の起動・停止
+
+セットアップ済みなら次の順で起動します。依存やlockfileが変わった場合は先に`npm ci`、Prismaスキーマが変わった場合は`npm run db:generate`を実行します。
+
+```bash
+npm run db:up
+npm run dev
+```
+
+ターミナルに表示されたURL（通常は[http://localhost:3000](http://localhost:3000)）をブラウザで開きます。現在はNext.jsの初期画面で、`To get started, edit the page.tsx file.`が表示されれば起動確認になります。この画面はDBを使わないため、DBへの接続は`npm run db:check`で別に確認します。
+
+アプリは実行中のターミナルで`Ctrl+C`を押して停止します。DBも止める場合は、同じプロジェクトのルートで次を実行します。
+
+```bash
+npm run db:down
+```
+
+名前付きボリュームにDBデータが残り、次回の`db:up`で再利用されます。通常の停止手順にボリューム削除（`down -v`）やDBリセットは含めません。
+
+### 検証と本番モードのローカル起動
+
+開発サーバーを停止してから、次を順に実行します。
+
+```bash
+npm run check
+npm run db:check
+npm run build
+npm run audit:dependencies
+npm run start
+```
+
+`start`は成功した`build`の成果物を使います。ブラウザで同じ初期画面を確認し、`Ctrl+C`で停止します。これはローカルの本番モード確認で、Vercelへのデプロイではありません。
+
+| コマンド | 確認内容・前提 |
+| --- | --- |
+| `npm run check` | まとめて静的検証とテスト。DB稼働は不要だが、CLI設定読込のため`DIRECT_URL`は必要 |
+| `npm run db:validate` / `npm run db:generate` | schema検証／Client生成。設定ファイルはスクリプト内で明示 |
+| `npm run lint` | ESLint。`build`とは別に実行する |
+| `npm run typecheck` | `next typegen`後にTypeScript検証 |
+| `npm test` / `npm run test:watch` | 単発／継続テスト。現在は接続先ガード等の14件でDB不要 |
+| `npm run db:check` | 稼働中のローカルDBへ`SELECT 1`。テーブル・業務機能の検証ではない |
+| `npm run build` | 本番ビルド。現在はGoogle Fonts取得にもネットワークが必要 |
+| `npm run audit:dependencies` | 全依存を監査し、high以上で失敗する。レジストリへの通信が必要 |
+
+GitHub Actionsはpush・pull request・手動実行で起動します。`checks`は専用PostgreSQLを使って`npm ci` → `check` → `db:check` → `build`、`dependency-audit`は依存監査を実行します。ローカルの成功とGitHub上の成功は別に確認します。依存修正後のGitHub実行は未確認です。
+
+### うまく動かない場合
+
+| 症状 | 確認・対処 |
+| --- | --- |
+| Node版の不一致・`EBADENGINE` | `.nvmrc`の版を選択し直し、`npm ci`を再実行 |
+| Dockerへ接続できない | Docker Engineの起動・ソケットへのアクセス権を確認 |
+| DBがhealthyにならない・5432番が使用中 | `docker compose ps`で状態を確認。既存PostgreSQLや別コピーのComposeとのポート競合を解消する |
+| `DIRECT_URL`未設定 | ルートの`.env`に変数があるか確認。CLIは`.env.local`だけでは読み込めない |
+| `DB check failed` | DBの稼働と環境変数の上書きを確認。許可先はローカルhost、5432番、`booking_sample`、任意の`schema=public`のみ。外部DBは接続前に拒否される |
+| 3000番が使用中 | 既存プロセスの用途を確認。開発時は表示URLを使うか`npm run dev -- --port 3001`。本番モードは`npm run start -- --port 3001` |
+| Google Fontsの取得失敗 | ネットワーク・プロキシ設定を確認し再実行。通信制限下の失敗とコードのエラーを区別する |
+| 本番ビルドがないというエラー | `dev`を止め、`npm run build`の成功後に`npm run start` |
+| 依存監査が失敗 | 指摘対象と修正版の互換性を確認。`npm audit fix --force`で一括major変更せず、[Epic 2詳細設計第7章](docs/detailed_design_ep2.md#7-dependency-auditの失敗への対応)のoverride管理方針に従う |
+
+### デプロイ方針・後続作業
+
+開発用DBと本番DBを分離し、Vercel上のアプリからNeonのPostgreSQLへ接続する予定です。Prismaスキーマ・migrationはリポジトリで管理し、本番への適用方法・実行タイミング・バックアップと復旧手順はStory 7.2で整備します。
+
+初期リリースには入会・復旧確認、パスワード再設定、店舗都合の変更案内メールの配信基盤を含めます。管理者認証情報・認証用秘密鍵・SMTP接続情報は導入時にサーバー専用環境変数として追加し、リポジトリ・ブラウザ・ログへ出力しません。現時点のセットアップで架空の値を設定する必要はありません。
+
+設計の根拠と手順の実行結果は[Epic 2詳細設計](docs/detailed_design_ep2.md)の第3・6〜8章で管理します。
 
 ## 11. 実装前の決定事項と残る設計詳細
 
@@ -564,7 +677,7 @@ Next.jsのひな形、開発・ビルド・起動・lintスクリプト、Prisma
 
 Epic 1〜7を初期リリースの対象とし、Epic 8は公開後の拡張候補とします。原則として番号順に進めます。各Storyは、配下のTaskと記載した完了条件を満たした時点で完了とします。日程・担当者は未定です。
 
-**進捗の扱い：** Next.jsのひな形、パッケージスクリプト、Prismaの初期設定は存在しますが、予約用データモデルは未定義です。本ロードマップのチェック欄は、既存設定の動作確認を含め、すべて未完了から開始します。第11章の業務方針は確定済みです。Taskごとに設計内容の確認または実装・検証など、その作業の完了条件を満たしてからチェックします。詳細と確認記録は[詳細設計](docs/detailed_design.md)で管理します。設計Taskの完了は機能の実装完了を意味しません。
+**進捗の扱い：** 第11章の業務方針は確定済みです。Taskごとに設計内容の確認または実装・検証など、その作業の完了条件を満たしてからチェックします。詳細と確認記録は[業務の詳細設計](docs/detailed_design.md)と[Epic 2詳細設計](docs/detailed_design_ep2.md)で管理します。設計やスキーマ定義の完了は、DBへの適用や業務機能の実装完了を意味しません。
 
 ### Epic 1：予約・運用ルールを確定する
 
@@ -597,13 +710,13 @@ Epic 1〜7を初期リリースの対象とし、Epic 8は公開後の拡張候�
 - [x] Task 2.1.1：既存のNext.js・TypeScript・Tailwind CSS・Prisma設定と採用バージョンを確認する。（2026-09-17確認。結果・検証範囲はEpic 2詳細設計第2章）
 - [x] Task 2.1.2：開発用PostgreSQLの起動方法、環境変数のサンプル、Prismaの接続処理を整える。（Epic 2詳細設計第3章。ローカルSELECT 1成功、実データ更新なし）
 - [x] Task 2.1.3：lint・型チェック・テスト・ビルドの実行手順とCIを整える。（Epic 2詳細設計第6章。クリーンインストール・14テスト・build成功。依存監査は限定overrideで0件を確認。修正後のGitHub実行は未確認）
-- [ ] Task 2.1.4：第2章・第10章を更新し、セットアップ・起動・検証手順を追記する。
+- [x] Task 2.1.4：第2章・第10章を更新し、セットアップ・起動・検証手順を追記する。（2026-09-19完了。Epic 2詳細設計第8章。隔離コピーでDB疎通・check・build・dev／startのHTTP応答を確認。ブラウザ目視・GitHub実行は未確認）
 
 #### Story 2.2：予約履歴と部屋・施術者の占有枠を一貫して保存できる
 
 完了条件：開発用DBにモデル・制約・初期データを作成でき、枠の重複をDBで拒否できる。
 
-- [ ] Task 2.2.1：第9章の会員・予約等のモデル、会員IDの必須関連、会員・予約状態、認証方式に必要なモデル、日時・料金の型をPrisma Schemaへ定義する。
+- [x] Task 2.2.1：第9章の会員・予約等のモデル、会員IDの必須関連、会員・予約状態、認証方式に必要なモデル、日時・料金の型をPrisma Schemaへ定義する。（2026-09-19完了。Epic 2詳細設計第9章。基本10モデル・3enum、Client生成・check・SQL出力確認済み。DB適用は未実施）
 - [ ] Task 2.2.2：予約時点の氏名・連絡先・メニュー等の名称・時間・料金を保持する項目と、無効化後も履歴を維持する参照関係を定義する。
 - [ ] Task 2.2.3：部屋・施術者それぞれの枠一意制約と、検索用インデックスを定義する。
 - [ ] Task 2.2.4：マイグレーションと開発用初期データを用意し、適用・再作成を検証する。

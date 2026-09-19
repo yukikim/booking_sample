@@ -51,7 +51,16 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-
+  Member: 'Member',
+  StaffAccount: 'StaffAccount',
+  AdminAccount: 'AdminAccount',
+  AppSession: 'AppSession',
+  Room: 'Room',
+  Therapist: 'Therapist',
+  Treatment: 'Treatment',
+  Option: 'Option',
+  Reservation: 'Reservation',
+  ReservationOption: 'ReservationOption'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -68,4 +77,172 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const MemberScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  emailKey: 'emailKey',
+  lastName: 'lastName',
+  firstName: 'firstName',
+  lastNameKey: 'lastNameKey',
+  firstNameKey: 'firstNameKey',
+  phoneNumber: 'phoneNumber',
+  postalCode: 'postalCode',
+  ageBand: 'ageBand',
+  passwordHash: 'passwordHash',
+  status: 'status',
+  isDeleted: 'isDeleted',
+  emailVerifiedAt: 'emailVerifiedAt',
+  firstActivatedAt: 'firstActivatedAt',
+  authVersion: 'authVersion',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
+
+
+export const StaffAccountScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  emailKey: 'emailKey',
+  displayName: 'displayName',
+  passwordHash: 'passwordHash',
+  isActive: 'isActive',
+  authVersion: 'authVersion',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffAccountScalarFieldEnum = (typeof StaffAccountScalarFieldEnum)[keyof typeof StaffAccountScalarFieldEnum]
+
+
+export const AdminAccountScalarFieldEnum = {
+  id: 'id',
+  displayName: 'displayName',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminAccountScalarFieldEnum = (typeof AdminAccountScalarFieldEnum)[keyof typeof AdminAccountScalarFieldEnum]
+
+
+export const AppSessionScalarFieldEnum = {
+  id: 'id',
+  principalType: 'principalType',
+  memberId: 'memberId',
+  staffId: 'staffId',
+  adminId: 'adminId',
+  authVersion: 'authVersion',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type AppSessionScalarFieldEnum = (typeof AppSessionScalarFieldEnum)[keyof typeof AppSessionScalarFieldEnum]
+
+
+export const RoomScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RoomScalarFieldEnum = (typeof RoomScalarFieldEnum)[keyof typeof RoomScalarFieldEnum]
+
+
+export const TherapistScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TherapistScalarFieldEnum = (typeof TherapistScalarFieldEnum)[keyof typeof TherapistScalarFieldEnum]
+
+
+export const TreatmentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  durationMinutes: 'durationMinutes',
+  priceYen: 'priceYen',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TreatmentScalarFieldEnum = (typeof TreatmentScalarFieldEnum)[keyof typeof TreatmentScalarFieldEnum]
+
+
+export const OptionScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  durationMinutes: 'durationMinutes',
+  priceYen: 'priceYen',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OptionScalarFieldEnum = (typeof OptionScalarFieldEnum)[keyof typeof OptionScalarFieldEnum]
+
+
+export const ReservationScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  treatmentId: 'treatmentId',
+  roomId: 'roomId',
+  therapistId: 'therapistId',
+  status: 'status',
+  businessDate: 'businessDate',
+  startsAt: 'startsAt',
+  treatmentEndsAt: 'treatmentEndsAt',
+  occupiesUntil: 'occupiesUntil',
+  totalDurationMinutes: 'totalDurationMinutes',
+  totalPriceYen: 'totalPriceYen',
+  slotCount: 'slotCount',
+  notes: 'notes',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
+
+
+export const ReservationOptionScalarFieldEnum = {
+  reservationId: 'reservationId',
+  optionId: 'optionId'
+} as const
+
+export type ReservationOptionScalarFieldEnum = (typeof ReservationOptionScalarFieldEnum)[keyof typeof ReservationOptionScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

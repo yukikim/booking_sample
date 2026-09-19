@@ -8,4 +8,14 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Member'
+export type * from './models/StaffAccount'
+export type * from './models/AdminAccount'
+export type * from './models/AppSession'
+export type * from './models/Room'
+export type * from './models/Therapist'
+export type * from './models/Treatment'
+export type * from './models/Option'
+export type * from './models/Reservation'
+export type * from './models/ReservationOption'
 export type * from './commonInputTypes'

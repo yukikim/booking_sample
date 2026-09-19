@@ -31,8 +31,8 @@ export * from "./enums"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Members
+ * const members = await prisma.member.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -41,4 +41,53 @@ export const PrismaClient = $Class.getPrismaClientClass()
 export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts extends Prisma.PrismaClientOptions["omit"] = Prisma.PrismaClientOptions["omit"], ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = $Class.PrismaClient<LogOpts, OmitOpts, ExtArgs>
 export { Prisma }
 
-
+/**
+ * Model Member
+ * 
+ */
+export type Member = Prisma.MemberModel
+/**
+ * Model StaffAccount
+ * 
+ */
+export type StaffAccount = Prisma.StaffAccountModel
+/**
+ * Model AdminAccount
+ * 
+ */
+export type AdminAccount = Prisma.AdminAccountModel
+/**
+ * Model AppSession
+ * 
+ */
+export type AppSession = Prisma.AppSessionModel
+/**
+ * Model Room
+ * 
+ */
+export type Room = Prisma.RoomModel
+/**
+ * Model Therapist
+ * 
+ */
+export type Therapist = Prisma.TherapistModel
+/**
+ * Model Treatment
+ * 
+ */
+export type Treatment = Prisma.TreatmentModel
+/**
+ * Model Option
+ * 
+ */
+export type Option = Prisma.OptionModel
+/**
+ * Model Reservation
+ * 
+ */
+export type Reservation = Prisma.ReservationModel
+/**
+ * Model ReservationOption
+ * 
+ */
+export type ReservationOption = Prisma.ReservationOptionModel
