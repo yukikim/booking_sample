@@ -81,6 +81,7 @@ async function main() {
     }
     async function resetAttempts() { await prisma!.rateLimitBucket.deleteMany(); }
     assert.equal(await (await call("session")).json(), null);
+    assert.equal((await fetch(`${origin}/api/manage/staff`)).status, 401);
     assert.equal((await call("callback/admin", { email: "x", password: "x" }, "https://evil.test")).status, 403);
     assert.equal((await call("callback/admin", { email: "admin@example.test", password: process.env.ADMIN_PASSWORD })).status, 403);
     assert.equal(await prisma.appSession.count(), 0);
@@ -91,6 +92,11 @@ async function main() {
     const adminSession = await (await call("session")).json();
     assert.equal(adminSession.user.role, "ADMIN");
     assert.deepEqual(Object.keys(adminSession.user).sort(), ["id", "role"]);
+    const adminRoster = await fetch(`${origin}/api/manage/staff`, { headers: { cookie: cookie() } });
+    assert.equal(adminRoster.status, 200);
+    assert.equal(adminRoster.headers.get("cache-control"), "no-store");
+    assert.deepEqual((await adminRoster.json()).staff.map((person: { id: string }) => person.id), [staff.id]);
+    assert.match(await (await fetch(`${origin}/manage/staff`, { headers: { cookie: cookie() } })).text(), /staff@example\.test/);
     const savedCookie = cookie();
     const token = await getToken({ req: new Request(origin, { headers: { cookie: savedCookie } }), secret: process.env.AUTH_SECRET, secureCookie: false });
     assert(token);
@@ -112,6 +118,14 @@ async function main() {
     await login("staff", "staff@example.test", password);
     assert.equal((await (await call("session")).json()).user.role, "STAFF");
     assert.equal(await prisma.staffPermission.count(), 0);
+    assert.equal((await fetch(`${origin}/api/manage/staff`, { headers: { cookie: cookie() } })).status, 403);
+    assert.doesNotMatch(await (await fetch(`${origin}/manage/staff`, { headers: { cookie: cookie() } })).text(), /staff@example\.test/);
+    assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /現在は閲覧のみ可能です/);
+    await prisma.staffPermission.create({ data: { staffId: staff.id, permission: "RESERVATION_CANCEL", grantedByAdminId: ADMIN_ID } });
+    assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /更新操作の権限が1件/);
+    assert.equal((await fetch(`${origin}/api/manage/staff`, { headers: { cookie: cookie() } })).status, 403);
+    await prisma.staffPermission.delete({ where: { staffId_permission: { staffId: staff.id, permission: "RESERVATION_CANCEL" } } });
+    assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /現在は閲覧のみ可能です/);
     await prisma.staffAccount.update({ where: { id: staff.id }, data: { authVersion: 2 } });
     assert.equal(await (await call("session")).json(), null);
     await login("staff", "staff@example.test", password);
