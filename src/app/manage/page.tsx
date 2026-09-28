@@ -21,6 +21,7 @@ export default async function Page() {
       : <p>{access.permissions.length === 0 ? "現在は閲覧のみ可能です。" : `更新操作の権限が${access.permissions.length}件設定されています。`}</p>}
     {(access.canManagePermissions || access.permissions.includes("STAFF_CREATE")) && <Link href="/manage/staff/new" className="block underline">スタッフを作成</Link>}
     <Link href="/manage/catalog" className="block underline">施術メニュー・オプション</Link>
+    <Link href="/manage/resources" className="block underline">部屋・施術者</Link>
     <p>予約やその他の店舗設定機能は、今後の開発で追加します。</p>
     <LogoutButton />
   </main>;

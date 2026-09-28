@@ -8,7 +8,7 @@ import { claimsFrom } from "./policy";
 import { resolveSession } from "./session";
 
 export class StoreInputError extends Error {
-  constructor(readonly status: 400 | 404 | 409) { super("InvalidInput"); }
+  constructor(readonly status: 400 | 404 | 409, readonly code?: "AffectedReservations") { super("InvalidInput"); }
 }
 
 export function checkMutationOrigin(request: Request) {
@@ -44,6 +44,6 @@ export async function requireStoreMutation(tx: Prisma.TransactionClient, request
 
 export function mutationFailure(error: unknown) {
   const status = error instanceof StoreAccessError || error instanceof StoreInputError ? error.status : (error && typeof error === "object" && "code" in error && error.code === "P2002" ? 409 : 503);
-  const message = status === 401 ? "Unauthorized" : status === 403 ? "Forbidden" : status === 400 ? "InvalidInput" : status === 404 ? "NotFound" : status === 409 ? "Conflict" : "TemporarilyUnavailable";
+  const message = error instanceof StoreInputError && error.code ? error.code : status === 401 ? "Unauthorized" : status === 403 ? "Forbidden" : status === 400 ? "InvalidInput" : status === 404 ? "NotFound" : status === 409 ? "Conflict" : "TemporarilyUnavailable";
   return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
 }
