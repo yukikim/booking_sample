@@ -249,6 +249,9 @@ export type StaffAccountWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"StaffAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StaffAccount"> | Date | string
   sessions?: Prisma.AppSessionListRelationFilter
+  permissions?: Prisma.StaffPermissionListRelationFilter
+  tokens?: Prisma.AuthTokenListRelationFilter
+  actorLogs?: Prisma.AuditLogListRelationFilter
 }
 
 export type StaffAccountOrderByWithRelationInput = {
@@ -262,6 +265,9 @@ export type StaffAccountOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.AppSessionOrderByRelationAggregateInput
+  permissions?: Prisma.StaffPermissionOrderByRelationAggregateInput
+  tokens?: Prisma.AuthTokenOrderByRelationAggregateInput
+  actorLogs?: Prisma.AuditLogOrderByRelationAggregateInput
 }
 
 export type StaffAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -278,6 +284,9 @@ export type StaffAccountWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"StaffAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StaffAccount"> | Date | string
   sessions?: Prisma.AppSessionListRelationFilter
+  permissions?: Prisma.StaffPermissionListRelationFilter
+  tokens?: Prisma.AuthTokenListRelationFilter
+  actorLogs?: Prisma.AuditLogListRelationFilter
 }, "id" | "emailKey">
 
 export type StaffAccountOrderByWithAggregationInput = {
@@ -323,6 +332,9 @@ export type StaffAccountCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AppSessionCreateNestedManyWithoutStaffInput
+  permissions?: Prisma.StaffPermissionCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorStaffInput
 }
 
 export type StaffAccountUncheckedCreateInput = {
@@ -336,6 +348,9 @@ export type StaffAccountUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutStaffInput
+  permissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorStaffInput
 }
 
 export type StaffAccountUpdateInput = {
@@ -349,6 +364,9 @@ export type StaffAccountUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AppSessionUpdateManyWithoutStaffNestedInput
+  permissions?: Prisma.StaffPermissionUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorStaffNestedInput
 }
 
 export type StaffAccountUncheckedUpdateInput = {
@@ -362,6 +380,9 @@ export type StaffAccountUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutStaffNestedInput
+  permissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorStaffNestedInput
 }
 
 export type StaffAccountCreateManyInput = {
@@ -449,6 +470,11 @@ export type StaffAccountNullableScalarRelationFilter = {
   isNot?: Prisma.StaffAccountWhereInput | null
 }
 
+export type StaffAccountScalarRelationFilter = {
+  is?: Prisma.StaffAccountWhereInput
+  isNot?: Prisma.StaffAccountWhereInput
+}
+
 export type StaffAccountCreateNestedOneWithoutSessionsInput = {
   create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutSessionsInput, Prisma.StaffAccountUncheckedCreateWithoutSessionsInput>
   connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutSessionsInput
@@ -465,6 +491,52 @@ export type StaffAccountUpdateOneWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StaffAccountUpdateToOneWithWhereWithoutSessionsInput, Prisma.StaffAccountUpdateWithoutSessionsInput>, Prisma.StaffAccountUncheckedUpdateWithoutSessionsInput>
 }
 
+export type StaffAccountCreateNestedOneWithoutPermissionsInput = {
+  create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutPermissionsInput, Prisma.StaffAccountUncheckedCreateWithoutPermissionsInput>
+  connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutPermissionsInput
+  connect?: Prisma.StaffAccountWhereUniqueInput
+}
+
+export type StaffAccountUpdateOneRequiredWithoutPermissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutPermissionsInput, Prisma.StaffAccountUncheckedCreateWithoutPermissionsInput>
+  connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutPermissionsInput
+  upsert?: Prisma.StaffAccountUpsertWithoutPermissionsInput
+  connect?: Prisma.StaffAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StaffAccountUpdateToOneWithWhereWithoutPermissionsInput, Prisma.StaffAccountUpdateWithoutPermissionsInput>, Prisma.StaffAccountUncheckedUpdateWithoutPermissionsInput>
+}
+
+export type StaffAccountCreateNestedOneWithoutTokensInput = {
+  create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutTokensInput, Prisma.StaffAccountUncheckedCreateWithoutTokensInput>
+  connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutTokensInput
+  connect?: Prisma.StaffAccountWhereUniqueInput
+}
+
+export type StaffAccountUpdateOneWithoutTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutTokensInput, Prisma.StaffAccountUncheckedCreateWithoutTokensInput>
+  connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutTokensInput
+  upsert?: Prisma.StaffAccountUpsertWithoutTokensInput
+  disconnect?: Prisma.StaffAccountWhereInput | boolean
+  delete?: Prisma.StaffAccountWhereInput | boolean
+  connect?: Prisma.StaffAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StaffAccountUpdateToOneWithWhereWithoutTokensInput, Prisma.StaffAccountUpdateWithoutTokensInput>, Prisma.StaffAccountUncheckedUpdateWithoutTokensInput>
+}
+
+export type StaffAccountCreateNestedOneWithoutActorLogsInput = {
+  create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutActorLogsInput, Prisma.StaffAccountUncheckedCreateWithoutActorLogsInput>
+  connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutActorLogsInput
+  connect?: Prisma.StaffAccountWhereUniqueInput
+}
+
+export type StaffAccountUpdateOneWithoutActorLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.StaffAccountCreateWithoutActorLogsInput, Prisma.StaffAccountUncheckedCreateWithoutActorLogsInput>
+  connectOrCreate?: Prisma.StaffAccountCreateOrConnectWithoutActorLogsInput
+  upsert?: Prisma.StaffAccountUpsertWithoutActorLogsInput
+  disconnect?: Prisma.StaffAccountWhereInput | boolean
+  delete?: Prisma.StaffAccountWhereInput | boolean
+  connect?: Prisma.StaffAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StaffAccountUpdateToOneWithWhereWithoutActorLogsInput, Prisma.StaffAccountUpdateWithoutActorLogsInput>, Prisma.StaffAccountUncheckedUpdateWithoutActorLogsInput>
+}
+
 export type StaffAccountCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -475,6 +547,9 @@ export type StaffAccountCreateWithoutSessionsInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  permissions?: Prisma.StaffPermissionCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorStaffInput
 }
 
 export type StaffAccountUncheckedCreateWithoutSessionsInput = {
@@ -487,6 +562,9 @@ export type StaffAccountUncheckedCreateWithoutSessionsInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  permissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorStaffInput
 }
 
 export type StaffAccountCreateOrConnectWithoutSessionsInput = {
@@ -515,6 +593,9 @@ export type StaffAccountUpdateWithoutSessionsInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  permissions?: Prisma.StaffPermissionUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorStaffNestedInput
 }
 
 export type StaffAccountUncheckedUpdateWithoutSessionsInput = {
@@ -527,6 +608,237 @@ export type StaffAccountUncheckedUpdateWithoutSessionsInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  permissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorStaffNestedInput
+}
+
+export type StaffAccountCreateWithoutPermissionsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  displayName: string
+  passwordHash: string
+  isActive?: boolean
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorStaffInput
+}
+
+export type StaffAccountUncheckedCreateWithoutPermissionsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  displayName: string
+  passwordHash: string
+  isActive?: boolean
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorStaffInput
+}
+
+export type StaffAccountCreateOrConnectWithoutPermissionsInput = {
+  where: Prisma.StaffAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.StaffAccountCreateWithoutPermissionsInput, Prisma.StaffAccountUncheckedCreateWithoutPermissionsInput>
+}
+
+export type StaffAccountUpsertWithoutPermissionsInput = {
+  update: Prisma.XOR<Prisma.StaffAccountUpdateWithoutPermissionsInput, Prisma.StaffAccountUncheckedUpdateWithoutPermissionsInput>
+  create: Prisma.XOR<Prisma.StaffAccountCreateWithoutPermissionsInput, Prisma.StaffAccountUncheckedCreateWithoutPermissionsInput>
+  where?: Prisma.StaffAccountWhereInput
+}
+
+export type StaffAccountUpdateToOneWithWhereWithoutPermissionsInput = {
+  where?: Prisma.StaffAccountWhereInput
+  data: Prisma.XOR<Prisma.StaffAccountUpdateWithoutPermissionsInput, Prisma.StaffAccountUncheckedUpdateWithoutPermissionsInput>
+}
+
+export type StaffAccountUpdateWithoutPermissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorStaffNestedInput
+}
+
+export type StaffAccountUncheckedUpdateWithoutPermissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorStaffNestedInput
+}
+
+export type StaffAccountCreateWithoutTokensInput = {
+  id?: string
+  email: string
+  emailKey: string
+  displayName: string
+  passwordHash: string
+  isActive?: boolean
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutStaffInput
+  permissions?: Prisma.StaffPermissionCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorStaffInput
+}
+
+export type StaffAccountUncheckedCreateWithoutTokensInput = {
+  id?: string
+  email: string
+  emailKey: string
+  displayName: string
+  passwordHash: string
+  isActive?: boolean
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutStaffInput
+  permissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutStaffInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorStaffInput
+}
+
+export type StaffAccountCreateOrConnectWithoutTokensInput = {
+  where: Prisma.StaffAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.StaffAccountCreateWithoutTokensInput, Prisma.StaffAccountUncheckedCreateWithoutTokensInput>
+}
+
+export type StaffAccountUpsertWithoutTokensInput = {
+  update: Prisma.XOR<Prisma.StaffAccountUpdateWithoutTokensInput, Prisma.StaffAccountUncheckedUpdateWithoutTokensInput>
+  create: Prisma.XOR<Prisma.StaffAccountCreateWithoutTokensInput, Prisma.StaffAccountUncheckedCreateWithoutTokensInput>
+  where?: Prisma.StaffAccountWhereInput
+}
+
+export type StaffAccountUpdateToOneWithWhereWithoutTokensInput = {
+  where?: Prisma.StaffAccountWhereInput
+  data: Prisma.XOR<Prisma.StaffAccountUpdateWithoutTokensInput, Prisma.StaffAccountUncheckedUpdateWithoutTokensInput>
+}
+
+export type StaffAccountUpdateWithoutTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUpdateManyWithoutStaffNestedInput
+  permissions?: Prisma.StaffPermissionUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorStaffNestedInput
+}
+
+export type StaffAccountUncheckedUpdateWithoutTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutStaffNestedInput
+  permissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutStaffNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorStaffNestedInput
+}
+
+export type StaffAccountCreateWithoutActorLogsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  displayName: string
+  passwordHash: string
+  isActive?: boolean
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutStaffInput
+  permissions?: Prisma.StaffPermissionCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutStaffInput
+}
+
+export type StaffAccountUncheckedCreateWithoutActorLogsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  displayName: string
+  passwordHash: string
+  isActive?: boolean
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutStaffInput
+  permissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutStaffInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutStaffInput
+}
+
+export type StaffAccountCreateOrConnectWithoutActorLogsInput = {
+  where: Prisma.StaffAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.StaffAccountCreateWithoutActorLogsInput, Prisma.StaffAccountUncheckedCreateWithoutActorLogsInput>
+}
+
+export type StaffAccountUpsertWithoutActorLogsInput = {
+  update: Prisma.XOR<Prisma.StaffAccountUpdateWithoutActorLogsInput, Prisma.StaffAccountUncheckedUpdateWithoutActorLogsInput>
+  create: Prisma.XOR<Prisma.StaffAccountCreateWithoutActorLogsInput, Prisma.StaffAccountUncheckedCreateWithoutActorLogsInput>
+  where?: Prisma.StaffAccountWhereInput
+}
+
+export type StaffAccountUpdateToOneWithWhereWithoutActorLogsInput = {
+  where?: Prisma.StaffAccountWhereInput
+  data: Prisma.XOR<Prisma.StaffAccountUpdateWithoutActorLogsInput, Prisma.StaffAccountUncheckedUpdateWithoutActorLogsInput>
+}
+
+export type StaffAccountUpdateWithoutActorLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUpdateManyWithoutStaffNestedInput
+  permissions?: Prisma.StaffPermissionUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutStaffNestedInput
+}
+
+export type StaffAccountUncheckedUpdateWithoutActorLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutStaffNestedInput
+  permissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutStaffNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutStaffNestedInput
 }
 
 
@@ -536,10 +848,16 @@ export type StaffAccountUncheckedUpdateWithoutSessionsInput = {
 
 export type StaffAccountCountOutputType = {
   sessions: number
+  permissions: number
+  tokens: number
+  actorLogs: number
 }
 
 export type StaffAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | StaffAccountCountOutputTypeCountSessionsArgs
+  permissions?: boolean | StaffAccountCountOutputTypeCountPermissionsArgs
+  tokens?: boolean | StaffAccountCountOutputTypeCountTokensArgs
+  actorLogs?: boolean | StaffAccountCountOutputTypeCountActorLogsArgs
 }
 
 /**
@@ -559,6 +877,27 @@ export type StaffAccountCountOutputTypeCountSessionsArgs<ExtArgs extends runtime
   where?: Prisma.AppSessionWhereInput
 }
 
+/**
+ * StaffAccountCountOutputType without action
+ */
+export type StaffAccountCountOutputTypeCountPermissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffPermissionWhereInput
+}
+
+/**
+ * StaffAccountCountOutputType without action
+ */
+export type StaffAccountCountOutputTypeCountTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthTokenWhereInput
+}
+
+/**
+ * StaffAccountCountOutputType without action
+ */
+export type StaffAccountCountOutputTypeCountActorLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
+}
+
 
 export type StaffAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -571,6 +910,9 @@ export type StaffAccountSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.StaffAccount$sessionsArgs<ExtArgs>
+  permissions?: boolean | Prisma.StaffAccount$permissionsArgs<ExtArgs>
+  tokens?: boolean | Prisma.StaffAccount$tokensArgs<ExtArgs>
+  actorLogs?: boolean | Prisma.StaffAccount$actorLogsArgs<ExtArgs>
   _count?: boolean | Prisma.StaffAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staffAccount"]>
 
@@ -613,6 +955,9 @@ export type StaffAccountSelectScalar = {
 export type StaffAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailKey" | "displayName" | "passwordHash" | "isActive" | "authVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["staffAccount"]>
 export type StaffAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.StaffAccount$sessionsArgs<ExtArgs>
+  permissions?: boolean | Prisma.StaffAccount$permissionsArgs<ExtArgs>
+  tokens?: boolean | Prisma.StaffAccount$tokensArgs<ExtArgs>
+  actorLogs?: boolean | Prisma.StaffAccount$actorLogsArgs<ExtArgs>
   _count?: boolean | Prisma.StaffAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StaffAccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -622,6 +967,9 @@ export type $StaffAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "StaffAccount"
   objects: {
     sessions: Prisma.$AppSessionPayload<ExtArgs>[]
+    permissions: Prisma.$StaffPermissionPayload<ExtArgs>[]
+    tokens: Prisma.$AuthTokenPayload<ExtArgs>[]
+    actorLogs: Prisma.$AuditLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1028,6 +1376,9 @@ readonly fields: StaffAccountFieldRefs;
 export interface Prisma__StaffAccountClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.StaffAccount$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffAccount$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  permissions<T extends Prisma.StaffAccount$permissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffAccount$permissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffPermissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tokens<T extends Prisma.StaffAccount$tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffAccount$tokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  actorLogs<T extends Prisma.StaffAccount$actorLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffAccount$actorLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1480,6 +1831,78 @@ export type StaffAccount$sessionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AppSessionScalarFieldEnum | Prisma.AppSessionScalarFieldEnum[]
+}
+
+/**
+ * StaffAccount.permissions
+ */
+export type StaffAccount$permissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffPermission
+   */
+  select?: Prisma.StaffPermissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffPermission
+   */
+  omit?: Prisma.StaffPermissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffPermissionInclude<ExtArgs> | null
+  where?: Prisma.StaffPermissionWhereInput
+  orderBy?: Prisma.StaffPermissionOrderByWithRelationInput | Prisma.StaffPermissionOrderByWithRelationInput[]
+  cursor?: Prisma.StaffPermissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffPermissionScalarFieldEnum | Prisma.StaffPermissionScalarFieldEnum[]
+}
+
+/**
+ * StaffAccount.tokens
+ */
+export type StaffAccount$tokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthToken
+   */
+  select?: Prisma.AuthTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuthToken
+   */
+  omit?: Prisma.AuthTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthTokenInclude<ExtArgs> | null
+  where?: Prisma.AuthTokenWhereInput
+  orderBy?: Prisma.AuthTokenOrderByWithRelationInput | Prisma.AuthTokenOrderByWithRelationInput[]
+  cursor?: Prisma.AuthTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuthTokenScalarFieldEnum | Prisma.AuthTokenScalarFieldEnum[]
+}
+
+/**
+ * StaffAccount.actorLogs
+ */
+export type StaffAccount$actorLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**

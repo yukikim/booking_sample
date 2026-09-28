@@ -72,3 +72,78 @@ export type ReservationOption = Prisma.ReservationOptionModel
  * 
  */
 export type ReservationSlot = Prisma.ReservationSlotModel
+/**
+ * Model StaffPermission
+ * 
+ */
+export type StaffPermission = Prisma.StaffPermissionModel
+/**
+ * Model AuthToken
+ * 
+ */
+export type AuthToken = Prisma.AuthTokenModel
+/**
+ * Model MemberLifecycleEvent
+ * 
+ */
+export type MemberLifecycleEvent = Prisma.MemberLifecycleEventModel
+/**
+ * Model MemberReview
+ * 
+ */
+export type MemberReview = Prisma.MemberReviewModel
+/**
+ * Model MemberReviewMatch
+ * 
+ */
+export type MemberReviewMatch = Prisma.MemberReviewMatchModel
+/**
+ * Model BusinessSchedule
+ * 
+ */
+export type BusinessSchedule = Prisma.BusinessScheduleModel
+/**
+ * Model BusinessDay
+ * 
+ */
+export type BusinessDay = Prisma.BusinessDayModel
+/**
+ * Model TherapistSchedule
+ * 
+ */
+export type TherapistSchedule = Prisma.TherapistScheduleModel
+/**
+ * Model TherapistBreak
+ * 
+ */
+export type TherapistBreak = Prisma.TherapistBreakModel
+/**
+ * Model ReservationChangeNotice
+ * 
+ */
+export type ReservationChangeNotice = Prisma.ReservationChangeNoticeModel
+/**
+ * Model EmailDelivery
+ * 
+ */
+export type EmailDelivery = Prisma.EmailDeliveryModel
+/**
+ * Model EmailDeliveryAttempt
+ * 
+ */
+export type EmailDeliveryAttempt = Prisma.EmailDeliveryAttemptModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model RateLimitBucket
+ * 
+ */
+export type RateLimitBucket = Prisma.RateLimitBucketModel
+/**
+ * Model RateLimitEvent
+ * 
+ */
+export type RateLimitEvent = Prisma.RateLimitEventModel

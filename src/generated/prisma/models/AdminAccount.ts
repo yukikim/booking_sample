@@ -183,6 +183,9 @@ export type AdminAccountWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"AdminAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminAccount"> | Date | string
   sessions?: Prisma.AppSessionListRelationFilter
+  grantedPermissions?: Prisma.StaffPermissionListRelationFilter
+  reviewedMembers?: Prisma.MemberReviewListRelationFilter
+  actorLogs?: Prisma.AuditLogListRelationFilter
 }
 
 export type AdminAccountOrderByWithRelationInput = {
@@ -192,6 +195,9 @@ export type AdminAccountOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.AppSessionOrderByRelationAggregateInput
+  grantedPermissions?: Prisma.StaffPermissionOrderByRelationAggregateInput
+  reviewedMembers?: Prisma.MemberReviewOrderByRelationAggregateInput
+  actorLogs?: Prisma.AuditLogOrderByRelationAggregateInput
 }
 
 export type AdminAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +210,9 @@ export type AdminAccountWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"AdminAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminAccount"> | Date | string
   sessions?: Prisma.AppSessionListRelationFilter
+  grantedPermissions?: Prisma.StaffPermissionListRelationFilter
+  reviewedMembers?: Prisma.MemberReviewListRelationFilter
+  actorLogs?: Prisma.AuditLogListRelationFilter
 }, "id">
 
 export type AdminAccountOrderByWithAggregationInput = {
@@ -235,6 +244,9 @@ export type AdminAccountCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AppSessionCreateNestedManyWithoutAdminInput
+  grantedPermissions?: Prisma.StaffPermissionCreateNestedManyWithoutGrantedByInput
+  reviewedMembers?: Prisma.MemberReviewCreateNestedManyWithoutReviewedByInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorAdminInput
 }
 
 export type AdminAccountUncheckedCreateInput = {
@@ -244,6 +256,9 @@ export type AdminAccountUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutAdminInput
+  grantedPermissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutGrantedByInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutReviewedByInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorAdminInput
 }
 
 export type AdminAccountUpdateInput = {
@@ -253,6 +268,9 @@ export type AdminAccountUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AppSessionUpdateManyWithoutAdminNestedInput
+  grantedPermissions?: Prisma.StaffPermissionUpdateManyWithoutGrantedByNestedInput
+  reviewedMembers?: Prisma.MemberReviewUpdateManyWithoutReviewedByNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorAdminNestedInput
 }
 
 export type AdminAccountUncheckedUpdateInput = {
@@ -262,6 +280,9 @@ export type AdminAccountUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutAdminNestedInput
+  grantedPermissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedUpdateManyWithoutReviewedByNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorAdminNestedInput
 }
 
 export type AdminAccountCreateManyInput = {
@@ -317,6 +338,11 @@ export type AdminAccountNullableScalarRelationFilter = {
   isNot?: Prisma.AdminAccountWhereInput | null
 }
 
+export type AdminAccountScalarRelationFilter = {
+  is?: Prisma.AdminAccountWhereInput
+  isNot?: Prisma.AdminAccountWhereInput
+}
+
 export type AdminAccountCreateNestedOneWithoutSessionsInput = {
   create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutSessionsInput, Prisma.AdminAccountUncheckedCreateWithoutSessionsInput>
   connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutSessionsInput
@@ -333,12 +359,61 @@ export type AdminAccountUpdateOneWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdminAccountUpdateToOneWithWhereWithoutSessionsInput, Prisma.AdminAccountUpdateWithoutSessionsInput>, Prisma.AdminAccountUncheckedUpdateWithoutSessionsInput>
 }
 
+export type AdminAccountCreateNestedOneWithoutGrantedPermissionsInput = {
+  create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutGrantedPermissionsInput, Prisma.AdminAccountUncheckedCreateWithoutGrantedPermissionsInput>
+  connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutGrantedPermissionsInput
+  connect?: Prisma.AdminAccountWhereUniqueInput
+}
+
+export type AdminAccountUpdateOneRequiredWithoutGrantedPermissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutGrantedPermissionsInput, Prisma.AdminAccountUncheckedCreateWithoutGrantedPermissionsInput>
+  connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutGrantedPermissionsInput
+  upsert?: Prisma.AdminAccountUpsertWithoutGrantedPermissionsInput
+  connect?: Prisma.AdminAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminAccountUpdateToOneWithWhereWithoutGrantedPermissionsInput, Prisma.AdminAccountUpdateWithoutGrantedPermissionsInput>, Prisma.AdminAccountUncheckedUpdateWithoutGrantedPermissionsInput>
+}
+
+export type AdminAccountCreateNestedOneWithoutReviewedMembersInput = {
+  create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutReviewedMembersInput, Prisma.AdminAccountUncheckedCreateWithoutReviewedMembersInput>
+  connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutReviewedMembersInput
+  connect?: Prisma.AdminAccountWhereUniqueInput
+}
+
+export type AdminAccountUpdateOneWithoutReviewedMembersNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutReviewedMembersInput, Prisma.AdminAccountUncheckedCreateWithoutReviewedMembersInput>
+  connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutReviewedMembersInput
+  upsert?: Prisma.AdminAccountUpsertWithoutReviewedMembersInput
+  disconnect?: Prisma.AdminAccountWhereInput | boolean
+  delete?: Prisma.AdminAccountWhereInput | boolean
+  connect?: Prisma.AdminAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminAccountUpdateToOneWithWhereWithoutReviewedMembersInput, Prisma.AdminAccountUpdateWithoutReviewedMembersInput>, Prisma.AdminAccountUncheckedUpdateWithoutReviewedMembersInput>
+}
+
+export type AdminAccountCreateNestedOneWithoutActorLogsInput = {
+  create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutActorLogsInput, Prisma.AdminAccountUncheckedCreateWithoutActorLogsInput>
+  connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutActorLogsInput
+  connect?: Prisma.AdminAccountWhereUniqueInput
+}
+
+export type AdminAccountUpdateOneWithoutActorLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminAccountCreateWithoutActorLogsInput, Prisma.AdminAccountUncheckedCreateWithoutActorLogsInput>
+  connectOrCreate?: Prisma.AdminAccountCreateOrConnectWithoutActorLogsInput
+  upsert?: Prisma.AdminAccountUpsertWithoutActorLogsInput
+  disconnect?: Prisma.AdminAccountWhereInput | boolean
+  delete?: Prisma.AdminAccountWhereInput | boolean
+  connect?: Prisma.AdminAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminAccountUpdateToOneWithWhereWithoutActorLogsInput, Prisma.AdminAccountUpdateWithoutActorLogsInput>, Prisma.AdminAccountUncheckedUpdateWithoutActorLogsInput>
+}
+
 export type AdminAccountCreateWithoutSessionsInput = {
   id: string
   displayName: string
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  grantedPermissions?: Prisma.StaffPermissionCreateNestedManyWithoutGrantedByInput
+  reviewedMembers?: Prisma.MemberReviewCreateNestedManyWithoutReviewedByInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorAdminInput
 }
 
 export type AdminAccountUncheckedCreateWithoutSessionsInput = {
@@ -347,6 +422,9 @@ export type AdminAccountUncheckedCreateWithoutSessionsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  grantedPermissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutGrantedByInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutReviewedByInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorAdminInput
 }
 
 export type AdminAccountCreateOrConnectWithoutSessionsInput = {
@@ -371,6 +449,9 @@ export type AdminAccountUpdateWithoutSessionsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  grantedPermissions?: Prisma.StaffPermissionUpdateManyWithoutGrantedByNestedInput
+  reviewedMembers?: Prisma.MemberReviewUpdateManyWithoutReviewedByNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorAdminNestedInput
 }
 
 export type AdminAccountUncheckedUpdateWithoutSessionsInput = {
@@ -379,6 +460,189 @@ export type AdminAccountUncheckedUpdateWithoutSessionsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  grantedPermissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedUpdateManyWithoutReviewedByNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorAdminNestedInput
+}
+
+export type AdminAccountCreateWithoutGrantedPermissionsInput = {
+  id: string
+  displayName: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutAdminInput
+  reviewedMembers?: Prisma.MemberReviewCreateNestedManyWithoutReviewedByInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorAdminInput
+}
+
+export type AdminAccountUncheckedCreateWithoutGrantedPermissionsInput = {
+  id: string
+  displayName: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutAdminInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutReviewedByInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorAdminInput
+}
+
+export type AdminAccountCreateOrConnectWithoutGrantedPermissionsInput = {
+  where: Prisma.AdminAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminAccountCreateWithoutGrantedPermissionsInput, Prisma.AdminAccountUncheckedCreateWithoutGrantedPermissionsInput>
+}
+
+export type AdminAccountUpsertWithoutGrantedPermissionsInput = {
+  update: Prisma.XOR<Prisma.AdminAccountUpdateWithoutGrantedPermissionsInput, Prisma.AdminAccountUncheckedUpdateWithoutGrantedPermissionsInput>
+  create: Prisma.XOR<Prisma.AdminAccountCreateWithoutGrantedPermissionsInput, Prisma.AdminAccountUncheckedCreateWithoutGrantedPermissionsInput>
+  where?: Prisma.AdminAccountWhereInput
+}
+
+export type AdminAccountUpdateToOneWithWhereWithoutGrantedPermissionsInput = {
+  where?: Prisma.AdminAccountWhereInput
+  data: Prisma.XOR<Prisma.AdminAccountUpdateWithoutGrantedPermissionsInput, Prisma.AdminAccountUncheckedUpdateWithoutGrantedPermissionsInput>
+}
+
+export type AdminAccountUpdateWithoutGrantedPermissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUpdateManyWithoutAdminNestedInput
+  reviewedMembers?: Prisma.MemberReviewUpdateManyWithoutReviewedByNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorAdminNestedInput
+}
+
+export type AdminAccountUncheckedUpdateWithoutGrantedPermissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutAdminNestedInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedUpdateManyWithoutReviewedByNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorAdminNestedInput
+}
+
+export type AdminAccountCreateWithoutReviewedMembersInput = {
+  id: string
+  displayName: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutAdminInput
+  grantedPermissions?: Prisma.StaffPermissionCreateNestedManyWithoutGrantedByInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorAdminInput
+}
+
+export type AdminAccountUncheckedCreateWithoutReviewedMembersInput = {
+  id: string
+  displayName: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutAdminInput
+  grantedPermissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutGrantedByInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorAdminInput
+}
+
+export type AdminAccountCreateOrConnectWithoutReviewedMembersInput = {
+  where: Prisma.AdminAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminAccountCreateWithoutReviewedMembersInput, Prisma.AdminAccountUncheckedCreateWithoutReviewedMembersInput>
+}
+
+export type AdminAccountUpsertWithoutReviewedMembersInput = {
+  update: Prisma.XOR<Prisma.AdminAccountUpdateWithoutReviewedMembersInput, Prisma.AdminAccountUncheckedUpdateWithoutReviewedMembersInput>
+  create: Prisma.XOR<Prisma.AdminAccountCreateWithoutReviewedMembersInput, Prisma.AdminAccountUncheckedCreateWithoutReviewedMembersInput>
+  where?: Prisma.AdminAccountWhereInput
+}
+
+export type AdminAccountUpdateToOneWithWhereWithoutReviewedMembersInput = {
+  where?: Prisma.AdminAccountWhereInput
+  data: Prisma.XOR<Prisma.AdminAccountUpdateWithoutReviewedMembersInput, Prisma.AdminAccountUncheckedUpdateWithoutReviewedMembersInput>
+}
+
+export type AdminAccountUpdateWithoutReviewedMembersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUpdateManyWithoutAdminNestedInput
+  grantedPermissions?: Prisma.StaffPermissionUpdateManyWithoutGrantedByNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorAdminNestedInput
+}
+
+export type AdminAccountUncheckedUpdateWithoutReviewedMembersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutAdminNestedInput
+  grantedPermissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorAdminNestedInput
+}
+
+export type AdminAccountCreateWithoutActorLogsInput = {
+  id: string
+  displayName: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutAdminInput
+  grantedPermissions?: Prisma.StaffPermissionCreateNestedManyWithoutGrantedByInput
+  reviewedMembers?: Prisma.MemberReviewCreateNestedManyWithoutReviewedByInput
+}
+
+export type AdminAccountUncheckedCreateWithoutActorLogsInput = {
+  id: string
+  displayName: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutAdminInput
+  grantedPermissions?: Prisma.StaffPermissionUncheckedCreateNestedManyWithoutGrantedByInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutReviewedByInput
+}
+
+export type AdminAccountCreateOrConnectWithoutActorLogsInput = {
+  where: Prisma.AdminAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminAccountCreateWithoutActorLogsInput, Prisma.AdminAccountUncheckedCreateWithoutActorLogsInput>
+}
+
+export type AdminAccountUpsertWithoutActorLogsInput = {
+  update: Prisma.XOR<Prisma.AdminAccountUpdateWithoutActorLogsInput, Prisma.AdminAccountUncheckedUpdateWithoutActorLogsInput>
+  create: Prisma.XOR<Prisma.AdminAccountCreateWithoutActorLogsInput, Prisma.AdminAccountUncheckedCreateWithoutActorLogsInput>
+  where?: Prisma.AdminAccountWhereInput
+}
+
+export type AdminAccountUpdateToOneWithWhereWithoutActorLogsInput = {
+  where?: Prisma.AdminAccountWhereInput
+  data: Prisma.XOR<Prisma.AdminAccountUpdateWithoutActorLogsInput, Prisma.AdminAccountUncheckedUpdateWithoutActorLogsInput>
+}
+
+export type AdminAccountUpdateWithoutActorLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUpdateManyWithoutAdminNestedInput
+  grantedPermissions?: Prisma.StaffPermissionUpdateManyWithoutGrantedByNestedInput
+  reviewedMembers?: Prisma.MemberReviewUpdateManyWithoutReviewedByNestedInput
+}
+
+export type AdminAccountUncheckedUpdateWithoutActorLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutAdminNestedInput
+  grantedPermissions?: Prisma.StaffPermissionUncheckedUpdateManyWithoutGrantedByNestedInput
+  reviewedMembers?: Prisma.MemberReviewUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 
@@ -388,10 +652,16 @@ export type AdminAccountUncheckedUpdateWithoutSessionsInput = {
 
 export type AdminAccountCountOutputType = {
   sessions: number
+  grantedPermissions: number
+  reviewedMembers: number
+  actorLogs: number
 }
 
 export type AdminAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | AdminAccountCountOutputTypeCountSessionsArgs
+  grantedPermissions?: boolean | AdminAccountCountOutputTypeCountGrantedPermissionsArgs
+  reviewedMembers?: boolean | AdminAccountCountOutputTypeCountReviewedMembersArgs
+  actorLogs?: boolean | AdminAccountCountOutputTypeCountActorLogsArgs
 }
 
 /**
@@ -411,6 +681,27 @@ export type AdminAccountCountOutputTypeCountSessionsArgs<ExtArgs extends runtime
   where?: Prisma.AppSessionWhereInput
 }
 
+/**
+ * AdminAccountCountOutputType without action
+ */
+export type AdminAccountCountOutputTypeCountGrantedPermissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffPermissionWhereInput
+}
+
+/**
+ * AdminAccountCountOutputType without action
+ */
+export type AdminAccountCountOutputTypeCountReviewedMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberReviewWhereInput
+}
+
+/**
+ * AdminAccountCountOutputType without action
+ */
+export type AdminAccountCountOutputTypeCountActorLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
+}
+
 
 export type AdminAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -419,6 +710,9 @@ export type AdminAccountSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.AdminAccount$sessionsArgs<ExtArgs>
+  grantedPermissions?: boolean | Prisma.AdminAccount$grantedPermissionsArgs<ExtArgs>
+  reviewedMembers?: boolean | Prisma.AdminAccount$reviewedMembersArgs<ExtArgs>
+  actorLogs?: boolean | Prisma.AdminAccount$actorLogsArgs<ExtArgs>
   _count?: boolean | Prisma.AdminAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminAccount"]>
 
@@ -449,6 +743,9 @@ export type AdminAccountSelectScalar = {
 export type AdminAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "displayName" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["adminAccount"]>
 export type AdminAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.AdminAccount$sessionsArgs<ExtArgs>
+  grantedPermissions?: boolean | Prisma.AdminAccount$grantedPermissionsArgs<ExtArgs>
+  reviewedMembers?: boolean | Prisma.AdminAccount$reviewedMembersArgs<ExtArgs>
+  actorLogs?: boolean | Prisma.AdminAccount$actorLogsArgs<ExtArgs>
   _count?: boolean | Prisma.AdminAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdminAccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -458,6 +755,9 @@ export type $AdminAccountPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "AdminAccount"
   objects: {
     sessions: Prisma.$AppSessionPayload<ExtArgs>[]
+    grantedPermissions: Prisma.$StaffPermissionPayload<ExtArgs>[]
+    reviewedMembers: Prisma.$MemberReviewPayload<ExtArgs>[]
+    actorLogs: Prisma.$AuditLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -860,6 +1160,9 @@ readonly fields: AdminAccountFieldRefs;
 export interface Prisma__AdminAccountClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.AdminAccount$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminAccount$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  grantedPermissions<T extends Prisma.AdminAccount$grantedPermissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminAccount$grantedPermissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffPermissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedMembers<T extends Prisma.AdminAccount$reviewedMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminAccount$reviewedMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  actorLogs<T extends Prisma.AdminAccount$actorLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminAccount$actorLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1308,6 +1611,78 @@ export type AdminAccount$sessionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AppSessionScalarFieldEnum | Prisma.AppSessionScalarFieldEnum[]
+}
+
+/**
+ * AdminAccount.grantedPermissions
+ */
+export type AdminAccount$grantedPermissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffPermission
+   */
+  select?: Prisma.StaffPermissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffPermission
+   */
+  omit?: Prisma.StaffPermissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffPermissionInclude<ExtArgs> | null
+  where?: Prisma.StaffPermissionWhereInput
+  orderBy?: Prisma.StaffPermissionOrderByWithRelationInput | Prisma.StaffPermissionOrderByWithRelationInput[]
+  cursor?: Prisma.StaffPermissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffPermissionScalarFieldEnum | Prisma.StaffPermissionScalarFieldEnum[]
+}
+
+/**
+ * AdminAccount.reviewedMembers
+ */
+export type AdminAccount$reviewedMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberReview
+   */
+  select?: Prisma.MemberReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberReview
+   */
+  omit?: Prisma.MemberReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberReviewInclude<ExtArgs> | null
+  where?: Prisma.MemberReviewWhereInput
+  orderBy?: Prisma.MemberReviewOrderByWithRelationInput | Prisma.MemberReviewOrderByWithRelationInput[]
+  cursor?: Prisma.MemberReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberReviewScalarFieldEnum | Prisma.MemberReviewScalarFieldEnum[]
+}
+
+/**
+ * AdminAccount.actorLogs
+ */
+export type AdminAccount$actorLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**

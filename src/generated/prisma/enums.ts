@@ -38,3 +38,140 @@ export const PrincipalType = {
 } as const
 
 export type PrincipalType = (typeof PrincipalType)[keyof typeof PrincipalType]
+
+
+export const StaffPermissionKey = {
+  RESERVATION_CREATE: 'RESERVATION_CREATE',
+  RESERVATION_UPDATE: 'RESERVATION_UPDATE',
+  RESERVATION_CANCEL: 'RESERVATION_CANCEL',
+  RESERVATION_EXCEPTION: 'RESERVATION_EXCEPTION',
+  RESERVATION_START: 'RESERVATION_START',
+  RESERVATION_COMPLETE: 'RESERVATION_COMPLETE',
+  TREATMENT_CREATE: 'TREATMENT_CREATE',
+  TREATMENT_UPDATE: 'TREATMENT_UPDATE',
+  TREATMENT_DISABLE: 'TREATMENT_DISABLE',
+  OPTION_CREATE: 'OPTION_CREATE',
+  OPTION_UPDATE: 'OPTION_UPDATE',
+  OPTION_DISABLE: 'OPTION_DISABLE',
+  ROOM_CREATE: 'ROOM_CREATE',
+  ROOM_UPDATE: 'ROOM_UPDATE',
+  ROOM_DISABLE: 'ROOM_DISABLE',
+  THERAPIST_CREATE: 'THERAPIST_CREATE',
+  THERAPIST_UPDATE: 'THERAPIST_UPDATE',
+  THERAPIST_DISABLE: 'THERAPIST_DISABLE',
+  BUSINESS_SETTING_MANAGE: 'BUSINESS_SETTING_MANAGE',
+  THERAPIST_BREAK_MANAGE: 'THERAPIST_BREAK_MANAGE',
+  STAFF_CREATE: 'STAFF_CREATE',
+  MEMBER_FORCE_WITHDRAW: 'MEMBER_FORCE_WITHDRAW',
+  MEMBER_DELETE: 'MEMBER_DELETE',
+  MEMBER_RESTORE: 'MEMBER_RESTORE',
+  NOTICE_SEND: 'NOTICE_SEND',
+  NOTICE_UPDATE_RESPONSE: 'NOTICE_UPDATE_RESPONSE'
+} as const
+
+export type StaffPermissionKey = (typeof StaffPermissionKey)[keyof typeof StaffPermissionKey]
+
+
+export const ActorType = {
+  MEMBER: 'MEMBER',
+  STAFF: 'STAFF',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type ActorType = (typeof ActorType)[keyof typeof ActorType]
+
+
+export const AuthTokenPurpose = {
+  MEMBERSHIP_CONFIRM: 'MEMBERSHIP_CONFIRM',
+  RESTORE_CONFIRM: 'RESTORE_CONFIRM',
+  PASSWORD_RESET: 'PASSWORD_RESET'
+} as const
+
+export type AuthTokenPurpose = (typeof AuthTokenPurpose)[keyof typeof AuthTokenPurpose]
+
+
+export const MemberEventKind = {
+  VOLUNTARY_WITHDRAWAL: 'VOLUNTARY_WITHDRAWAL',
+  FORCED_WITHDRAWAL: 'FORCED_WITHDRAWAL',
+  RESTORE_REQUESTED: 'RESTORE_REQUESTED',
+  RESTORE_COMPLETED: 'RESTORE_COMPLETED',
+  RESTORE_CANCELLED: 'RESTORE_CANCELLED'
+} as const
+
+export type MemberEventKind = (typeof MemberEventKind)[keyof typeof MemberEventKind]
+
+
+export const ReviewDecision = {
+  PENDING: 'PENDING',
+  DIFFERENT_PERSON: 'DIFFERENT_PERSON',
+  SAME_PERSON: 'SAME_PERSON'
+} as const
+
+export type ReviewDecision = (typeof ReviewDecision)[keyof typeof ReviewDecision]
+
+
+export const CancellationKind = {
+  NORMAL: 'NORMAL',
+  STORE_EXCEPTION: 'STORE_EXCEPTION',
+  MEMBER_WITHDRAWAL: 'MEMBER_WITHDRAWAL'
+} as const
+
+export type CancellationKind = (typeof CancellationKind)[keyof typeof CancellationKind]
+
+
+export const NoticeResponseStatus = {
+  UNCONTACTED: 'UNCONTACTED',
+  AWAITING_CUSTOMER: 'AWAITING_CUSTOMER',
+  IN_PROGRESS: 'IN_PROGRESS',
+  IMPACT_RESOLVED_PENDING_REVIEW: 'IMPACT_RESOLVED_PENDING_REVIEW',
+  RESOLVED: 'RESOLVED'
+} as const
+
+export type NoticeResponseStatus = (typeof NoticeResponseStatus)[keyof typeof NoticeResponseStatus]
+
+
+export const EmailKind = {
+  MEMBERSHIP_CONFIRM: 'MEMBERSHIP_CONFIRM',
+  RESTORE_CONFIRM: 'RESTORE_CONFIRM',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  RESERVATION_CHANGE: 'RESERVATION_CHANGE'
+} as const
+
+export type EmailKind = (typeof EmailKind)[keyof typeof EmailKind]
+
+
+export const EmailStatus = {
+  PENDING: 'PENDING',
+  SENDING: 'SENDING',
+  RETRY_WAIT: 'RETRY_WAIT',
+  ACCEPTED: 'ACCEPTED',
+  FAILED: 'FAILED',
+  UNKNOWN: 'UNKNOWN',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type EmailStatus = (typeof EmailStatus)[keyof typeof EmailStatus]
+
+
+export const EmailAttemptResult = {
+  STARTED: 'STARTED',
+  ACCEPTED: 'ACCEPTED',
+  TRANSIENT_FAILURE: 'TRANSIENT_FAILURE',
+  PERMANENT_FAILURE: 'PERMANENT_FAILURE',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type EmailAttemptResult = (typeof EmailAttemptResult)[keyof typeof EmailAttemptResult]
+
+
+export const RateLimitScope = {
+  MAIL_ADDRESS: 'MAIL_ADDRESS',
+  MAIL_IP: 'MAIL_IP',
+  LOGIN_ACCOUNT: 'LOGIN_ACCOUNT',
+  LOGIN_IP: 'LOGIN_IP',
+  TOKEN_IP: 'TOKEN_IP'
+} as const
+
+export type RateLimitScope = (typeof RateLimitScope)[keyof typeof RateLimitScope]

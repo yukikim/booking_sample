@@ -4,6 +4,7 @@ import { Client, type DatabaseError } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { seedDevelopment, seedIds } from "../prisma/seed-data";
+import { verifyOperationalModels } from "./lib/verify-operational-models";
 import { loadDevelopmentDatabase, runPrisma } from "./lib/development-database";
 
 let passed = 0;
@@ -125,8 +126,7 @@ async function verifyConstraints(db: Client, schema: string, connectionString: s
     const snapshot = (await db.query('SELECT "memberLastNameSnapshot", "treatmentNameSnapshot", "totalPriceYen" FROM "Reservation" WHERE id=$1',[a.id])).rows[0];
     assert.deepEqual(snapshot,{memberLastNameSnapshot:"予約",treatmentNameSnapshot:"ボディケア",totalPriceYen:7000});
     const checks = (await db.query("SELECT conname FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname=$1 AND contype='c'",[schema])).rows;
-    assert.equal(checks.length,49);
-    assert.deepEqual(checks.map(r=>r.conname).sort(),[...checked].filter(n=>n.endsWith('_check')).sort());
+    for (const name of checked) if (name.endsWith("_check")) assert(checks.some(r => r.conname === name));
     passed += 6;
   } finally { await db.query("ROLLBACK"); }
 
@@ -174,12 +174,14 @@ async function verifyConstraints(db: Client, schema: string, connectionString: s
   assert.equal((await db.query('SELECT count(*)::int AS n FROM "ReservationSlot" WHERE "reservationId"=$1 AND "therapistId"=$2',[a.id,b.therapistId])).rows[0].n,2);
   passed++;
   // Cancellation deletes occupancy only; completed reservation retains original slots.
+  const cancellationAuditId = randomUUID();
   await db.query("BEGIN");
-  await db.query('UPDATE "Reservation" SET status=\'CANCELLED\' WHERE id=$1',[a.id]);
+  await insert(db, "AuditLog", {id:cancellationAuditId,requestKey:randomUUID(),actorType:"SYSTEM",action:"reservation.cancel",targetType:"Reservation",targetId:a.id});
+  await db.query('UPDATE "Reservation" SET status=\'CANCELLED\', "cancelledAt"=$2,"cancellationKind"=\'NORMAL\',"cancellationAuditId"=$3 WHERE id=$1',[a.id,now,cancellationAuditId]);
   await db.query('DELETE FROM "ReservationSlot" WHERE "reservationId"=$1',[a.id]);
   await db.query("COMMIT");
   assert.equal((await db.query('SELECT count(*)::int AS n FROM "ReservationOption" WHERE "reservationId"=$1',[a.id])).rows[0].n,1);
-  await db.query('UPDATE "Reservation" SET status=\'COMPLETED\' WHERE id=$1',[d.id]);
+  await db.query('UPDATE "Reservation" SET status=\'COMPLETED\',"actualStartedAt"=$2,"actualCompletedAt"=$3 WHERE id=$1',[d.id,now,new Date(now.getTime()+70*60000)]);
   assert.equal((await db.query('SELECT count(*)::int AS n FROM "ReservationSlot" WHERE "reservationId"=$1',[d.id])).rows[0].n,1);
   passed += 5;
 }
@@ -220,7 +222,12 @@ async function main() {
         const room=await prisma.room.findUniqueOrThrow({where:{id:seedIds.rooms[0]}});
         assert.equal(room.name,"編集済み");assert.equal(room.isActive,false);
         passed += 4;
-        if(round===0) await verifyConstraints(db,schema,connectionString);
+        if(round===0) {
+          await verifyConstraints(db,schema,connectionString);
+          passed += await verifyOperationalModels(db, checked);
+          const names=(await db.query("SELECT conname FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname=$1 AND contype='c'",[schema])).rows.map(r=>r.conname).sort();
+          assert.deepEqual(names,[...checked].filter(n=>n.endsWith("_check")).sort());
+        }
         console.log(`Isolated database round ${round+1}: migrations, repeated seed and catalog verification passed.`);
       } finally {
         await prisma?.$disconnect();
@@ -229,7 +236,7 @@ async function main() {
         await db.query(`DROP SCHEMA ${quote(schema)} CASCADE`);
       }
     }
-    console.log(`Database verification passed: ${passed} cases; all 49 CHECK constraints exercised; isolated schemas removed.`);
+    console.log(`Database verification passed: ${passed} cases; all ${[...checked].filter(n=>n.endsWith("_check")).length} CHECK constraints exercised; isolated schemas removed.`);
   } finally { await db.end(); }
 }
 main().catch((error: unknown)=>{

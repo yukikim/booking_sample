@@ -1,5 +1,5 @@
-// Tasks 2.2.1–2.2.4: base models, snapshots, slots and initial migration.
-// Row CHECKs live in migration.sql. Operational history follows in 2.2.5–2.2.6.
+// Tasks 2.2.1–2.2.5: booking foundation and operational models.
+// Row CHECKs live in migrations. Effective-dated settings follow in 2.2.6.
 
 generator client {
   provider = "prisma-client"
@@ -54,8 +54,17 @@ model Member {
   createdAt        DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
 
-  reservations Reservation[]
-  sessions     AppSession[]
+  reservations      Reservation[]
+  sessions          AppSession[]
+  version           Int                    @default(1)
+  restoreGeneration Int                    @default(0)
+  tokens            AuthToken[]
+  lifecycleEvents   MemberLifecycleEvent[]
+  reviews           MemberReview[]
+  reviewMatches     MemberReviewMatch[]
+  actorLogs         AuditLog[]             @relation("MemberActor")
+
+  @@index([lastNameKey, firstNameKey, isDeleted])
 }
 
 // Staff credentials are independent of Member and of environment-based admins.
@@ -70,7 +79,10 @@ model StaffAccount {
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @db.Timestamptz(3)
 
-  sessions AppSession[]
+  sessions    AppSession[]
+  permissions StaffPermission[]
+  tokens      AuthToken[]
+  actorLogs   AuditLog[]        @relation("StaffActor")
 }
 
 // Seed supplies a stable ID. Credentials and ADMIN_AUTH_VERSION stay in env.
@@ -82,7 +94,10 @@ model AdminAccount {
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
-  sessions AppSession[]
+  sessions           AppSession[]
+  grantedPermissions StaffPermission[]
+  reviewedMembers    MemberReview[]
+  actorLogs          AuditLog[]        @relation("AdminActor")
 }
 
 // Application revocation record for JWT auth; not an Auth.js adapter Session.
@@ -122,6 +137,7 @@ model Therapist {
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   reservations Reservation[]
+  schedules    TherapistSchedule[]
 }
 
 model Treatment {
@@ -179,12 +195,20 @@ model Reservation {
   updatedAt                        DateTime          @updatedAt @db.Timestamptz(3)
 
   // Retain mandatory references after withdrawal/deactivation; never cascade history.
-  member    Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  treatment Treatment           @relation(fields: [treatmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  room      Room                @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  therapist Therapist           @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  options   ReservationOption[]
-  slots     ReservationSlot[]
+  member              Member                    @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  treatment           Treatment                 @relation(fields: [treatmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  room                Room                      @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  therapist           Therapist                 @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  options             ReservationOption[]
+  slots               ReservationSlot[]
+  actualStartedAt     DateTime?                 @db.Timestamptz(3)
+  actualCompletedAt   DateTime?                 @db.Timestamptz(3)
+  cancelledAt         DateTime?                 @db.Timestamptz(3)
+  cancellationKind    CancellationKind?
+  cancellationReason  String?                   @db.VarChar(1000)
+  cancellationAuditId String?                   @unique @db.Uuid
+  cancellationAudit   AuditLog?                 @relation(fields: [cancellationAuditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  notices             ReservationChangeNotice[]
 
   // Referenced by the slot FK so every slot uses this reservation's assignment.
   @@unique([id, roomId, therapistId])
@@ -228,4 +252,357 @@ model ReservationSlot {
   @@unique([roomId, slotStartsAt])
   @@unique([therapistId, slotStartsAt])
   @@index([slotStartsAt])
+}
+
+enum StaffPermissionKey {
+  RESERVATION_CREATE
+  RESERVATION_UPDATE
+  RESERVATION_CANCEL
+  RESERVATION_EXCEPTION
+  RESERVATION_START
+  RESERVATION_COMPLETE
+  TREATMENT_CREATE
+  TREATMENT_UPDATE
+  TREATMENT_DISABLE
+  OPTION_CREATE
+  OPTION_UPDATE
+  OPTION_DISABLE
+  ROOM_CREATE
+  ROOM_UPDATE
+  ROOM_DISABLE
+  THERAPIST_CREATE
+  THERAPIST_UPDATE
+  THERAPIST_DISABLE
+  BUSINESS_SETTING_MANAGE
+  THERAPIST_BREAK_MANAGE
+  STAFF_CREATE
+  MEMBER_FORCE_WITHDRAW
+  MEMBER_DELETE
+  MEMBER_RESTORE
+  NOTICE_SEND
+  NOTICE_UPDATE_RESPONSE
+}
+
+enum ActorType {
+  MEMBER
+  STAFF
+  ADMIN
+  SYSTEM
+}
+
+enum AuthTokenPurpose {
+  MEMBERSHIP_CONFIRM
+  RESTORE_CONFIRM
+  PASSWORD_RESET
+}
+
+enum MemberEventKind {
+  VOLUNTARY_WITHDRAWAL
+  FORCED_WITHDRAWAL
+  RESTORE_REQUESTED
+  RESTORE_COMPLETED
+  RESTORE_CANCELLED
+}
+
+enum ReviewDecision {
+  PENDING
+  DIFFERENT_PERSON
+  SAME_PERSON
+}
+
+enum CancellationKind {
+  NORMAL
+  STORE_EXCEPTION
+  MEMBER_WITHDRAWAL
+}
+
+enum NoticeResponseStatus {
+  UNCONTACTED
+  AWAITING_CUSTOMER
+  IN_PROGRESS
+  IMPACT_RESOLVED_PENDING_REVIEW
+  RESOLVED
+}
+
+enum EmailKind {
+  MEMBERSHIP_CONFIRM
+  RESTORE_CONFIRM
+  PASSWORD_RESET
+  RESERVATION_CHANGE
+}
+
+enum EmailStatus {
+  PENDING
+  SENDING
+  RETRY_WAIT
+  ACCEPTED
+  FAILED
+  UNKNOWN
+  CANCELLED
+  EXPIRED
+}
+
+enum EmailAttemptResult {
+  STARTED
+  ACCEPTED
+  TRANSIENT_FAILURE
+  PERMANENT_FAILURE
+  UNKNOWN
+}
+
+enum RateLimitScope {
+  MAIL_ADDRESS
+  MAIL_IP
+  LOGIN_ACCOUNT
+  LOGIN_IP
+  TOKEN_IP
+}
+
+// No row means no write permission. Permission delegation is deliberately absent.
+model StaffPermission {
+  staffId          String             @db.Uuid
+  permission       StaffPermissionKey
+  grantedByAdminId String             @db.Uuid
+  grantedAt        DateTime           @default(now()) @db.Timestamptz(3)
+  staff            StaffAccount       @relation(fields: [staffId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  grantedBy        AdminAccount       @relation(fields: [grantedByAdminId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([staffId, permission])
+  @@index([grantedByAdminId])
+}
+
+// Digest only. Email delivery temporarily retains encrypted payload separately.
+model AuthToken {
+  id                String           @id @default(uuid()) @db.Uuid
+  digest            String           @unique @db.VarChar(64)
+  purpose           AuthTokenPurpose
+  memberId          String?          @db.Uuid
+  staffId           String?          @db.Uuid
+  emailKey          String           @db.VarChar(254)
+  authVersion       Int
+  restoreGeneration Int?
+  createdAt         DateTime         @default(now()) @db.Timestamptz(3)
+  expiresAt         DateTime         @db.Timestamptz(3)
+  usedAt            DateTime?        @db.Timestamptz(3)
+  revokedAt         DateTime?        @db.Timestamptz(3)
+  member            Member?          @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  staff             StaffAccount?    @relation(fields: [staffId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  deliveries        EmailDelivery[]
+
+  @@index([memberId, purpose, createdAt])
+  @@index([staffId, purpose, createdAt])
+  @@index([expiresAt])
+}
+
+model MemberLifecycleEvent {
+  id                String          @id @default(uuid()) @db.Uuid
+  memberId          String          @db.Uuid
+  kind              MemberEventKind
+  reason            String?         @db.VarChar(1000)
+  restoreGeneration Int
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  auditId           String          @unique @db.Uuid
+  member            Member          @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  audit             AuditLog        @relation(fields: [auditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([memberId, createdAt])
+}
+
+model MemberReview {
+  id                String              @id @default(uuid()) @db.Uuid
+  memberId          String              @db.Uuid
+  decision          ReviewDecision      @default(PENDING)
+  reason            String?             @db.VarChar(1000)
+  reviewedByAdminId String?             @db.Uuid
+  reviewedAt        DateTime?           @db.Timestamptz(3)
+  decisionAuditId   String?             @unique @db.Uuid
+  version           Int                 @default(1)
+  createdAt         DateTime            @default(now()) @db.Timestamptz(3)
+  member            Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  reviewedBy        AdminAccount?       @relation(fields: [reviewedByAdminId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  decisionAudit     AuditLog?           @relation(fields: [decisionAuditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  matches           MemberReviewMatch[]
+
+  @@index([memberId, createdAt])
+  @@index([decision, createdAt])
+  @@index([reviewedByAdminId])
+}
+
+model MemberReviewMatch {
+  reviewId        String       @db.Uuid
+  matchedMemberId String       @db.Uuid
+  review          MemberReview @relation(fields: [reviewId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  matchedMember   Member       @relation(fields: [matchedMemberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([reviewId, matchedMemberId])
+  @@index([matchedMemberId])
+}
+
+// Immutable content containers. Effective dates/revisions come in Task 2.2.6.
+// Neither container is a current setting until selected by that later model.
+model BusinessSchedule {
+  id        String        @id @default(uuid()) @db.Uuid
+  createdAt DateTime      @default(now()) @db.Timestamptz(3)
+  days      BusinessDay[]
+}
+
+model BusinessDay {
+  scheduleId String           @db.Uuid
+  weekday    Int              @db.SmallInt
+  isOpen     Boolean
+  opensAt    DateTime?        @db.Time(0)
+  // Required even on holidays for the previous-calendar-day booking cutoff.
+  closesAt   DateTime         @db.Time(0)
+  schedule   BusinessSchedule @relation(fields: [scheduleId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([scheduleId, weekday])
+}
+
+model TherapistSchedule {
+  id          String           @id @default(uuid()) @db.Uuid
+  therapistId String           @db.Uuid
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  therapist   Therapist        @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  breaks      TherapistBreak[]
+
+  @@index([therapistId])
+}
+
+model TherapistBreak {
+  scheduleId String            @db.Uuid
+  weekday    Int               @db.SmallInt
+  // Both null explicitly means unconfigured: do not assign on that weekday.
+  startsAt   DateTime?         @db.Time(0)
+  endsAt     DateTime?         @db.Time(0)
+  schedule   TherapistSchedule @relation(fields: [scheduleId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([scheduleId, weekday])
+}
+
+model ReservationChangeNotice {
+  id                 String               @id @default(uuid()) @db.Uuid
+  reservationId      String               @db.Uuid
+  // Audit of the source change (settings or resource deactivation).
+  changeAuditId      String               @db.Uuid
+  reservationVersion Int
+  reason             String               @db.VarChar(1000)
+  proposedChange     Json?
+  responseStatus     NoticeResponseStatus @default(UNCONTACTED)
+  responseNote       String?              @db.VarChar(1000)
+  resolvedAt         DateTime?            @db.Timestamptz(3)
+  version            Int                  @default(1)
+  createdAt          DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime             @updatedAt @db.Timestamptz(3)
+  reservation        Reservation          @relation(fields: [reservationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  changeAudit        AuditLog             @relation(fields: [changeAuditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  deliveries         EmailDelivery[]
+
+  @@unique([changeAuditId, reservationId])
+  @@index([reservationId, responseStatus])
+  @@index([responseStatus, createdAt])
+}
+
+// Persistent deduplication receipt. Clear sensitive details, not this row.
+model EmailDelivery {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  requestKey          String                   @unique @db.Uuid
+  kind                EmailKind
+  tokenId             String?                  @db.Uuid
+  // Preserved after the short-lived AuthToken is deleted.
+  tokenReferenceId    String?                  @db.Uuid
+  noticeId            String?                  @db.Uuid
+  // Required for change notices: audit of explicit staff/admin send confirmation.
+  confirmationAuditId String?                  @db.Uuid
+  status              EmailStatus              @default(PENDING)
+  recipient           String?                  @db.VarChar(254)
+  encryptedPayload    Bytes?
+  payloadKeyId        String?                  @db.VarChar(100)
+  payloadExpiresAt    DateTime?                @db.Timestamptz(3)
+  attemptCount        Int                      @default(0)
+  nextAttemptAt       DateTime?                @db.Timestamptz(3)
+  leaseId             String?                  @db.Uuid
+  leaseExpiresAt      DateTime?                @db.Timestamptz(3)
+  acceptedAt          DateTime?                @db.Timestamptz(3)
+  closedAt            DateTime?                @db.Timestamptz(3)
+  version             Int                      @default(1)
+  createdAt           DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime                 @updatedAt @db.Timestamptz(3)
+  // Token retention is expiresAt+7 days; delivery receipt survives its deletion.
+  token               AuthToken?               @relation(fields: [tokenId], references: [id], onDelete: SetNull, onUpdate: Restrict)
+  notice              ReservationChangeNotice? @relation(fields: [noticeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  confirmationAudit   AuditLog?                @relation(fields: [confirmationAuditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  attempts            EmailDeliveryAttempt[]
+
+  @@unique([tokenReferenceId, kind])
+  @@unique([noticeId, kind])
+  @@index([status, nextAttemptAt])
+  @@index([leaseExpiresAt])
+  @@index([closedAt])
+  @@index([tokenId])
+  @@index([confirmationAuditId])
+}
+
+model EmailDeliveryAttempt {
+  id            String             @id @default(uuid()) @db.Uuid
+  deliveryId    String             @db.Uuid
+  attemptNumber Int
+  leaseId       String             @db.Uuid
+  result        EmailAttemptResult @default(STARTED)
+  startedAt     DateTime           @default(now()) @db.Timestamptz(3)
+  finishedAt    DateTime?          @db.Timestamptz(3)
+  // Sanitized code only, never SMTP response bodies or tokens.
+  errorCode     String?            @db.VarChar(100)
+  delivery      EmailDelivery      @relation(fields: [deliveryId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([deliveryId, attemptNumber])
+}
+
+// Append-only by service contract; generic target IDs are historical identifiers.
+model AuditLog {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  requestKey           String                    @unique @db.Uuid
+  actorType            ActorType
+  actorMemberId        String?                   @db.Uuid
+  actorStaffId         String?                   @db.Uuid
+  actorAdminId         String?                   @db.Uuid
+  action               String                    @db.VarChar(100)
+  targetType           String                    @db.VarChar(100)
+  targetId             String                    @db.Uuid
+  // Allowlisted business fields only; never whole account records or secrets.
+  changes              Json?
+  createdAt            DateTime                  @default(now()) @db.Timestamptz(3)
+  actorMember          Member?                   @relation("MemberActor", fields: [actorMemberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  actorStaff           StaffAccount?             @relation("StaffActor", fields: [actorStaffId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  actorAdmin           AdminAccount?             @relation("AdminActor", fields: [actorAdminId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  memberEvents         MemberLifecycleEvent[]
+  reviews              MemberReview[]
+  cancelledReservation Reservation?
+  notices              ReservationChangeNotice[]
+  confirmedDeliveries  EmailDelivery[]
+
+  @@index([targetType, targetId, createdAt])
+  @@index([actorMemberId, createdAt])
+  @@index([actorStaffId, createdAt])
+  @@index([actorAdminId, createdAt])
+}
+
+// Bucket row is the lock target; event timestamps support exact sliding windows.
+model RateLimitBucket {
+  scope         RateLimitScope
+  keyDigest     String           @db.VarChar(64)
+  lastAttemptAt DateTime         @db.Timestamptz(3)
+  events        RateLimitEvent[]
+
+  @@id([scope, keyDigest])
+  @@index([lastAttemptAt])
+}
+
+model RateLimitEvent {
+  id         String          @id @default(uuid()) @db.Uuid
+  scope      RateLimitScope
+  keyDigest  String          @db.VarChar(64)
+  occurredAt DateTime        @default(now()) @db.Timestamptz(3)
+  bucket     RateLimitBucket @relation(fields: [scope, keyDigest], references: [scope, keyDigest], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([scope, keyDigest, occurredAt])
 }

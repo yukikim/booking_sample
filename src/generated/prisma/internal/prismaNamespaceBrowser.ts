@@ -61,7 +61,22 @@ export const ModelName = {
   Option: 'Option',
   Reservation: 'Reservation',
   ReservationOption: 'ReservationOption',
-  ReservationSlot: 'ReservationSlot'
+  ReservationSlot: 'ReservationSlot',
+  StaffPermission: 'StaffPermission',
+  AuthToken: 'AuthToken',
+  MemberLifecycleEvent: 'MemberLifecycleEvent',
+  MemberReview: 'MemberReview',
+  MemberReviewMatch: 'MemberReviewMatch',
+  BusinessSchedule: 'BusinessSchedule',
+  BusinessDay: 'BusinessDay',
+  TherapistSchedule: 'TherapistSchedule',
+  TherapistBreak: 'TherapistBreak',
+  ReservationChangeNotice: 'ReservationChangeNotice',
+  EmailDelivery: 'EmailDelivery',
+  EmailDeliveryAttempt: 'EmailDeliveryAttempt',
+  AuditLog: 'AuditLog',
+  RateLimitBucket: 'RateLimitBucket',
+  RateLimitEvent: 'RateLimitEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -98,7 +113,9 @@ export const MemberScalarFieldEnum = {
   firstActivatedAt: 'firstActivatedAt',
   authVersion: 'authVersion',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  version: 'version',
+  restoreGeneration: 'restoreGeneration'
 } as const
 
 export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
@@ -219,7 +236,13 @@ export const ReservationScalarFieldEnum = {
   notes: 'notes',
   version: 'version',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  actualStartedAt: 'actualStartedAt',
+  actualCompletedAt: 'actualCompletedAt',
+  cancelledAt: 'cancelledAt',
+  cancellationKind: 'cancellationKind',
+  cancellationReason: 'cancellationReason',
+  cancellationAuditId: 'cancellationAuditId'
 } as const
 
 export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
@@ -246,12 +269,217 @@ export const ReservationSlotScalarFieldEnum = {
 export type ReservationSlotScalarFieldEnum = (typeof ReservationSlotScalarFieldEnum)[keyof typeof ReservationSlotScalarFieldEnum]
 
 
+export const StaffPermissionScalarFieldEnum = {
+  staffId: 'staffId',
+  permission: 'permission',
+  grantedByAdminId: 'grantedByAdminId',
+  grantedAt: 'grantedAt'
+} as const
+
+export type StaffPermissionScalarFieldEnum = (typeof StaffPermissionScalarFieldEnum)[keyof typeof StaffPermissionScalarFieldEnum]
+
+
+export const AuthTokenScalarFieldEnum = {
+  id: 'id',
+  digest: 'digest',
+  purpose: 'purpose',
+  memberId: 'memberId',
+  staffId: 'staffId',
+  emailKey: 'emailKey',
+  authVersion: 'authVersion',
+  restoreGeneration: 'restoreGeneration',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type AuthTokenScalarFieldEnum = (typeof AuthTokenScalarFieldEnum)[keyof typeof AuthTokenScalarFieldEnum]
+
+
+export const MemberLifecycleEventScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  kind: 'kind',
+  reason: 'reason',
+  restoreGeneration: 'restoreGeneration',
+  createdAt: 'createdAt',
+  auditId: 'auditId'
+} as const
+
+export type MemberLifecycleEventScalarFieldEnum = (typeof MemberLifecycleEventScalarFieldEnum)[keyof typeof MemberLifecycleEventScalarFieldEnum]
+
+
+export const MemberReviewScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  decision: 'decision',
+  reason: 'reason',
+  reviewedByAdminId: 'reviewedByAdminId',
+  reviewedAt: 'reviewedAt',
+  decisionAuditId: 'decisionAuditId',
+  version: 'version',
+  createdAt: 'createdAt'
+} as const
+
+export type MemberReviewScalarFieldEnum = (typeof MemberReviewScalarFieldEnum)[keyof typeof MemberReviewScalarFieldEnum]
+
+
+export const MemberReviewMatchScalarFieldEnum = {
+  reviewId: 'reviewId',
+  matchedMemberId: 'matchedMemberId'
+} as const
+
+export type MemberReviewMatchScalarFieldEnum = (typeof MemberReviewMatchScalarFieldEnum)[keyof typeof MemberReviewMatchScalarFieldEnum]
+
+
+export const BusinessScheduleScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt'
+} as const
+
+export type BusinessScheduleScalarFieldEnum = (typeof BusinessScheduleScalarFieldEnum)[keyof typeof BusinessScheduleScalarFieldEnum]
+
+
+export const BusinessDayScalarFieldEnum = {
+  scheduleId: 'scheduleId',
+  weekday: 'weekday',
+  isOpen: 'isOpen',
+  opensAt: 'opensAt',
+  closesAt: 'closesAt'
+} as const
+
+export type BusinessDayScalarFieldEnum = (typeof BusinessDayScalarFieldEnum)[keyof typeof BusinessDayScalarFieldEnum]
+
+
+export const TherapistScheduleScalarFieldEnum = {
+  id: 'id',
+  therapistId: 'therapistId',
+  createdAt: 'createdAt'
+} as const
+
+export type TherapistScheduleScalarFieldEnum = (typeof TherapistScheduleScalarFieldEnum)[keyof typeof TherapistScheduleScalarFieldEnum]
+
+
+export const TherapistBreakScalarFieldEnum = {
+  scheduleId: 'scheduleId',
+  weekday: 'weekday',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt'
+} as const
+
+export type TherapistBreakScalarFieldEnum = (typeof TherapistBreakScalarFieldEnum)[keyof typeof TherapistBreakScalarFieldEnum]
+
+
+export const ReservationChangeNoticeScalarFieldEnum = {
+  id: 'id',
+  reservationId: 'reservationId',
+  changeAuditId: 'changeAuditId',
+  reservationVersion: 'reservationVersion',
+  reason: 'reason',
+  proposedChange: 'proposedChange',
+  responseStatus: 'responseStatus',
+  responseNote: 'responseNote',
+  resolvedAt: 'resolvedAt',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReservationChangeNoticeScalarFieldEnum = (typeof ReservationChangeNoticeScalarFieldEnum)[keyof typeof ReservationChangeNoticeScalarFieldEnum]
+
+
+export const EmailDeliveryScalarFieldEnum = {
+  id: 'id',
+  requestKey: 'requestKey',
+  kind: 'kind',
+  tokenId: 'tokenId',
+  tokenReferenceId: 'tokenReferenceId',
+  noticeId: 'noticeId',
+  confirmationAuditId: 'confirmationAuditId',
+  status: 'status',
+  recipient: 'recipient',
+  encryptedPayload: 'encryptedPayload',
+  payloadKeyId: 'payloadKeyId',
+  payloadExpiresAt: 'payloadExpiresAt',
+  attemptCount: 'attemptCount',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  acceptedAt: 'acceptedAt',
+  closedAt: 'closedAt',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmailDeliveryScalarFieldEnum = (typeof EmailDeliveryScalarFieldEnum)[keyof typeof EmailDeliveryScalarFieldEnum]
+
+
+export const EmailDeliveryAttemptScalarFieldEnum = {
+  id: 'id',
+  deliveryId: 'deliveryId',
+  attemptNumber: 'attemptNumber',
+  leaseId: 'leaseId',
+  result: 'result',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  errorCode: 'errorCode'
+} as const
+
+export type EmailDeliveryAttemptScalarFieldEnum = (typeof EmailDeliveryAttemptScalarFieldEnum)[keyof typeof EmailDeliveryAttemptScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  requestKey: 'requestKey',
+  actorType: 'actorType',
+  actorMemberId: 'actorMemberId',
+  actorStaffId: 'actorStaffId',
+  actorAdminId: 'actorAdminId',
+  action: 'action',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  changes: 'changes',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const RateLimitBucketScalarFieldEnum = {
+  scope: 'scope',
+  keyDigest: 'keyDigest',
+  lastAttemptAt: 'lastAttemptAt'
+} as const
+
+export type RateLimitBucketScalarFieldEnum = (typeof RateLimitBucketScalarFieldEnum)[keyof typeof RateLimitBucketScalarFieldEnum]
+
+
+export const RateLimitEventScalarFieldEnum = {
+  id: 'id',
+  scope: 'scope',
+  keyDigest: 'keyDigest',
+  occurredAt: 'occurredAt'
+} as const
+
+export type RateLimitEventScalarFieldEnum = (typeof RateLimitEventScalarFieldEnum)[keyof typeof RateLimitEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -268,4 +496,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

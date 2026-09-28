@@ -29,11 +29,15 @@ export type AggregateMember = {
 export type MemberAvgAggregateOutputType = {
   ageBand: number | null
   authVersion: number | null
+  version: number | null
+  restoreGeneration: number | null
 }
 
 export type MemberSumAggregateOutputType = {
   ageBand: number | null
   authVersion: number | null
+  version: number | null
+  restoreGeneration: number | null
 }
 
 export type MemberMinAggregateOutputType = {
@@ -55,6 +59,8 @@ export type MemberMinAggregateOutputType = {
   authVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  version: number | null
+  restoreGeneration: number | null
 }
 
 export type MemberMaxAggregateOutputType = {
@@ -76,6 +82,8 @@ export type MemberMaxAggregateOutputType = {
   authVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
+  version: number | null
+  restoreGeneration: number | null
 }
 
 export type MemberCountAggregateOutputType = {
@@ -97,6 +105,8 @@ export type MemberCountAggregateOutputType = {
   authVersion: number
   createdAt: number
   updatedAt: number
+  version: number
+  restoreGeneration: number
   _all: number
 }
 
@@ -104,11 +114,15 @@ export type MemberCountAggregateOutputType = {
 export type MemberAvgAggregateInputType = {
   ageBand?: true
   authVersion?: true
+  version?: true
+  restoreGeneration?: true
 }
 
 export type MemberSumAggregateInputType = {
   ageBand?: true
   authVersion?: true
+  version?: true
+  restoreGeneration?: true
 }
 
 export type MemberMinAggregateInputType = {
@@ -130,6 +144,8 @@ export type MemberMinAggregateInputType = {
   authVersion?: true
   createdAt?: true
   updatedAt?: true
+  version?: true
+  restoreGeneration?: true
 }
 
 export type MemberMaxAggregateInputType = {
@@ -151,6 +167,8 @@ export type MemberMaxAggregateInputType = {
   authVersion?: true
   createdAt?: true
   updatedAt?: true
+  version?: true
+  restoreGeneration?: true
 }
 
 export type MemberCountAggregateInputType = {
@@ -172,6 +190,8 @@ export type MemberCountAggregateInputType = {
   authVersion?: true
   createdAt?: true
   updatedAt?: true
+  version?: true
+  restoreGeneration?: true
   _all?: true
 }
 
@@ -280,6 +300,8 @@ export type MemberGroupByOutputType = {
   authVersion: number
   createdAt: Date
   updatedAt: Date
+  version: number
+  restoreGeneration: number
   _count: MemberCountAggregateOutputType | null
   _avg: MemberAvgAggregateOutputType | null
   _sum: MemberSumAggregateOutputType | null
@@ -324,8 +346,15 @@ export type MemberWhereInput = {
   authVersion?: Prisma.IntFilter<"Member"> | number
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+  version?: Prisma.IntFilter<"Member"> | number
+  restoreGeneration?: Prisma.IntFilter<"Member"> | number
   reservations?: Prisma.ReservationListRelationFilter
   sessions?: Prisma.AppSessionListRelationFilter
+  tokens?: Prisma.AuthTokenListRelationFilter
+  lifecycleEvents?: Prisma.MemberLifecycleEventListRelationFilter
+  reviews?: Prisma.MemberReviewListRelationFilter
+  reviewMatches?: Prisma.MemberReviewMatchListRelationFilter
+  actorLogs?: Prisma.AuditLogListRelationFilter
 }
 
 export type MemberOrderByWithRelationInput = {
@@ -347,8 +376,15 @@ export type MemberOrderByWithRelationInput = {
   authVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
   sessions?: Prisma.AppSessionOrderByRelationAggregateInput
+  tokens?: Prisma.AuthTokenOrderByRelationAggregateInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventOrderByRelationAggregateInput
+  reviews?: Prisma.MemberReviewOrderByRelationAggregateInput
+  reviewMatches?: Prisma.MemberReviewMatchOrderByRelationAggregateInput
+  actorLogs?: Prisma.AuditLogOrderByRelationAggregateInput
 }
 
 export type MemberWhereUniqueInput = Prisma.AtLeast<{
@@ -373,8 +409,15 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   authVersion?: Prisma.IntFilter<"Member"> | number
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+  version?: Prisma.IntFilter<"Member"> | number
+  restoreGeneration?: Prisma.IntFilter<"Member"> | number
   reservations?: Prisma.ReservationListRelationFilter
   sessions?: Prisma.AppSessionListRelationFilter
+  tokens?: Prisma.AuthTokenListRelationFilter
+  lifecycleEvents?: Prisma.MemberLifecycleEventListRelationFilter
+  reviews?: Prisma.MemberReviewListRelationFilter
+  reviewMatches?: Prisma.MemberReviewMatchListRelationFilter
+  actorLogs?: Prisma.AuditLogListRelationFilter
 }, "id" | "emailKey">
 
 export type MemberOrderByWithAggregationInput = {
@@ -396,6 +439,8 @@ export type MemberOrderByWithAggregationInput = {
   authVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
   _count?: Prisma.MemberCountOrderByAggregateInput
   _avg?: Prisma.MemberAvgOrderByAggregateInput
   _max?: Prisma.MemberMaxOrderByAggregateInput
@@ -425,6 +470,8 @@ export type MemberScalarWhereWithAggregatesInput = {
   authVersion?: Prisma.IntWithAggregatesFilter<"Member"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
+  version?: Prisma.IntWithAggregatesFilter<"Member"> | number
+  restoreGeneration?: Prisma.IntWithAggregatesFilter<"Member"> | number
 }
 
 export type MemberCreateInput = {
@@ -446,8 +493,15 @@ export type MemberCreateInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
   reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
   sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
 }
 
 export type MemberUncheckedCreateInput = {
@@ -469,8 +523,15 @@ export type MemberUncheckedCreateInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
   sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
 }
 
 export type MemberUpdateInput = {
@@ -492,8 +553,15 @@ export type MemberUpdateInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
   reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
   sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
 }
 
 export type MemberUncheckedUpdateInput = {
@@ -515,8 +583,15 @@ export type MemberUncheckedUpdateInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
   sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
 }
 
 export type MemberCreateManyInput = {
@@ -538,6 +613,8 @@ export type MemberCreateManyInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
 }
 
 export type MemberUpdateManyMutationInput = {
@@ -559,6 +636,8 @@ export type MemberUpdateManyMutationInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type MemberUncheckedUpdateManyInput = {
@@ -580,6 +659,8 @@ export type MemberUncheckedUpdateManyInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type MemberCountOrderByAggregateInput = {
@@ -601,11 +682,15 @@ export type MemberCountOrderByAggregateInput = {
   authVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
 }
 
 export type MemberAvgOrderByAggregateInput = {
   ageBand?: Prisma.SortOrder
   authVersion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
 }
 
 export type MemberMaxOrderByAggregateInput = {
@@ -627,6 +712,8 @@ export type MemberMaxOrderByAggregateInput = {
   authVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
 }
 
 export type MemberMinOrderByAggregateInput = {
@@ -648,11 +735,15 @@ export type MemberMinOrderByAggregateInput = {
   authVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
 }
 
 export type MemberSumOrderByAggregateInput = {
   ageBand?: Prisma.SortOrder
   authVersion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  restoreGeneration?: Prisma.SortOrder
 }
 
 export type MemberNullableScalarRelationFilter = {
@@ -723,6 +814,80 @@ export type MemberUpdateOneRequiredWithoutReservationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutReservationsInput, Prisma.MemberUpdateWithoutReservationsInput>, Prisma.MemberUncheckedUpdateWithoutReservationsInput>
 }
 
+export type MemberCreateNestedOneWithoutTokensInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutTokensInput, Prisma.MemberUncheckedCreateWithoutTokensInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutTokensInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneWithoutTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutTokensInput, Prisma.MemberUncheckedCreateWithoutTokensInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutTokensInput
+  upsert?: Prisma.MemberUpsertWithoutTokensInput
+  disconnect?: Prisma.MemberWhereInput | boolean
+  delete?: Prisma.MemberWhereInput | boolean
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutTokensInput, Prisma.MemberUpdateWithoutTokensInput>, Prisma.MemberUncheckedUpdateWithoutTokensInput>
+}
+
+export type MemberCreateNestedOneWithoutLifecycleEventsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutLifecycleEventsInput, Prisma.MemberUncheckedCreateWithoutLifecycleEventsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutLifecycleEventsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutLifecycleEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutLifecycleEventsInput, Prisma.MemberUncheckedCreateWithoutLifecycleEventsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutLifecycleEventsInput
+  upsert?: Prisma.MemberUpsertWithoutLifecycleEventsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutLifecycleEventsInput, Prisma.MemberUpdateWithoutLifecycleEventsInput>, Prisma.MemberUncheckedUpdateWithoutLifecycleEventsInput>
+}
+
+export type MemberCreateNestedOneWithoutReviewsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutReviewsInput, Prisma.MemberUncheckedCreateWithoutReviewsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutReviewsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutReviewsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutReviewsInput, Prisma.MemberUncheckedCreateWithoutReviewsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutReviewsInput
+  upsert?: Prisma.MemberUpsertWithoutReviewsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutReviewsInput, Prisma.MemberUpdateWithoutReviewsInput>, Prisma.MemberUncheckedUpdateWithoutReviewsInput>
+}
+
+export type MemberCreateNestedOneWithoutReviewMatchesInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutReviewMatchesInput, Prisma.MemberUncheckedCreateWithoutReviewMatchesInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutReviewMatchesInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutReviewMatchesNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutReviewMatchesInput, Prisma.MemberUncheckedCreateWithoutReviewMatchesInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutReviewMatchesInput
+  upsert?: Prisma.MemberUpsertWithoutReviewMatchesInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutReviewMatchesInput, Prisma.MemberUpdateWithoutReviewMatchesInput>, Prisma.MemberUncheckedUpdateWithoutReviewMatchesInput>
+}
+
+export type MemberCreateNestedOneWithoutActorLogsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutActorLogsInput, Prisma.MemberUncheckedCreateWithoutActorLogsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutActorLogsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneWithoutActorLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutActorLogsInput, Prisma.MemberUncheckedCreateWithoutActorLogsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutActorLogsInput
+  upsert?: Prisma.MemberUpsertWithoutActorLogsInput
+  disconnect?: Prisma.MemberWhereInput | boolean
+  delete?: Prisma.MemberWhereInput | boolean
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutActorLogsInput, Prisma.MemberUpdateWithoutActorLogsInput>, Prisma.MemberUncheckedUpdateWithoutActorLogsInput>
+}
+
 export type MemberCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -742,7 +907,14 @@ export type MemberCreateWithoutSessionsInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
   reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
 }
 
 export type MemberUncheckedCreateWithoutSessionsInput = {
@@ -764,7 +936,14 @@ export type MemberUncheckedCreateWithoutSessionsInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
 }
 
 export type MemberCreateOrConnectWithoutSessionsInput = {
@@ -802,7 +981,14 @@ export type MemberUpdateWithoutSessionsInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
   reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutSessionsInput = {
@@ -824,7 +1010,14 @@ export type MemberUncheckedUpdateWithoutSessionsInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
 }
 
 export type MemberCreateWithoutReservationsInput = {
@@ -846,7 +1039,14 @@ export type MemberCreateWithoutReservationsInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
   sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
 }
 
 export type MemberUncheckedCreateWithoutReservationsInput = {
@@ -868,7 +1068,14 @@ export type MemberUncheckedCreateWithoutReservationsInput = {
   authVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
   sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
 }
 
 export type MemberCreateOrConnectWithoutReservationsInput = {
@@ -906,7 +1113,14 @@ export type MemberUpdateWithoutReservationsInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutReservationsInput = {
@@ -928,7 +1142,674 @@ export type MemberUncheckedUpdateWithoutReservationsInput = {
   authVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
   sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberCreateWithoutTokensInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberUncheckedCreateWithoutTokensInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberCreateOrConnectWithoutTokensInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutTokensInput, Prisma.MemberUncheckedCreateWithoutTokensInput>
+}
+
+export type MemberUpsertWithoutTokensInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutTokensInput, Prisma.MemberUncheckedUpdateWithoutTokensInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutTokensInput, Prisma.MemberUncheckedCreateWithoutTokensInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutTokensInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutTokensInput, Prisma.MemberUncheckedUpdateWithoutTokensInput>
+}
+
+export type MemberUpdateWithoutTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberCreateWithoutLifecycleEventsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberUncheckedCreateWithoutLifecycleEventsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberCreateOrConnectWithoutLifecycleEventsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutLifecycleEventsInput, Prisma.MemberUncheckedCreateWithoutLifecycleEventsInput>
+}
+
+export type MemberUpsertWithoutLifecycleEventsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutLifecycleEventsInput, Prisma.MemberUncheckedUpdateWithoutLifecycleEventsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutLifecycleEventsInput, Prisma.MemberUncheckedCreateWithoutLifecycleEventsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutLifecycleEventsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutLifecycleEventsInput, Prisma.MemberUncheckedUpdateWithoutLifecycleEventsInput>
+}
+
+export type MemberUpdateWithoutLifecycleEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutLifecycleEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberCreateWithoutReviewsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberUncheckedCreateWithoutReviewsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberCreateOrConnectWithoutReviewsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutReviewsInput, Prisma.MemberUncheckedCreateWithoutReviewsInput>
+}
+
+export type MemberUpsertWithoutReviewsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutReviewsInput, Prisma.MemberUncheckedUpdateWithoutReviewsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutReviewsInput, Prisma.MemberUncheckedCreateWithoutReviewsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutReviewsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutReviewsInput, Prisma.MemberUncheckedUpdateWithoutReviewsInput>
+}
+
+export type MemberUpdateWithoutReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutReviewsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberCreateWithoutReviewMatchesInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  actorLogs?: Prisma.AuditLogCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberUncheckedCreateWithoutReviewMatchesInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  actorLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorMemberInput
+}
+
+export type MemberCreateOrConnectWithoutReviewMatchesInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutReviewMatchesInput, Prisma.MemberUncheckedCreateWithoutReviewMatchesInput>
+}
+
+export type MemberUpsertWithoutReviewMatchesInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutReviewMatchesInput, Prisma.MemberUncheckedUpdateWithoutReviewMatchesInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutReviewMatchesInput, Prisma.MemberUncheckedCreateWithoutReviewMatchesInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutReviewMatchesInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutReviewMatchesInput, Prisma.MemberUncheckedUpdateWithoutReviewMatchesInput>
+}
+
+export type MemberUpdateWithoutReviewMatchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  actorLogs?: Prisma.AuditLogUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutReviewMatchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  actorLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorMemberNestedInput
+}
+
+export type MemberCreateWithoutActorLogsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchCreateNestedManyWithoutMatchedMemberInput
+}
+
+export type MemberUncheckedCreateWithoutActorLogsInput = {
+  id?: string
+  email: string
+  emailKey: string
+  lastName: string
+  firstName: string
+  lastNameKey: string
+  firstNameKey: string
+  phoneNumber: string
+  postalCode: string
+  ageBand: number
+  passwordHash: string
+  status?: $Enums.MemberStatus
+  isDeleted?: boolean
+  emailVerifiedAt?: Date | string | null
+  firstActivatedAt?: Date | string | null
+  authVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  version?: number
+  restoreGeneration?: number
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutMemberInput
+  sessions?: Prisma.AppSessionUncheckedCreateNestedManyWithoutMemberInput
+  tokens?: Prisma.AuthTokenUncheckedCreateNestedManyWithoutMemberInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutMemberInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutMemberInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedCreateNestedManyWithoutMatchedMemberInput
+}
+
+export type MemberCreateOrConnectWithoutActorLogsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutActorLogsInput, Prisma.MemberUncheckedCreateWithoutActorLogsInput>
+}
+
+export type MemberUpsertWithoutActorLogsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutActorLogsInput, Prisma.MemberUncheckedUpdateWithoutActorLogsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutActorLogsInput, Prisma.MemberUncheckedCreateWithoutActorLogsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutActorLogsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutActorLogsInput, Prisma.MemberUncheckedUpdateWithoutActorLogsInput>
+}
+
+export type MemberUpdateWithoutActorLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUpdateManyWithoutMatchedMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutActorLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailKey?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  firstNameKey?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.StringFieldUpdateOperationsInput | string
+  ageBand?: Prisma.IntFieldUpdateOperationsInput | number
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  firstActivatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  restoreGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutMemberNestedInput
+  sessions?: Prisma.AppSessionUncheckedUpdateManyWithoutMemberNestedInput
+  tokens?: Prisma.AuthTokenUncheckedUpdateManyWithoutMemberNestedInput
+  lifecycleEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutMemberNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutMemberNestedInput
+  reviewMatches?: Prisma.MemberReviewMatchUncheckedUpdateManyWithoutMatchedMemberNestedInput
 }
 
 
@@ -939,11 +1820,21 @@ export type MemberUncheckedUpdateWithoutReservationsInput = {
 export type MemberCountOutputType = {
   reservations: number
   sessions: number
+  tokens: number
+  lifecycleEvents: number
+  reviews: number
+  reviewMatches: number
+  actorLogs: number
 }
 
 export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reservations?: boolean | MemberCountOutputTypeCountReservationsArgs
   sessions?: boolean | MemberCountOutputTypeCountSessionsArgs
+  tokens?: boolean | MemberCountOutputTypeCountTokensArgs
+  lifecycleEvents?: boolean | MemberCountOutputTypeCountLifecycleEventsArgs
+  reviews?: boolean | MemberCountOutputTypeCountReviewsArgs
+  reviewMatches?: boolean | MemberCountOutputTypeCountReviewMatchesArgs
+  actorLogs?: boolean | MemberCountOutputTypeCountActorLogsArgs
 }
 
 /**
@@ -970,6 +1861,41 @@ export type MemberCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types
   where?: Prisma.AppSessionWhereInput
 }
 
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthTokenWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountLifecycleEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberLifecycleEventWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberReviewWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountReviewMatchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberReviewMatchWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountActorLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
+}
+
 
 export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -990,8 +1916,15 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   authVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  version?: boolean
+  restoreGeneration?: boolean
   reservations?: boolean | Prisma.Member$reservationsArgs<ExtArgs>
   sessions?: boolean | Prisma.Member$sessionsArgs<ExtArgs>
+  tokens?: boolean | Prisma.Member$tokensArgs<ExtArgs>
+  lifecycleEvents?: boolean | Prisma.Member$lifecycleEventsArgs<ExtArgs>
+  reviews?: boolean | Prisma.Member$reviewsArgs<ExtArgs>
+  reviewMatches?: boolean | Prisma.Member$reviewMatchesArgs<ExtArgs>
+  actorLogs?: boolean | Prisma.Member$actorLogsArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
@@ -1014,6 +1947,8 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   authVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  version?: boolean
+  restoreGeneration?: boolean
 }, ExtArgs["result"]["member"]>
 
 export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1035,6 +1970,8 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   authVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  version?: boolean
+  restoreGeneration?: boolean
 }, ExtArgs["result"]["member"]>
 
 export type MemberSelectScalar = {
@@ -1056,12 +1993,19 @@ export type MemberSelectScalar = {
   authVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  version?: boolean
+  restoreGeneration?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailKey" | "lastName" | "firstName" | "lastNameKey" | "firstNameKey" | "phoneNumber" | "postalCode" | "ageBand" | "passwordHash" | "status" | "isDeleted" | "emailVerifiedAt" | "firstActivatedAt" | "authVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailKey" | "lastName" | "firstName" | "lastNameKey" | "firstNameKey" | "phoneNumber" | "postalCode" | "ageBand" | "passwordHash" | "status" | "isDeleted" | "emailVerifiedAt" | "firstActivatedAt" | "authVersion" | "createdAt" | "updatedAt" | "version" | "restoreGeneration", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reservations?: boolean | Prisma.Member$reservationsArgs<ExtArgs>
   sessions?: boolean | Prisma.Member$sessionsArgs<ExtArgs>
+  tokens?: boolean | Prisma.Member$tokensArgs<ExtArgs>
+  lifecycleEvents?: boolean | Prisma.Member$lifecycleEventsArgs<ExtArgs>
+  reviews?: boolean | Prisma.Member$reviewsArgs<ExtArgs>
+  reviewMatches?: boolean | Prisma.Member$reviewMatchesArgs<ExtArgs>
+  actorLogs?: boolean | Prisma.Member$actorLogsArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1072,6 +2016,11 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   objects: {
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
     sessions: Prisma.$AppSessionPayload<ExtArgs>[]
+    tokens: Prisma.$AuthTokenPayload<ExtArgs>[]
+    lifecycleEvents: Prisma.$MemberLifecycleEventPayload<ExtArgs>[]
+    reviews: Prisma.$MemberReviewPayload<ExtArgs>[]
+    reviewMatches: Prisma.$MemberReviewMatchPayload<ExtArgs>[]
+    actorLogs: Prisma.$AuditLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1092,6 +2041,8 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     authVersion: number
     createdAt: Date
     updatedAt: Date
+    version: number
+    restoreGeneration: number
   }, ExtArgs["result"]["member"]>
   composites: {}
 }
@@ -1488,6 +2439,11 @@ export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.T
   readonly [Symbol.toStringTag]: "PrismaPromise"
   reservations<T extends Prisma.Member$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.Member$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tokens<T extends Prisma.Member$tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$tokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  lifecycleEvents<T extends Prisma.Member$lifecycleEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$lifecycleEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberLifecycleEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviews<T extends Prisma.Member$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewMatches<T extends Prisma.Member$reviewMatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$reviewMatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberReviewMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  actorLogs<T extends Prisma.Member$actorLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$actorLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1535,6 +2491,8 @@ export interface MemberFieldRefs {
   readonly authVersion: Prisma.FieldRef<"Member", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Member", 'DateTime'>
+  readonly version: Prisma.FieldRef<"Member", 'Int'>
+  readonly restoreGeneration: Prisma.FieldRef<"Member", 'Int'>
 }
     
 
@@ -1973,6 +2931,126 @@ export type Member$sessionsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AppSessionScalarFieldEnum | Prisma.AppSessionScalarFieldEnum[]
+}
+
+/**
+ * Member.tokens
+ */
+export type Member$tokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthToken
+   */
+  select?: Prisma.AuthTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuthToken
+   */
+  omit?: Prisma.AuthTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthTokenInclude<ExtArgs> | null
+  where?: Prisma.AuthTokenWhereInput
+  orderBy?: Prisma.AuthTokenOrderByWithRelationInput | Prisma.AuthTokenOrderByWithRelationInput[]
+  cursor?: Prisma.AuthTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuthTokenScalarFieldEnum | Prisma.AuthTokenScalarFieldEnum[]
+}
+
+/**
+ * Member.lifecycleEvents
+ */
+export type Member$lifecycleEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberLifecycleEvent
+   */
+  select?: Prisma.MemberLifecycleEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberLifecycleEvent
+   */
+  omit?: Prisma.MemberLifecycleEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberLifecycleEventInclude<ExtArgs> | null
+  where?: Prisma.MemberLifecycleEventWhereInput
+  orderBy?: Prisma.MemberLifecycleEventOrderByWithRelationInput | Prisma.MemberLifecycleEventOrderByWithRelationInput[]
+  cursor?: Prisma.MemberLifecycleEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberLifecycleEventScalarFieldEnum | Prisma.MemberLifecycleEventScalarFieldEnum[]
+}
+
+/**
+ * Member.reviews
+ */
+export type Member$reviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberReview
+   */
+  select?: Prisma.MemberReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberReview
+   */
+  omit?: Prisma.MemberReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberReviewInclude<ExtArgs> | null
+  where?: Prisma.MemberReviewWhereInput
+  orderBy?: Prisma.MemberReviewOrderByWithRelationInput | Prisma.MemberReviewOrderByWithRelationInput[]
+  cursor?: Prisma.MemberReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberReviewScalarFieldEnum | Prisma.MemberReviewScalarFieldEnum[]
+}
+
+/**
+ * Member.reviewMatches
+ */
+export type Member$reviewMatchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberReviewMatch
+   */
+  select?: Prisma.MemberReviewMatchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberReviewMatch
+   */
+  omit?: Prisma.MemberReviewMatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberReviewMatchInclude<ExtArgs> | null
+  where?: Prisma.MemberReviewMatchWhereInput
+  orderBy?: Prisma.MemberReviewMatchOrderByWithRelationInput | Prisma.MemberReviewMatchOrderByWithRelationInput[]
+  cursor?: Prisma.MemberReviewMatchWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberReviewMatchScalarFieldEnum | Prisma.MemberReviewMatchScalarFieldEnum[]
+}
+
+/**
+ * Member.actorLogs
+ */
+export type Member$actorLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**
