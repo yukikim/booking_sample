@@ -83,6 +83,9 @@ async function main() {
     const protectedGet = (path: string, sessionCookie = cookie()) => fetch(`${origin}${path}`, {
       headers: { cookie: sessionCookie }, redirect: "manual",
     });
+    const mutation = (path: string, body: Record<string, unknown>, sessionCookie = cookie(), requestOrigin = origin) => fetch(`${origin}${path}`, {
+      method: "POST", headers: { cookie: sessionCookie, origin: requestOrigin, "content-type": "application/json" }, body: JSON.stringify(body),
+    });
     assert.equal(await (await call("session")).json(), null);
     assert.equal((await fetch(`${origin}/api/manage/staff`)).status, 401);
     for (const [path, destination] of [["/manage", "/staff/login"], ["/manage/staff", "/admin/login"]]) {
@@ -143,6 +146,7 @@ async function main() {
     assert.equal((await protectedGet("/api/manage/staff", savedCookie)).status, 401);
     await resetAttempts();
     await login("admin", "admin@example.test", process.env.ADMIN_PASSWORD);
+    const activeAdminCookie = cookie();
     const currentAdminToken = await getToken({ req: new Request(origin, { headers: { cookie: cookie() } }), secret: process.env.AUTH_SECRET, secureCookie: false });
     process.env.ADMIN_AUTH_VERSION = "2";
     assert.equal(await resolveSession(currentAdminToken), null);
@@ -157,6 +161,38 @@ async function main() {
     assert.match(await forbiddenPage.text(), /スタッフ一覧を閲覧する権限がありません/);
     assert.doesNotMatch(await (await protectedGet("/manage/staff")).text(), /staff@example\.test/);
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /現在は閲覧のみ可能です/);
+    await prisma.adminAccount.update({ where: { id: ADMIN_ID }, data: { isActive: true } });
+    const staffPath = `/api/manage/staff/${staff.id}/permissions`;
+    assert.match(await (await protectedGet(`/manage/staff/${staff.id}`, activeAdminCookie)).text(), /権限の付与・解除/);
+    assert.doesNotMatch(await (await protectedGet(`/manage/staff/${staff.id}`)).text(), /staff@example\.test/);
+    assert.equal((await mutation("/api/manage/staff", { displayName: "Invalid", email: "invalid@example.test", password: password }, cookie(), "https://evil.test")).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "STAFF_CREATE", enabled: true }, activeAdminCookie, "https://evil.test")).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "STAFF_CREATE", enabled: true })).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "STAFF_PERMISSION_MANAGE", enabled: true }, activeAdminCookie)).status, 400);
+    assert.equal((await mutation(staffPath, { permission: "STAFF_CREATE", enabled: true }, activeAdminCookie)).status, 200);
+    assert.equal((await mutation(staffPath, { permission: "STAFF_CREATE", enabled: true }, activeAdminCookie)).status, 200);
+    assert.equal(await prisma.auditLog.count({ where: { action: "STAFF_PERMISSION_GRANTED" } }), 1);
+    assert.match(await (await protectedGet("/manage", cookie())).text(), /更新操作の権限が1件/);
+    assert.equal((await protectedGet("/api/manage/staff")).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "RESERVATION_CREATE", enabled: true })).status, 403);
+    const createdResponse = await mutation("/api/manage/staff", { displayName: "Created staff", email: " CREATED@example.test ", password });
+    assert.equal(createdResponse.status, 201);
+    const created = await createdResponse.json() as { id: string };
+    assert.equal((await prisma.staffAccount.findUniqueOrThrow({ where: { id: created.id } })).emailKey, "created@example.test");
+    assert.equal(await prisma.staffPermission.count({ where: { staffId: created.id } }), 0);
+    const newStaffExpiry = new Date(Date.now() + 8 * 60 * 60_000);
+    const newStaffSession = await prisma.appSession.create({ data: { principalType: "STAFF", staffId: created.id, authVersion: 1, expiresAt: newStaffExpiry } });
+    const newStaffJwt = await encode({ token: { sid: newStaffSession.id, principalId: created.id, role: "STAFF", authVersion: 1, absoluteExpiry: newStaffExpiry.getTime() }, secret: process.env.AUTH_SECRET, salt: "authjs.session-token", maxAge: 8 * 60 * 60 });
+    const newStaffCookie = `authjs.session-token=${newStaffJwt}`;
+    assert.match(await (await protectedGet("/manage", newStaffCookie)).text(), /現在は閲覧のみ可能です/);
+    assert.equal((await mutation("/api/manage/staff", { displayName: "No grant", email: "no-grant@example.test", password }, newStaffCookie)).status, 403);
+    assert.equal((await mutation("/api/manage/staff", { displayName: "Again", email: "created@example.test", password })).status, 409);
+    assert.equal((await mutation(staffPath, { permission: "STAFF_CREATE", enabled: false }, activeAdminCookie)).status, 200);
+    assert.equal((await mutation("/api/manage/staff", { displayName: "Denied", email: "denied@example.test", password })).status, 403);
+    assert.equal(await prisma.staffAccount.count({ where: { emailKey: "denied@example.test" } }), 0);
+    assert.match(await (await protectedGet("/manage")).text(), /現在は閲覧のみ可能です/);
+    assert.equal(await prisma.auditLog.count({ where: { action: "STAFF_PERMISSION_REVOKED" } }), 1);
+    assert.equal((await mutation("/api/manage/staff", { displayName: "Admin created", email: "admin-created@example.test", password }, activeAdminCookie)).status, 201);
     await prisma.staffPermission.create({ data: { staffId: staff.id, permission: "RESERVATION_CANCEL", grantedByAdminId: ADMIN_ID } });
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /更新操作の権限が1件/);
     assert.equal((await fetch(`${origin}/api/manage/staff`, { headers: { cookie: cookie() } })).status, 403);
@@ -197,7 +233,7 @@ async function main() {
       assert.equal(cookie(), beforeFailureCookie);
     } finally { await pg.query(`ALTER TABLE "${schema}"."UnavailableSession" RENAME TO "AppSession"`); }
     assert.equal((await call("signout", { csrfToken: logoutCsrf.csrfToken })).status, 200);
-    console.log("Auth integration passed: HTTP page/API authorization, signed expired session, JWT refresh boundary, revocation, role separation, CSRF, rate limits and DB-failure handling (isolated schema).");
+    console.log("Auth integration passed: HTTP page/API authorization, staff creation and permission revocation, signed expired session, JWT refresh boundary, role separation, CSRF, rate limits and DB-failure handling (isolated schema).");
   } finally {
     if (server && server.exitCode === null) { server.kill("SIGTERM"); await once(server, "exit"); }
     await prisma?.$disconnect();

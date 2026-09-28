@@ -2,11 +2,12 @@ import "server-only";
 import { getPrisma } from "../prisma";
 import { adminEnvironment } from "./config";
 import { claimsFrom } from "./policy";
+import type { Prisma } from "@/generated/prisma/client";
 
-export async function resolveSession(value: unknown, now = new Date()) {
+export async function resolveSession(value: unknown, now = new Date(), db: Prisma.TransactionClient = getPrisma()) {
   const claims = claimsFrom(value);
   if (!claims || claims.absoluteExpiry <= now.getTime()) return null;
-  const row = await getPrisma().appSession.findUnique({ where: { id: claims.sid }, include: { staff: { select: { isActive: true, authVersion: true } }, admin: { select: { isActive: true } } } });
+  const row = await db.appSession.findUnique({ where: { id: claims.sid }, include: { staff: { select: { isActive: true, authVersion: true } }, admin: { select: { isActive: true } } } });
   if (!row || row.revokedAt || row.expiresAt <= now || row.expiresAt.getTime() !== claims.absoluteExpiry || row.principalType !== claims.role || row.authVersion !== claims.authVersion) return null;
   if (claims.role === "STAFF") {
     if (row.staffId !== claims.principalId || !row.staff?.isActive || row.staff.authVersion !== claims.authVersion) return null;

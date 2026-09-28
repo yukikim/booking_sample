@@ -1,5 +1,6 @@
 import { StoreAccessError } from "@/lib/auth/permissions";
 import { getStaffRoster } from "@/lib/manage/staff-roster";
+import { createStaff, readStaffBody, staffMutationFailure } from "@/lib/manage/staff-mutations";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,4 +15,11 @@ export async function GET() {
       status, headers: { "Cache-Control": "no-store" },
     });
   }
+}
+
+export async function POST(request: Request) {
+  try {
+    const created = await createStaff(request, await readStaffBody(request));
+    return Response.json(created, { status: 201, headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return staffMutationFailure(error); }
 }
