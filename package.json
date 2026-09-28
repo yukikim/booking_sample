@@ -19,14 +19,17 @@
     "audit:dependencies": "npm audit --audit-level=high",
     "db:migrate": "node --import tsx scripts/migrate-local.ts",
     "db:seed": "node --import tsx prisma/seed.ts",
-    "test:db": "node --conditions=react-server --import tsx scripts/verify-database.ts"
+    "test:db": "node --conditions=react-server --import tsx scripts/verify-database.ts",
+    "test:auth": "node --conditions=react-server --import tsx scripts/verify-auth.ts"
   },
   "dependencies": {
     "@next/env": "16.3.5",
+    "@node-rs/argon2": "2.2.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "dotenv": "^17.4.2",
     "next": "16.3.5",
+    "next-auth": "5.0.0-beta.32",
     "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
