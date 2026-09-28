@@ -20,7 +20,9 @@
     "db:migrate": "node --import tsx scripts/migrate-local.ts",
     "db:seed": "node --import tsx prisma/seed.ts",
     "test:db": "node --conditions=react-server --import tsx scripts/verify-database.ts",
-    "test:auth": "node --conditions=react-server --import tsx scripts/verify-auth.ts"
+    "test:auth": "node --conditions=react-server --import tsx scripts/verify-auth.ts",
+    "test:member": "node --conditions=react-server --import tsx scripts/verify-member.ts",
+    "mail:send": "node --conditions=react-server --import tsx scripts/send-member-mail.ts"
   },
   "dependencies": {
     "@next/env": "16.3.5",
@@ -30,6 +32,7 @@
     "dotenv": "^17.4.2",
     "next": "16.3.5",
     "next-auth": "5.0.0-beta.32",
+    "nodemailer": "9.1.1",
     "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -38,6 +41,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "7.0.9",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",

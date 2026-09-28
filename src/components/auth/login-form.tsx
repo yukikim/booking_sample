@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export function LoginForm({ role }: { role: "admin" | "staff" }) {
+export function LoginForm({ role }: { role: "admin" | "staff" | "member" }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -12,8 +12,9 @@ export function LoginForm({ role }: { role: "admin" | "staff" }) {
     setPending(true); setMessage("");
     const form = new FormData(event.currentTarget);
     try {
-      const result = await signIn(role, { email: form.get("email"), password: form.get("password"), redirect: false, redirectTo: "/manage" });
-      if (result?.ok && !result.error) { router.replace("/manage"); router.refresh(); return; }
+      const target = role === "member" ? "/account" : "/manage";
+      const result = await signIn(role, { email: form.get("email"), password: form.get("password"), redirect: false, redirectTo: target });
+      if (result?.ok && !result.error) { router.replace(target); router.refresh(); return; }
       setMessage(result?.code === "rate_limited" ? "試行回数が上限に達しました。15分ほど待って再試行してください。" : result?.code === "already_signed_in" ? "別のアカウントを使う場合は先にログアウトしてください。" : result?.status === 503 ? "現在ログインできません。時間をおいて再試行してください。" : "メールアドレスまたはパスワードを確認してください。");
     } catch { setMessage("現在ログインできません。時間をおいて再試行してください。"); }
     finally { setPending(false); }
@@ -25,7 +26,7 @@ export function LoginForm({ role }: { role: "admin" | "staff" }) {
     <p role="status" aria-live="polite">{message}</p>
   </form>;
 }
-export function LogoutButton() {
+export function LogoutButton({ target = "/staff/login" }: { target?: string }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -36,9 +37,9 @@ export function LogoutButton() {
       const csrf = await fetch("/api/auth/csrf");
       if (!csrf.ok) throw new Error();
       const { csrfToken } = await csrf.json();
-      const response = await fetch("/api/auth/signout", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Auth-Return-Redirect": "1" }, body: new URLSearchParams({ csrfToken, callbackUrl: "/staff/login" }) });
+      const response = await fetch("/api/auth/signout", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Auth-Return-Redirect": "1" }, body: new URLSearchParams({ csrfToken, callbackUrl: target }) });
       if (!response.ok) throw new Error();
-      router.replace("/staff/login"); router.refresh();
+      router.replace(target); router.refresh();
     } catch { setMessage("ログアウトを完了できませんでした。再試行してください。"); }
     finally { setPending(false); }
   }

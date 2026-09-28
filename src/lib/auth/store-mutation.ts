@@ -8,7 +8,7 @@ import { claimsFrom } from "./policy";
 import { resolveSession } from "./session";
 
 export class StoreInputError extends Error {
-  constructor(readonly status: 400 | 404 | 409, readonly code?: "AffectedReservations" | "ImpactReviewPending" | "ExistingPlanReviewPending") { super("InvalidInput"); }
+  constructor(readonly status: 400 | 404 | 409, readonly code?: "ExistingPlanReviewPending" | "ReviewRequired") { super("InvalidInput"); }
 }
 
 export function checkMutationOrigin(request: Request) {
@@ -30,6 +30,7 @@ export async function requireStoreMutation(tx: Prisma.TransactionClient, request
   const token = await getToken({ req: new Request(env.origin, { headers: { cookie } }), secret: env.secret, secureCookie: env.secure });
   const claims = claimsFrom(token);
   if (!claims) throw new StoreAccessError(401);
+  if (claims.role === "MEMBER") throw new StoreAccessError(403);
   await tx.$queryRaw`SELECT id FROM "AppSession" WHERE id = ${claims.sid}::uuid FOR UPDATE`;
   if (claims.role === "ADMIN") await tx.$queryRaw`SELECT id FROM "AdminAccount" WHERE id = ${claims.principalId}::uuid FOR UPDATE`;
   else await tx.$queryRaw`SELECT id FROM "StaffAccount" WHERE id = ${claims.principalId}::uuid FOR UPDATE`;

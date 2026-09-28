@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { getPrisma, setTransactionSchema } from "../prisma";
 import { adminEnvironment } from "./config";
-import { ADMIN_ID, emailKey, validPassword, SESSION_SECONDS, type StoreRole } from "./policy";
+import { ADMIN_ID, emailKey, validPassword, SESSION_SECONDS, MEMBER_SESSION_SECONDS, type StoreRole } from "./policy";
 import { dummyHash, hashPassword, needsRehash, verifyPassword } from "./password";
 import { consumeLoginAttempt } from "./rate-limit";
 
@@ -24,7 +24,7 @@ export async function authenticate(role: StoreRole, credentials: Partial<Record<
     if (!passwordMatches || email !== configured.email) return null;
     principalId = ADMIN_ID;
     authVersion = configured.version;
-  } else {
+  } else if (role === "STAFF") {
     const staff = await db.staffAccount.findUnique({ where: { emailKey: email } });
     const encoded = staff?.passwordHash ?? await dummyHash();
     const matches = await verifyPassword(encoded, password);
@@ -32,6 +32,15 @@ export async function authenticate(role: StoreRole, credentials: Partial<Record<
     principalId = staff.id;
     authVersion = staff.authVersion;
     originalHash = staff.passwordHash;
+    if (needsRehash(encoded)) replacementHash = await hashPassword(password);
+  } else {
+    const member = await db.member.findUnique({ where: { emailKey: email } });
+    const encoded = member?.passwordHash ?? await dummyHash();
+    const matches = await verifyPassword(encoded, password);
+    if (!matches || !member || member.status !== "ACTIVE" || member.isDeleted || !member.emailVerifiedAt) return null;
+    principalId = member.id;
+    authVersion = member.authVersion;
+    originalHash = member.passwordHash;
     if (needsRehash(encoded)) replacementHash = await hashPassword(password);
   }
   return db.$transaction(async (tx) => {
@@ -41,15 +50,20 @@ export async function authenticate(role: StoreRole, credentials: Partial<Record<
       await tx.$queryRaw`SELECT id FROM "AdminAccount" WHERE id = ${principalId}::uuid FOR UPDATE`;
       const admin = await tx.adminAccount.findUnique({ where: { id: principalId } });
       if (!admin?.isActive || adminEnvironment().version !== authVersion) return null;
-    } else {
+    } else if (role === "STAFF") {
       await tx.$queryRaw`SELECT id FROM "StaffAccount" WHERE id = ${principalId}::uuid FOR UPDATE`;
       const staff = await tx.staffAccount.findUnique({ where: { id: principalId } });
       if (!staff?.isActive || staff.authVersion !== authVersion || staff.passwordHash !== originalHash || staff.emailKey !== email) return null;
       if (replacementHash) await tx.staffAccount.update({ where: { id: principalId }, data: { passwordHash: replacementHash } });
+    } else {
+      await tx.$queryRaw`SELECT id FROM "Member" WHERE id = ${principalId}::uuid FOR UPDATE`;
+      const member = await tx.member.findUnique({ where: { id: principalId } });
+      if (!member || member.status !== "ACTIVE" || member.isDeleted || !member.emailVerifiedAt || member.authVersion !== authVersion || member.passwordHash !== originalHash || member.emailKey !== email) return null;
+      if (replacementHash) await tx.member.update({ where: { id: principalId }, data: { passwordHash: replacementHash } });
     }
     const createdAt = new Date();
-    const expiresAt = new Date(createdAt.getTime() + SESSION_SECONDS * 1000);
-    const row = await tx.appSession.create({ data: { principalType: role, ...(role === "ADMIN" ? { adminId: principalId } : { staffId: principalId }), authVersion, createdAt, expiresAt } });
+    const expiresAt = new Date(createdAt.getTime() + (role === "MEMBER" ? MEMBER_SESSION_SECONDS : SESSION_SECONDS) * 1000);
+    const row = await tx.appSession.create({ data: { principalType: role, ...(role === "ADMIN" ? { adminId: principalId } : role === "STAFF" ? { staffId: principalId } : { memberId: principalId }), authVersion, createdAt, expiresAt } });
     return { id: principalId, principalId, role, authVersion, sid: row.id, absoluteExpiry: expiresAt.getTime() };
   });
 }

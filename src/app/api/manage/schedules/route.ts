@@ -1,11 +1,14 @@
 import { mutationFailure, readJsonBody } from "@/lib/auth/store-mutation";
-import { listManagedSchedules, saveManagedSchedule } from "@/lib/schedules/manage";
+import { listManagedSchedules, readManagedEffectiveSchedule, saveManagedSchedule } from "@/lib/schedules/manage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  try { return Response.json(await listManagedSchedules(), { headers: { "Cache-Control": "no-store" } }); }
+export async function GET(request: Request) {
+  try {
+    const date = new URL(request.url).searchParams.get("date");
+    return Response.json(date === null ? await listManagedSchedules() : await readManagedEffectiveSchedule(date), { headers: { "Cache-Control": "no-store" } });
+  }
   catch (error) { return mutationFailure(error); }
 }
 

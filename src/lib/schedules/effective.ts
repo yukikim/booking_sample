@@ -5,7 +5,7 @@ import { parseBusinessDate } from "./calendar";
 /** Call inside one repeatable-read transaction when composing multiple reads.
  * Write paths must additionally participate in the shared store lock (Story 4.2).
  */
-export async function getEffectiveBusinessDay(tx: Prisma.TransactionClient, value: string) {
+export async function getEffectiveBusinessDay(tx: Prisma.TransactionClient, value: string, excludedPlanId?: string) {
   const date = parseBusinessDate(value);
   const weekday = date.getUTCDay();
   const daily = await tx.schedulePlan.findFirst({
@@ -13,7 +13,7 @@ export async function getEffectiveBusinessDay(tx: Prisma.TransactionClient, valu
     include: { changes: { orderBy: { revision: "desc" }, take: 1, include: { businessOverride: true } } },
   });
   const override = daily?.changes[0];
-  if (override && override.action !== "CANCEL") {
+  if (override && daily?.id !== excludedPlanId && override.action !== "CANCEL") {
     if (!override.businessOverride) throw new Error("Incomplete daily business setting.");
     return { planId: daily!.id, revision: override.revision, auditId: override.auditId, source: "DAILY" as const,
       effectiveDate: daily!.effectiveDate, isOpen: override.businessOverride.isOpen,
@@ -25,6 +25,7 @@ export async function getEffectiveBusinessDay(tx: Prisma.TransactionClient, valu
     include: { changes: { orderBy: { revision: "desc" }, take: 1, include: { businessSchedule: { include: { days: true } } } } },
   });
   for (const plan of plans) {
+    if (plan.id === excludedPlanId) continue;
     const latest = plan.changes[0];
     if (!latest || latest.action === "CANCEL") continue;
     const day = latest.businessSchedule?.days.find(day => day.weekday === weekday);
@@ -35,7 +36,7 @@ export async function getEffectiveBusinessDay(tx: Prisma.TransactionClient, valu
   return null; // No implicit 09:00-18:00 fallback.
 }
 
-export async function getEffectiveTherapistBreak(tx: Prisma.TransactionClient, therapistId: string, value: string) {
+export async function getEffectiveTherapistBreak(tx: Prisma.TransactionClient, therapistId: string, value: string, excludedPlanId?: string) {
   const date = parseBusinessDate(value);
   const plans = await tx.schedulePlan.findMany({
     where: { kind: "THERAPIST_BREAK", therapistId, effectiveDate: { lte: date } },
@@ -43,6 +44,7 @@ export async function getEffectiveTherapistBreak(tx: Prisma.TransactionClient, t
     include: { changes: { orderBy: { revision: "desc" }, take: 1, include: { therapistSchedule: { include: { breaks: true } } } } },
   });
   for (const plan of plans) {
+    if (plan.id === excludedPlanId) continue;
     const latest = plan.changes[0];
     if (!latest || latest.action === "CANCEL") continue;
     const rest = latest.therapistSchedule?.breaks.find(rest => rest.weekday === date.getUTCDay());
@@ -56,14 +58,18 @@ export async function getEffectiveTherapistBreak(tx: Prisma.TransactionClient, t
 /** Pre-filter for booking assignment. Call within the same repeatable-read
  * transaction as availability checks; occupancy and capacity are checked later.
  */
-export async function getAssignableTherapistsForDate(tx: Prisma.TransactionClient, value: string) {
+export async function getEffectiveScheduleForDate(tx: Prisma.TransactionClient, value: string) {
   const business = await getEffectiveBusinessDay(tx, value);
-  if (!business?.isOpen || !business.opensAt) return [];
   const therapists = await tx.therapist.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
-  const candidates = await Promise.all(therapists.map(async (therapist) => {
+  const people = await Promise.all(therapists.map(async (therapist) => {
     const rest = await getEffectiveTherapistBreak(tx, therapist.id, value);
-    if (!rest?.startsAt || !rest.endsAt || rest.startsAt < business.opensAt! || rest.endsAt > business.closesAt) return null;
-    return therapist;
+    const assignable = Boolean(business?.isOpen && business.opensAt && rest?.startsAt && rest.endsAt && rest.startsAt >= business.opensAt && rest.endsAt <= business.closesAt);
+    return { ...therapist, rest, assignable };
   }));
-  return candidates.filter((therapist): therapist is NonNullable<typeof therapist> => therapist !== null);
+  return { business, therapists: people };
+}
+
+export async function getAssignableTherapistsForDate(tx: Prisma.TransactionClient, value: string) {
+  const effective = await getEffectiveScheduleForDate(tx, value);
+  return effective.therapists.filter((person) => person.assignable).map(({ id, name }) => ({ id, name }));
 }

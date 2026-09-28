@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 import { authEnvironment } from "./lib/auth/config";
 import { authenticate } from "./lib/auth/credentials";
 import { LoginRateLimited } from "./lib/auth/rate-limit";
-import { claimsFrom, safeRedirect, SESSION_SECONDS, type StoreRole } from "./lib/auth/policy";
+import { claimsFrom, safeRedirect, MEMBER_SESSION_SECONDS, type StoreRole } from "./lib/auth/policy";
 import { resolveSession, revokeSession } from "./lib/auth/session";
 
 class RateLimited extends CredentialsSignin { code = "rate_limited"; }
@@ -16,8 +16,8 @@ export class AuthUnavailable extends Error {}
 export function createStoreAuth() {
   const state = { unavailable: false, rateLimited: false, forbidden: false };
   const config: NextAuthConfig = {
-    providers: (["ADMIN", "STAFF"] as StoreRole[]).map((role) => Credentials({
-      id: role.toLowerCase(), name: role === "ADMIN" ? "管理者" : "スタッフ",
+    providers: (["ADMIN", "STAFF", "MEMBER"] as StoreRole[]).map((role) => Credentials({
+      id: role.toLowerCase(), name: role === "ADMIN" ? "管理者" : role === "STAFF" ? "スタッフ" : "会員",
       credentials: { email: { type: "email" }, password: { type: "password" } },
       async authorize(credentials, request) {
         try {
@@ -36,7 +36,7 @@ export function createStoreAuth() {
         }
       },
     })),
-    session: { strategy: "jwt", maxAge: SESSION_SECONDS },
+    session: { strategy: "jwt", maxAge: MEMBER_SESSION_SECONDS },
     pages: { signIn: "/staff/login", error: "/staff/login" },
     callbacks: {
       async jwt({ token, user }) {

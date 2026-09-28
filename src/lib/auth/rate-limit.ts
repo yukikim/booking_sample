@@ -15,6 +15,31 @@ function clientAddress(request: Request) {
   // URL normalizes equivalent IPv6 spellings. Keep each full IPv6 address for now.
   return isIP(ip) === 6 ? new URL(`http://[${ip}]/`).hostname : ip;
 }
+export class MailRateLimited extends Error {}
+export class TokenRateLimited extends Error {}
+async function consumeLimited(scope: "MAIL_ADDRESS" | "MAIL_IP" | "TOKEN_IP", value: string, limit: number, windowMs: number, minIntervalMs = 0) {
+  const keyDigest = createHmac("sha256", authEnvironment().rateSecret).update(value).digest("hex");
+  return getPrisma().$transaction(async (tx) => {
+    await setTransactionSchema(tx);
+    await tx.rateLimitBucket.upsert({ where: { scope_keyDigest: { scope, keyDigest } }, create: { scope, keyDigest, lastAttemptAt: new Date(0) }, update: { keyDigest } });
+    await tx.$queryRaw`SELECT "keyDigest" FROM "RateLimitBucket" WHERE scope = ${scope}::"RateLimitScope" AND "keyDigest" = ${keyDigest} FOR UPDATE`;
+    const [{ now }] = await tx.$queryRaw<{now: Date}[]>`SELECT clock_timestamp() AS now`;
+    const bucket = await tx.rateLimitBucket.findUniqueOrThrow({ where: { scope_keyDigest: { scope, keyDigest } } });
+    if (minIntervalMs && now.getTime() - bucket.lastAttemptAt.getTime() < minIntervalMs) return false;
+    const count = await tx.rateLimitEvent.count({ where: { scope, keyDigest, occurredAt: { gt: new Date(now.getTime() - windowMs), lte: now } } });
+    if (count >= limit) return false;
+    await tx.rateLimitEvent.create({ data: { scope, keyDigest, occurredAt: now } });
+    await tx.rateLimitBucket.update({ where: { scope_keyDigest: { scope, keyDigest } }, data: { lastAttemptAt: now } });
+    return true;
+  });
+}
+export async function consumeMailRequest(email: string, request: Request) {
+  if (!await consumeLimited("MAIL_IP", clientAddress(request), 20, 60 * 60_000)) throw new MailRateLimited();
+  return consumeLimited("MAIL_ADDRESS", email, 5, 60 * 60_000, 60_000);
+}
+export async function consumeTokenAttempt(request: Request) {
+  if (!await consumeLimited("TOKEN_IP", clientAddress(request), 30, 15 * 60_000)) throw new TokenRateLimited();
+}
 export async function consumeLoginAttempt(role: StoreRole, email: string, request: Request) {
   const { rateSecret } = authEnvironment();
   const digest = (value: string) => createHmac("sha256", rateSecret).update(value).digest("hex");

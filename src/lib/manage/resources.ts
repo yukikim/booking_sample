@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { requireStoreAction } from "@/lib/auth/permissions";
 import { checkMutationOrigin, requireStoreMutation, StoreInputError } from "@/lib/auth/store-mutation";
 import { getPrisma, setTransactionSchema } from "@/lib/prisma";
+import { issueReviewToken, matchesReviewToken } from "@/lib/schedules/review-token";
 
 export type ResourceKind = "rooms" | "therapists";
 export type ResourceItem = { id: string; name: string; isActive: boolean; updatedAt: string };
@@ -63,30 +64,41 @@ export async function createResource(request: Request, kind: ResourceKind, input
 export async function changeResource(request: Request, kind: ResourceKind, id: string, input: unknown) {
   checkMutationOrigin(request);
   if (!uuid.test(id)) throw new StoreInputError(400);
-  const body = bodyRecord(input, ["operation", "updatedAt", "name"]);
+  const body = bodyRecord(input, ["operation", "updatedAt", "name", "reviewToken"]);
   const operation = body.operation;
-  if (operation !== "update" && operation !== "disable") throw new StoreInputError(400);
-  if (operation === "disable" && "name" in body) throw new StoreInputError(400);
+  if (operation !== "update" && operation !== "disable" && operation !== "preview-disable") throw new StoreInputError(400);
+  if (operation !== "update" && "name" in body || operation === "update" && "reviewToken" in body || operation === "preview-disable" && "reviewToken" in body) throw new StoreInputError(400);
   const expected = version(body.updatedAt);
   const name = operation === "update" ? nameField(body.name) : undefined;
   return getPrisma().$transaction(async (tx) => {
     await setTransactionSchema(tx);
     const action = kind === "rooms" ? (operation === "update" ? "ROOM_UPDATE" : "ROOM_DISABLE") : (operation === "update" ? "THERAPIST_UPDATE" : "THERAPIST_DISABLE");
     const claims = await requireStoreMutation(tx, request, action);
+    if (operation === "disable") {
+      await tx.storeSettingState.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+      await tx.$queryRaw`SELECT id FROM "StoreSettingState" WHERE id = 1 FOR UPDATE`;
+    }
     if (kind === "rooms") await tx.$queryRaw`SELECT id FROM "Room" WHERE id = ${id}::uuid FOR UPDATE`;
     else await tx.$queryRaw`SELECT id FROM "Therapist" WHERE id = ${id}::uuid FOR UPDATE`;
     const old = kind === "rooms" ? await tx.room.findUnique({ where: { id } }) : await tx.therapist.findUnique({ where: { id } });
     if (!old) throw new StoreInputError(404);
     if (old.updatedAt.toISOString() !== expected || !old.isActive) throw new StoreInputError(409);
     if (operation === "update" && old.name === name) return serialize(old);
-    if (operation === "disable") {
-      const affected = await tx.reservation.findFirst({ where: { ...(kind === "rooms" ? { roomId: id } : { therapistId: id }), OR: [{ status: "IN_PROGRESS" }, { status: "CONFIRMED", occupiesUntil: { gt: new Date() } }] }, select: { id: true } });
-      if (affected) throw new StoreInputError(409, "AffectedReservations");
+    let affected: { id: string; version: number; businessDate: Date; startsAt: Date }[] = [];
+    if (operation !== "update") {
+      affected = await tx.reservation.findMany({ where: { ...(kind === "rooms" ? { roomId: id } : { therapistId: id }), OR: [{ status: "IN_PROGRESS" }, { status: "CONFIRMED", occupiesUntil: { gt: new Date() } }] }, select: { id: true, version: true, businessDate: true, startsAt: true }, orderBy: [{ startsAt: "asc" }, { id: "asc" }] });
+      const subject = { actor: `${claims.role}:${claims.principalId}`, kind, id, updatedAt: expected, affected: affected.map((row) => ({ id: row.id, version: row.version, startsAt: row.startsAt.toISOString() })) };
+      if (operation === "preview-disable") return { affected: affected.map((row) => ({ reservationId: row.id, businessDate: row.businessDate.toISOString().slice(0, 10), startsAt: row.startsAt.toISOString() })), reviewToken: issueReviewToken(subject) };
+      if (!matchesReviewToken(body.reviewToken, subject)) throw new StoreInputError(409, "ReviewRequired");
     }
     const updatedAt = new Date(Math.max(Date.now(), old.updatedAt.getTime() + 1));
     const data = operation === "update" ? { name: name!, updatedAt } : { isActive: false, updatedAt };
     const saved = kind === "rooms" ? await tx.room.update({ where: { id }, data }) : await tx.therapist.update({ where: { id }, data });
-    await tx.auditLog.create({ data: { requestKey: randomUUID(), actorType: claims.role, ...(claims.role === "ADMIN" ? { actorAdminId: claims.principalId } : { actorStaffId: claims.principalId }), action: kind === "rooms" ? (operation === "update" ? "ROOM_UPDATED" : "ROOM_DISABLED") : (operation === "update" ? "THERAPIST_UPDATED" : "THERAPIST_DISABLED"), targetType: kind === "rooms" ? "Room" : "Therapist", targetId: id, changes: { before: { name: old.name, isActive: old.isActive }, after: { name: saved.name, isActive: saved.isActive } } } });
+    const audit = await tx.auditLog.create({ data: { requestKey: randomUUID(), actorType: claims.role, ...(claims.role === "ADMIN" ? { actorAdminId: claims.principalId } : { actorStaffId: claims.principalId }), action: kind === "rooms" ? (operation === "update" ? "ROOM_UPDATED" : "ROOM_DISABLED") : (operation === "update" ? "THERAPIST_UPDATED" : "THERAPIST_DISABLED"), targetType: kind === "rooms" ? "Room" : "Therapist", targetId: id, changes: { before: { name: old.name, isActive: old.isActive }, after: { name: saved.name, isActive: saved.isActive }, affected: affected.length } } });
+    if (operation === "disable") {
+      for (const row of affected) await tx.reservationChangeNotice.create({ data: { reservationId: row.id, changeAuditId: audit.id, reservationVersion: row.version, reason: "RESOURCE_UNAVAILABLE", proposedChange: { kind, resourceId: id } } });
+      await tx.storeSettingState.update({ where: { id: 1 }, data: { version: { increment: 1 } } });
+    }
     return serialize(saved);
   });
 }

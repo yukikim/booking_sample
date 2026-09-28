@@ -30,6 +30,7 @@ export async function requireStoreAction(action: StoreAction): Promise<StorePrin
     throw error;
   }
   if (!session) throw new StoreAccessError(401);
+  if (session.user.role === "MEMBER") throw new StoreAccessError(403);
 
   const principal: StorePrincipal = {
     id: session.user.id,
