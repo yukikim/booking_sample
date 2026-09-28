@@ -63,7 +63,7 @@ async function main() {
     assert(ready, "Test server did not become ready.");
     const { resolveSession } = await import("../src/lib/auth/session");
     const { consumeLoginAttempt, LoginRateLimited } = await import("../src/lib/auth/rate-limit");
-    const { getToken } = await import("next-auth/jwt");
+    const { getToken, encode } = await import("next-auth/jwt");
     const jar = new Map<string, string>();
     const cookie = () => [...jar].map(([k,v]) => `${k}=${v}`).join("; ");
     async function call(path: string, body?: Record<string,string>, customOrigin = origin, customCookie = cookie()) {
@@ -80,8 +80,17 @@ async function main() {
       return call(`callback/${role}`, { email, password: secret, csrfToken: csrf.csrfToken, callbackUrl: "/manage" });
     }
     async function resetAttempts() { await prisma!.rateLimitBucket.deleteMany(); }
+    const protectedGet = (path: string, sessionCookie = cookie()) => fetch(`${origin}${path}`, {
+      headers: { cookie: sessionCookie }, redirect: "manual",
+    });
     assert.equal(await (await call("session")).json(), null);
     assert.equal((await fetch(`${origin}/api/manage/staff`)).status, 401);
+    for (const [path, destination] of [["/manage", "/staff/login"], ["/manage/staff", "/admin/login"]]) {
+      const response = await protectedGet(path);
+      assert.equal(response.status, 307);
+      assert.equal(new URL(response.headers.get("location")!, origin).pathname, destination);
+      assert.doesNotMatch(await response.text(), /staff@example\.test/);
+    }
     assert.equal((await call("callback/admin", { email: "x", password: "x" }, "https://evil.test")).status, 403);
     assert.equal((await call("callback/admin", { email: "admin@example.test", password: process.env.ADMIN_PASSWORD })).status, 403);
     assert.equal(await prisma.appSession.count(), 0);
@@ -100,13 +109,38 @@ async function main() {
     const savedCookie = cookie();
     const token = await getToken({ req: new Request(origin, { headers: { cookie: savedCookie } }), secret: process.env.AUTH_SECRET, secureCookie: false });
     assert(token);
+    const absoluteExpiry = token.absoluteExpiry;
+    await call("session"); // Auth.js may refresh the JWT cookie.
+    const refreshed = await getToken({ req: new Request(origin, { headers: { cookie: cookie() } }), secret: process.env.AUTH_SECRET, secureCookie: false });
+    assert.equal(refreshed?.absoluteExpiry, absoluteExpiry);
     assert.equal(await resolveSession(token, new Date(Number(token.absoluteExpiry) - 1)) !== null, true);
     assert.equal(await resolveSession(token, new Date(Number(token.absoluteExpiry))), null);
+    const expiredAt = new Date(Date.now() - 1000);
+    const expiredRow = await prisma.appSession.create({ data: {
+      principalType: "ADMIN", adminId: ADMIN_ID, authVersion: 1,
+      createdAt: new Date(expiredAt.getTime() - 8 * 60 * 60_000), expiresAt: expiredAt,
+    } });
+    const expiredJwt = await encode({
+      token: { sid: expiredRow.id, principalId: ADMIN_ID, role: "ADMIN", authVersion: 1, absoluteExpiry: expiredAt.getTime() },
+      secret: process.env.AUTH_SECRET, salt: "authjs.session-token", maxAge: 8 * 60 * 60,
+    });
+    const expiredCookie = `authjs.session-token=${expiredJwt}`;
+    assert.equal(await resolveSession({ sid: expiredRow.id, principalId: ADMIN_ID, role: "ADMIN", authVersion: 1, absoluteExpiry: expiredAt.getTime() }), null);
+    assert.equal((await protectedGet("/api/manage/staff", expiredCookie)).status, 401);
+    assert.equal(await (await protectedGet("/api/auth/session", expiredCookie)).json(), null);
+    const expiredPage = await protectedGet("/manage/staff", expiredCookie);
+    assert.equal(expiredPage.status, 307);
+    assert.equal(new URL(expiredPage.headers.get("location")!, origin).pathname, "/admin/login");
+    assert.doesNotMatch(await expiredPage.text(), /staff@example\.test/);
+    const expiredOverview = await protectedGet("/manage", expiredCookie);
+    assert.equal(expiredOverview.status, 307);
+    assert.equal(new URL(expiredOverview.headers.get("location")!, origin).pathname, "/staff/login");
     assert.match((await (await login("staff", "staff@example.test", password)).json()).url, /already_signed_in/);
     const csrf = await (await call("csrf")).json();
     assert.equal((await call("signout", { csrfToken: csrf.csrfToken })).status, 200);
     assert.equal(await resolveSession(token), null);
     assert.equal(await (await call("session", undefined, origin, savedCookie)).json(), null);
+    assert.equal((await protectedGet("/api/manage/staff", savedCookie)).status, 401);
     await resetAttempts();
     await login("admin", "admin@example.test", process.env.ADMIN_PASSWORD);
     const currentAdminToken = await getToken({ req: new Request(origin, { headers: { cookie: cookie() } }), secret: process.env.AUTH_SECRET, secureCookie: false });
@@ -119,7 +153,9 @@ async function main() {
     assert.equal((await (await call("session")).json()).user.role, "STAFF");
     assert.equal(await prisma.staffPermission.count(), 0);
     assert.equal((await fetch(`${origin}/api/manage/staff`, { headers: { cookie: cookie() } })).status, 403);
-    assert.doesNotMatch(await (await fetch(`${origin}/manage/staff`, { headers: { cookie: cookie() } })).text(), /staff@example\.test/);
+    const forbiddenPage = await protectedGet("/manage/staff");
+    assert.match(await forbiddenPage.text(), /スタッフ一覧を閲覧する権限がありません/);
+    assert.doesNotMatch(await (await protectedGet("/manage/staff")).text(), /staff@example\.test/);
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /現在は閲覧のみ可能です/);
     await prisma.staffPermission.create({ data: { staffId: staff.id, permission: "RESERVATION_CANCEL", grantedByAdminId: ADMIN_ID } });
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /更新操作の権限が1件/);
@@ -128,9 +164,11 @@ async function main() {
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /現在は閲覧のみ可能です/);
     await prisma.staffAccount.update({ where: { id: staff.id }, data: { authVersion: 2 } });
     assert.equal(await (await call("session")).json(), null);
+    assert.equal((await protectedGet("/api/manage/staff")).status, 401);
     await login("staff", "staff@example.test", password);
     await prisma.staffAccount.update({ where: { id: staff.id }, data: { isActive: false } });
     assert.equal(await (await call("session")).json(), null);
+    assert.equal((await protectedGet("/api/manage/staff")).status, 401);
     assert.match((await (await login("staff", "staff@example.test", password)).json()).url, /CredentialsSignin/);
     await resetAttempts();
     const attempts = await Promise.allSettled(Array.from({ length: 6 }, () => consumeLoginAttempt("STAFF", "parallel@example.test", new Request(origin))));
@@ -152,13 +190,14 @@ async function main() {
     await pg.query(`ALTER TABLE "${schema}"."AppSession" RENAME TO "UnavailableSession"`);
     try {
       assert.equal((await call("session")).status, 503);
+      assert.equal((await protectedGet("/api/manage/staff")).status, 503);
       const failedLogout = await call("signout", { csrfToken: logoutCsrf.csrfToken });
       assert.equal(failedLogout.status, 503);
       assert.equal(failedLogout.headers.getSetCookie().length, 0);
       assert.equal(cookie(), beforeFailureCookie);
     } finally { await pg.query(`ALTER TABLE "${schema}"."UnavailableSession" RENAME TO "AppSession"`); }
     assert.equal((await call("signout", { csrfToken: logoutCsrf.csrfToken })).status, 200);
-    console.log("Auth integration passed: real NextAuth handlers, CSRF, credentials, roles, JWT/DB expiry and revocation, parallel rate limits, DB-failure logout retry (isolated schema).");
+    console.log("Auth integration passed: HTTP page/API authorization, signed expired session, JWT refresh boundary, revocation, role separation, CSRF, rate limits and DB-failure handling (isolated schema).");
   } finally {
     if (server && server.exitCode === null) { server.kill("SIGTERM"); await once(server, "exit"); }
     await prisma?.$disconnect();
