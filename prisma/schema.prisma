@@ -1,5 +1,5 @@
-// Tasks 2.2.1–2.2.2: base models and snapshots. No migration has been applied yet.
-// Slot constraints and operational history follow in Tasks 2.2.3–2.2.6.
+// Tasks 2.2.1–2.2.3: base models, snapshots and slot constraints.
+// No migration has been applied yet. Operational history follows in 2.2.5–2.2.6.
 
 generator client {
   provider = "prisma-client"
@@ -184,6 +184,16 @@ model Reservation {
   room      Room                @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   therapist Therapist           @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   options   ReservationOption[]
+  slots     ReservationSlot[]
+
+  // Referenced by the slot FK so every slot uses this reservation's assignment.
+  @@unique([id, roomId, therapistId])
+  @@index([businessDate, startsAt])
+  @@index([memberId, startsAt])
+  @@index([roomId, startsAt])
+  @@index([therapistId, startsAt])
+  @@index([treatmentId])
+  @@index([status, startsAt])
 }
 
 // Keep each selected option's agreed values independently of its current master.
@@ -198,4 +208,24 @@ model ReservationOption {
   option      Option      @relation(fields: [optionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@id([reservationId, optionId])
+  @@index([optionId])
+}
+
+// One occupied hour [slotStartsAt, slotStartsAt + 1 hour).
+// Task 2.2.4 adds hour-alignment CHECKs; complete contiguous coverage is
+// validated by the booking transaction in Story 4.2.
+model ReservationSlot {
+  reservationId String   @db.Uuid
+  roomId        String   @db.Uuid
+  therapistId   String   @db.Uuid
+  slotStartsAt  DateTime @db.Timestamptz(3)
+
+  // Room/Therapist existence is enforced through Reservation's required FKs.
+  // Delete old slots before changing assignments, within the same transaction.
+  reservation Reservation @relation(fields: [reservationId, roomId, therapistId], references: [id, roomId, therapistId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([reservationId, slotStartsAt])
+  @@unique([roomId, slotStartsAt])
+  @@unique([therapistId, slotStartsAt])
+  @@index([slotStartsAt])
 }

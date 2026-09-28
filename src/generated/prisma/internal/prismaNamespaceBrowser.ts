@@ -60,7 +60,8 @@ export const ModelName = {
   Treatment: 'Treatment',
   Option: 'Option',
   Reservation: 'Reservation',
-  ReservationOption: 'ReservationOption'
+  ReservationOption: 'ReservationOption',
+  ReservationSlot: 'ReservationSlot'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -233,6 +234,16 @@ export const ReservationOptionScalarFieldEnum = {
 } as const
 
 export type ReservationOptionScalarFieldEnum = (typeof ReservationOptionScalarFieldEnum)[keyof typeof ReservationOptionScalarFieldEnum]
+
+
+export const ReservationSlotScalarFieldEnum = {
+  reservationId: 'reservationId',
+  roomId: 'roomId',
+  therapistId: 'therapistId',
+  slotStartsAt: 'slotStartsAt'
+} as const
+
+export type ReservationSlotScalarFieldEnum = (typeof ReservationSlotScalarFieldEnum)[keyof typeof ReservationSlotScalarFieldEnum]
 
 
 export const SortOrder = {

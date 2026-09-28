@@ -409,6 +409,7 @@ export type ReservationWhereInput = {
   room?: Prisma.XOR<Prisma.RoomScalarRelationFilter, Prisma.RoomWhereInput>
   therapist?: Prisma.XOR<Prisma.TherapistScalarRelationFilter, Prisma.TherapistWhereInput>
   options?: Prisma.ReservationOptionListRelationFilter
+  slots?: Prisma.ReservationSlotListRelationFilter
 }
 
 export type ReservationOrderByWithRelationInput = {
@@ -443,10 +444,12 @@ export type ReservationOrderByWithRelationInput = {
   room?: Prisma.RoomOrderByWithRelationInput
   therapist?: Prisma.TherapistOrderByWithRelationInput
   options?: Prisma.ReservationOptionOrderByRelationAggregateInput
+  slots?: Prisma.ReservationSlotOrderByRelationAggregateInput
 }
 
 export type ReservationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  id_roomId_therapistId?: Prisma.ReservationIdRoomIdTherapistIdCompoundUniqueInput
   AND?: Prisma.ReservationWhereInput | Prisma.ReservationWhereInput[]
   OR?: Prisma.ReservationWhereInput[]
   NOT?: Prisma.ReservationWhereInput | Prisma.ReservationWhereInput[]
@@ -480,7 +483,8 @@ export type ReservationWhereUniqueInput = Prisma.AtLeast<{
   room?: Prisma.XOR<Prisma.RoomScalarRelationFilter, Prisma.RoomWhereInput>
   therapist?: Prisma.XOR<Prisma.TherapistScalarRelationFilter, Prisma.TherapistWhereInput>
   options?: Prisma.ReservationOptionListRelationFilter
-}, "id">
+  slots?: Prisma.ReservationSlotListRelationFilter
+}, "id" | "id_roomId_therapistId">
 
 export type ReservationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -576,6 +580,7 @@ export type ReservationCreateInput = {
   room: Prisma.RoomCreateNestedOneWithoutReservationsInput
   therapist: Prisma.TherapistCreateNestedOneWithoutReservationsInput
   options?: Prisma.ReservationOptionCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUncheckedCreateInput = {
@@ -606,6 +611,7 @@ export type ReservationUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   options?: Prisma.ReservationOptionUncheckedCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotUncheckedCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUpdateInput = {
@@ -636,6 +642,7 @@ export type ReservationUpdateInput = {
   room?: Prisma.RoomUpdateOneRequiredWithoutReservationsNestedInput
   therapist?: Prisma.TherapistUpdateOneRequiredWithoutReservationsNestedInput
   options?: Prisma.ReservationOptionUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateInput = {
@@ -666,6 +673,7 @@ export type ReservationUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUncheckedUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationCreateManyInput = {
@@ -759,6 +767,12 @@ export type ReservationListRelationFilter = {
 
 export type ReservationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ReservationIdRoomIdTherapistIdCompoundUniqueInput = {
+  id: string
+  roomId: string
+  therapistId: string
 }
 
 export type ReservationCountOrderByAggregateInput = {
@@ -1057,6 +1071,20 @@ export type ReservationUpdateOneRequiredWithoutOptionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ReservationUpdateToOneWithWhereWithoutOptionsInput, Prisma.ReservationUpdateWithoutOptionsInput>, Prisma.ReservationUncheckedUpdateWithoutOptionsInput>
 }
 
+export type ReservationCreateNestedOneWithoutSlotsInput = {
+  create?: Prisma.XOR<Prisma.ReservationCreateWithoutSlotsInput, Prisma.ReservationUncheckedCreateWithoutSlotsInput>
+  connectOrCreate?: Prisma.ReservationCreateOrConnectWithoutSlotsInput
+  connect?: Prisma.ReservationWhereUniqueInput
+}
+
+export type ReservationUpdateOneRequiredWithoutSlotsNestedInput = {
+  create?: Prisma.XOR<Prisma.ReservationCreateWithoutSlotsInput, Prisma.ReservationUncheckedCreateWithoutSlotsInput>
+  connectOrCreate?: Prisma.ReservationCreateOrConnectWithoutSlotsInput
+  upsert?: Prisma.ReservationUpsertWithoutSlotsInput
+  connect?: Prisma.ReservationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ReservationUpdateToOneWithWhereWithoutSlotsInput, Prisma.ReservationUpdateWithoutSlotsInput>, Prisma.ReservationUncheckedUpdateWithoutSlotsInput>
+}
+
 export type ReservationCreateWithoutMemberInput = {
   id?: string
   memberLastNameSnapshot: string
@@ -1084,6 +1112,7 @@ export type ReservationCreateWithoutMemberInput = {
   room: Prisma.RoomCreateNestedOneWithoutReservationsInput
   therapist: Prisma.TherapistCreateNestedOneWithoutReservationsInput
   options?: Prisma.ReservationOptionCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUncheckedCreateWithoutMemberInput = {
@@ -1113,6 +1142,7 @@ export type ReservationUncheckedCreateWithoutMemberInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   options?: Prisma.ReservationOptionUncheckedCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotUncheckedCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationCreateOrConnectWithoutMemberInput = {
@@ -1200,6 +1230,7 @@ export type ReservationCreateWithoutRoomInput = {
   treatment: Prisma.TreatmentCreateNestedOneWithoutReservationsInput
   therapist: Prisma.TherapistCreateNestedOneWithoutReservationsInput
   options?: Prisma.ReservationOptionCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUncheckedCreateWithoutRoomInput = {
@@ -1229,6 +1260,7 @@ export type ReservationUncheckedCreateWithoutRoomInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   options?: Prisma.ReservationOptionUncheckedCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotUncheckedCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationCreateOrConnectWithoutRoomInput = {
@@ -1284,6 +1316,7 @@ export type ReservationCreateWithoutTherapistInput = {
   treatment: Prisma.TreatmentCreateNestedOneWithoutReservationsInput
   room: Prisma.RoomCreateNestedOneWithoutReservationsInput
   options?: Prisma.ReservationOptionCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUncheckedCreateWithoutTherapistInput = {
@@ -1313,6 +1346,7 @@ export type ReservationUncheckedCreateWithoutTherapistInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   options?: Prisma.ReservationOptionUncheckedCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotUncheckedCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationCreateOrConnectWithoutTherapistInput = {
@@ -1368,6 +1402,7 @@ export type ReservationCreateWithoutTreatmentInput = {
   room: Prisma.RoomCreateNestedOneWithoutReservationsInput
   therapist: Prisma.TherapistCreateNestedOneWithoutReservationsInput
   options?: Prisma.ReservationOptionCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUncheckedCreateWithoutTreatmentInput = {
@@ -1397,6 +1432,7 @@ export type ReservationUncheckedCreateWithoutTreatmentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   options?: Prisma.ReservationOptionUncheckedCreateNestedManyWithoutReservationInput
+  slots?: Prisma.ReservationSlotUncheckedCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationCreateOrConnectWithoutTreatmentInput = {
@@ -1452,6 +1488,7 @@ export type ReservationCreateWithoutOptionsInput = {
   treatment: Prisma.TreatmentCreateNestedOneWithoutReservationsInput
   room: Prisma.RoomCreateNestedOneWithoutReservationsInput
   therapist: Prisma.TherapistCreateNestedOneWithoutReservationsInput
+  slots?: Prisma.ReservationSlotCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationUncheckedCreateWithoutOptionsInput = {
@@ -1481,6 +1518,7 @@ export type ReservationUncheckedCreateWithoutOptionsInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  slots?: Prisma.ReservationSlotUncheckedCreateNestedManyWithoutReservationInput
 }
 
 export type ReservationCreateOrConnectWithoutOptionsInput = {
@@ -1526,6 +1564,7 @@ export type ReservationUpdateWithoutOptionsInput = {
   treatment?: Prisma.TreatmentUpdateOneRequiredWithoutReservationsNestedInput
   room?: Prisma.RoomUpdateOneRequiredWithoutReservationsNestedInput
   therapist?: Prisma.TherapistUpdateOneRequiredWithoutReservationsNestedInput
+  slots?: Prisma.ReservationSlotUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutOptionsInput = {
@@ -1555,6 +1594,143 @@ export type ReservationUncheckedUpdateWithoutOptionsInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slots?: Prisma.ReservationSlotUncheckedUpdateManyWithoutReservationNestedInput
+}
+
+export type ReservationCreateWithoutSlotsInput = {
+  id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
+  status?: $Enums.ReservationStatus
+  businessDate: Date | string
+  startsAt: Date | string
+  treatmentEndsAt: Date | string
+  occupiesUntil: Date | string
+  totalDurationMinutes: number
+  totalPriceYen: number
+  slotCount: number
+  notes?: string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  member: Prisma.MemberCreateNestedOneWithoutReservationsInput
+  treatment: Prisma.TreatmentCreateNestedOneWithoutReservationsInput
+  room: Prisma.RoomCreateNestedOneWithoutReservationsInput
+  therapist: Prisma.TherapistCreateNestedOneWithoutReservationsInput
+  options?: Prisma.ReservationOptionCreateNestedManyWithoutReservationInput
+}
+
+export type ReservationUncheckedCreateWithoutSlotsInput = {
+  id?: string
+  memberId: string
+  treatmentId: string
+  roomId: string
+  therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
+  status?: $Enums.ReservationStatus
+  businessDate: Date | string
+  startsAt: Date | string
+  treatmentEndsAt: Date | string
+  occupiesUntil: Date | string
+  totalDurationMinutes: number
+  totalPriceYen: number
+  slotCount: number
+  notes?: string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  options?: Prisma.ReservationOptionUncheckedCreateNestedManyWithoutReservationInput
+}
+
+export type ReservationCreateOrConnectWithoutSlotsInput = {
+  where: Prisma.ReservationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReservationCreateWithoutSlotsInput, Prisma.ReservationUncheckedCreateWithoutSlotsInput>
+}
+
+export type ReservationUpsertWithoutSlotsInput = {
+  update: Prisma.XOR<Prisma.ReservationUpdateWithoutSlotsInput, Prisma.ReservationUncheckedUpdateWithoutSlotsInput>
+  create: Prisma.XOR<Prisma.ReservationCreateWithoutSlotsInput, Prisma.ReservationUncheckedCreateWithoutSlotsInput>
+  where?: Prisma.ReservationWhereInput
+}
+
+export type ReservationUpdateToOneWithWhereWithoutSlotsInput = {
+  where?: Prisma.ReservationWhereInput
+  data: Prisma.XOR<Prisma.ReservationUpdateWithoutSlotsInput, Prisma.ReservationUncheckedUpdateWithoutSlotsInput>
+}
+
+export type ReservationUpdateWithoutSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
+  businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  treatmentEndsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occupiesUntil?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  totalDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPriceYen?: Prisma.IntFieldUpdateOperationsInput | number
+  slotCount?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  member?: Prisma.MemberUpdateOneRequiredWithoutReservationsNestedInput
+  treatment?: Prisma.TreatmentUpdateOneRequiredWithoutReservationsNestedInput
+  room?: Prisma.RoomUpdateOneRequiredWithoutReservationsNestedInput
+  therapist?: Prisma.TherapistUpdateOneRequiredWithoutReservationsNestedInput
+  options?: Prisma.ReservationOptionUpdateManyWithoutReservationNestedInput
+}
+
+export type ReservationUncheckedUpdateWithoutSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberId?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  roomId?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
+  businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  treatmentEndsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occupiesUntil?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  totalDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPriceYen?: Prisma.IntFieldUpdateOperationsInput | number
+  slotCount?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  options?: Prisma.ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationCreateManyMemberInput = {
@@ -1612,6 +1788,7 @@ export type ReservationUpdateWithoutMemberInput = {
   room?: Prisma.RoomUpdateOneRequiredWithoutReservationsNestedInput
   therapist?: Prisma.TherapistUpdateOneRequiredWithoutReservationsNestedInput
   options?: Prisma.ReservationOptionUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutMemberInput = {
@@ -1641,6 +1818,7 @@ export type ReservationUncheckedUpdateWithoutMemberInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUncheckedUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateManyWithoutMemberInput = {
@@ -1726,6 +1904,7 @@ export type ReservationUpdateWithoutRoomInput = {
   treatment?: Prisma.TreatmentUpdateOneRequiredWithoutReservationsNestedInput
   therapist?: Prisma.TherapistUpdateOneRequiredWithoutReservationsNestedInput
   options?: Prisma.ReservationOptionUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutRoomInput = {
@@ -1755,6 +1934,7 @@ export type ReservationUncheckedUpdateWithoutRoomInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUncheckedUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateManyWithoutRoomInput = {
@@ -1840,6 +2020,7 @@ export type ReservationUpdateWithoutTherapistInput = {
   treatment?: Prisma.TreatmentUpdateOneRequiredWithoutReservationsNestedInput
   room?: Prisma.RoomUpdateOneRequiredWithoutReservationsNestedInput
   options?: Prisma.ReservationOptionUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutTherapistInput = {
@@ -1869,6 +2050,7 @@ export type ReservationUncheckedUpdateWithoutTherapistInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUncheckedUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateManyWithoutTherapistInput = {
@@ -1954,6 +2136,7 @@ export type ReservationUpdateWithoutTreatmentInput = {
   room?: Prisma.RoomUpdateOneRequiredWithoutReservationsNestedInput
   therapist?: Prisma.TherapistUpdateOneRequiredWithoutReservationsNestedInput
   options?: Prisma.ReservationOptionUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutTreatmentInput = {
@@ -1983,6 +2166,7 @@ export type ReservationUncheckedUpdateWithoutTreatmentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput
+  slots?: Prisma.ReservationSlotUncheckedUpdateManyWithoutReservationNestedInput
 }
 
 export type ReservationUncheckedUpdateManyWithoutTreatmentInput = {
@@ -2020,10 +2204,12 @@ export type ReservationUncheckedUpdateManyWithoutTreatmentInput = {
 
 export type ReservationCountOutputType = {
   options: number
+  slots: number
 }
 
 export type ReservationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   options?: boolean | ReservationCountOutputTypeCountOptionsArgs
+  slots?: boolean | ReservationCountOutputTypeCountSlotsArgs
 }
 
 /**
@@ -2041,6 +2227,13 @@ export type ReservationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
  */
 export type ReservationCountOutputTypeCountOptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ReservationOptionWhereInput
+}
+
+/**
+ * ReservationCountOutputType without action
+ */
+export type ReservationCountOutputTypeCountSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationSlotWhereInput
 }
 
 
@@ -2076,6 +2269,7 @@ export type ReservationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   room?: boolean | Prisma.RoomDefaultArgs<ExtArgs>
   therapist?: boolean | Prisma.TherapistDefaultArgs<ExtArgs>
   options?: boolean | Prisma.Reservation$optionsArgs<ExtArgs>
+  slots?: boolean | Prisma.Reservation$slotsArgs<ExtArgs>
   _count?: boolean | Prisma.ReservationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservation"]>
 
@@ -2181,6 +2375,7 @@ export type ReservationInclude<ExtArgs extends runtime.Types.Extensions.Internal
   room?: boolean | Prisma.RoomDefaultArgs<ExtArgs>
   therapist?: boolean | Prisma.TherapistDefaultArgs<ExtArgs>
   options?: boolean | Prisma.Reservation$optionsArgs<ExtArgs>
+  slots?: boolean | Prisma.Reservation$slotsArgs<ExtArgs>
   _count?: boolean | Prisma.ReservationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ReservationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2204,6 +2399,7 @@ export type $ReservationPayload<ExtArgs extends runtime.Types.Extensions.Interna
     room: Prisma.$RoomPayload<ExtArgs>
     therapist: Prisma.$TherapistPayload<ExtArgs>
     options: Prisma.$ReservationOptionPayload<ExtArgs>[]
+    slots: Prisma.$ReservationSlotPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2631,6 +2827,7 @@ export interface Prisma__ReservationClient<T, Null = never, ExtArgs extends runt
   room<T extends Prisma.RoomDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RoomDefaultArgs<ExtArgs>>): Prisma.Prisma__RoomClient<runtime.Types.Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   therapist<T extends Prisma.TherapistDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TherapistDefaultArgs<ExtArgs>>): Prisma.Prisma__TherapistClient<runtime.Types.Result.GetResult<Prisma.$TherapistPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   options<T extends Prisma.Reservation$optionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Reservation$optionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationOptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  slots<T extends Prisma.Reservation$slotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Reservation$slotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationSlotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3108,6 +3305,30 @@ export type Reservation$optionsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ReservationOptionScalarFieldEnum | Prisma.ReservationOptionScalarFieldEnum[]
+}
+
+/**
+ * Reservation.slots
+ */
+export type Reservation$slotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReservationSlot
+   */
+  select?: Prisma.ReservationSlotSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReservationSlot
+   */
+  omit?: Prisma.ReservationSlotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationSlotInclude<ExtArgs> | null
+  where?: Prisma.ReservationSlotWhereInput
+  orderBy?: Prisma.ReservationSlotOrderByWithRelationInput | Prisma.ReservationSlotOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationSlotWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationSlotScalarFieldEnum | Prisma.ReservationSlotScalarFieldEnum[]
 }
 
 /**

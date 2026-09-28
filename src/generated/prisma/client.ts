@@ -91,3 +91,8 @@ export type Reservation = Prisma.ReservationModel
  * 
  */
 export type ReservationOption = Prisma.ReservationOptionModel
+/**
+ * Model ReservationSlot
+ * 
+ */
+export type ReservationSlot = Prisma.ReservationSlotModel
