@@ -8,7 +8,7 @@ import { claimsFrom } from "./policy";
 import { resolveSession } from "./session";
 
 export class StoreInputError extends Error {
-  constructor(readonly status: 400 | 404 | 409, readonly code?: "AffectedReservations") { super("InvalidInput"); }
+  constructor(readonly status: 400 | 404 | 409, readonly code?: "AffectedReservations" | "ImpactReviewPending" | "ExistingPlanReviewPending") { super("InvalidInput"); }
 }
 
 export function checkMutationOrigin(request: Request) {

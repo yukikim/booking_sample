@@ -22,6 +22,7 @@ export default async function Page() {
     {(access.canManagePermissions || access.permissions.includes("STAFF_CREATE")) && <Link href="/manage/staff/new" className="block underline">スタッフを作成</Link>}
     <Link href="/manage/catalog" className="block underline">施術メニュー・オプション</Link>
     <Link href="/manage/resources" className="block underline">部屋・施術者</Link>
+    <Link href="/manage/schedules" className="block underline">営業日・営業時間・休憩</Link>
     <p>予約やその他の店舗設定機能は、今後の開発で追加します。</p>
     <LogoutButton />
   </main>;

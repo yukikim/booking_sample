@@ -52,3 +52,18 @@ export async function getEffectiveTherapistBreak(tx: Prisma.TransactionClient, t
   }
   return null;
 }
+
+/** Pre-filter for booking assignment. Call within the same repeatable-read
+ * transaction as availability checks; occupancy and capacity are checked later.
+ */
+export async function getAssignableTherapistsForDate(tx: Prisma.TransactionClient, value: string) {
+  const business = await getEffectiveBusinessDay(tx, value);
+  if (!business?.isOpen || !business.opensAt) return [];
+  const therapists = await tx.therapist.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
+  const candidates = await Promise.all(therapists.map(async (therapist) => {
+    const rest = await getEffectiveTherapistBreak(tx, therapist.id, value);
+    if (!rest?.startsAt || !rest.endsAt || rest.startsAt < business.opensAt! || rest.endsAt > business.closesAt) return null;
+    return therapist;
+  }));
+  return candidates.filter((therapist): therapist is NonNullable<typeof therapist> => therapist !== null);
+}
