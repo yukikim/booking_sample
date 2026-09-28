@@ -86,6 +86,9 @@ async function main() {
     const mutation = (path: string, body: Record<string, unknown>, sessionCookie = cookie(), requestOrigin = origin) => fetch(`${origin}${path}`, {
       method: "POST", headers: { cookie: sessionCookie, origin: requestOrigin, "content-type": "application/json" }, body: JSON.stringify(body),
     });
+    const patch = (path: string, body: Record<string, unknown>, sessionCookie = cookie(), requestOrigin = origin) => fetch(`${origin}${path}`, {
+      method: "PATCH", headers: { cookie: sessionCookie, origin: requestOrigin, "content-type": "application/json" }, body: JSON.stringify(body),
+    });
     assert.equal(await (await call("session")).json(), null);
     assert.equal((await fetch(`${origin}/api/manage/staff`)).status, 401);
     for (const [path, destination] of [["/manage", "/staff/login"], ["/manage/staff", "/admin/login"]]) {
@@ -198,6 +201,62 @@ async function main() {
     assert.equal((await fetch(`${origin}/api/manage/staff`, { headers: { cookie: cookie() } })).status, 403);
     await prisma.staffPermission.delete({ where: { staffId_permission: { staffId: staff.id, permission: "RESERVATION_CANCEL" } } });
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: cookie() } })).text(), /現在は閲覧のみ可能です/);
+    const treatmentsPath = "/api/manage/catalog/treatments";
+    const optionsPath = "/api/manage/catalog/options";
+    const catalogPage = await protectedGet("/manage/catalog");
+    assert.equal(catalogPage.status, 200);
+    assert.match(await catalogPage.text(), /メニュー・オプション管理/);
+    assert.equal((await protectedGet("/manage/catalog", "")).status, 307);
+    assert.equal((await protectedGet(treatmentsPath, "")).status, 401);
+    assert.equal((await protectedGet(treatmentsPath)).status, 200);
+    assert.equal((await mutation(treatmentsPath, { name: "Denied", durationMinutes: "60", priceYen: "1000" })).status, 403);
+    assert.equal((await mutation(treatmentsPath, { name: "Denied", durationMinutes: "60", priceYen: "1000" }, activeAdminCookie, "https://evil.test")).status, 403);
+    for (const invalid of [
+      { name: "Zero", durationMinutes: "0", priceYen: "1000" },
+      { name: "Decimal", durationMinutes: "1.5", priceYen: "1000" },
+      { name: "Comma", durationMinutes: "60", priceYen: "1,000" },
+      { name: "Exp", durationMinutes: "1e3", priceYen: "1000" },
+      { name: "Excess", durationMinutes: "1381", priceYen: "1000" },
+      { name: "Price", durationMinutes: "60", priceYen: "1000001" },
+      { name: "Bad\nName", durationMinutes: "60", priceYen: "1000" },
+    ]) assert.equal((await mutation(treatmentsPath, invalid, activeAdminCookie)).status, 400);
+    const treatmentResponse = await mutation(treatmentsPath, { name: " Test treatment ", durationMinutes: "1380", priceYen: "1000000" }, activeAdminCookie);
+    assert.equal(treatmentResponse.status, 201);
+    const treatment = await treatmentResponse.json() as { id: string; updatedAt: string };
+    assert.equal((await prisma.treatment.findUniqueOrThrow({ where: { id: treatment.id } })).name, "Test treatment");
+    const optionResponse = await mutation(optionsPath, { name: " Zero option ", durationMinutes: "0", priceYen: "0" }, activeAdminCookie);
+    assert.equal(optionResponse.status, 201);
+    const option = await optionResponse.json() as { id: string; updatedAt: string };
+    assert.equal((await prisma.option.findUniqueOrThrow({ where: { id: option.id } })).durationMinutes, 0);
+    const treatmentItemPath = `${treatmentsPath}/${treatment.id}`;
+    const optionItemPath = `${optionsPath}/${option.id}`;
+    const optionUpdatedResponse = await patch(optionItemPath, { operation: "update", updatedAt: option.updatedAt, name: "Edited option", durationMinutes: "0", priceYen: "500" }, activeAdminCookie);
+    assert.equal(optionUpdatedResponse.status, 200);
+    const optionUpdated = await optionUpdatedResponse.json() as { updatedAt: string };
+    assert.equal((await patch(treatmentItemPath, { operation: "update", updatedAt: treatment.updatedAt, name: "Changed", durationMinutes: "60", priceYen: "0" })).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "TREATMENT_UPDATE", enabled: true }, activeAdminCookie)).status, 200);
+    assert.equal((await mutation(treatmentsPath, { name: "No create", durationMinutes: "60", priceYen: "0" })).status, 403);
+    const updatedResponse = await patch(treatmentItemPath, { operation: "update", updatedAt: treatment.updatedAt, name: " Changed ", durationMinutes: "60", priceYen: "0" });
+    assert.equal(updatedResponse.status, 200);
+    const updated = await updatedResponse.json() as { updatedAt: string };
+    assert.equal((await patch(treatmentItemPath, { operation: "update", updatedAt: treatment.updatedAt, name: "Stale", durationMinutes: "90", priceYen: "1" })).status, 409);
+    assert.equal((await patch(treatmentItemPath, { operation: "disable", updatedAt: updated.updatedAt })).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "TREATMENT_UPDATE", enabled: false }, activeAdminCookie)).status, 200);
+    assert.equal((await patch(treatmentItemPath, { operation: "update", updatedAt: updated.updatedAt, name: "Denied again", durationMinutes: "90", priceYen: "1" })).status, 403);
+    assert.equal((await mutation(staffPath, { permission: "OPTION_DISABLE", enabled: true }, activeAdminCookie)).status, 200);
+    assert.equal((await patch(optionItemPath, { operation: "disable", updatedAt: optionUpdated.updatedAt })).status, 200);
+    assert.equal((await prisma.option.findUniqueOrThrow({ where: { id: option.id } })).isActive, false);
+    assert.equal((await patch(optionItemPath, { operation: "disable", updatedAt: option.updatedAt })).status, 409);
+    assert.equal((await mutation(staffPath, { permission: "OPTION_DISABLE", enabled: false }, activeAdminCookie)).status, 200);
+    const currentTreatment = await prisma.treatment.findUniqueOrThrow({ where: { id: treatment.id } });
+    assert.equal((await patch(treatmentItemPath, { operation: "disable", updatedAt: currentTreatment.updatedAt.toISOString() }, activeAdminCookie)).status, 200);
+    assert.equal((await prisma.treatment.findUniqueOrThrow({ where: { id: treatment.id } })).isActive, false);
+    assert.equal(await prisma.auditLog.count({ where: { action: "TREATMENT_CREATED" } }), 1);
+    assert.equal(await prisma.auditLog.count({ where: { action: "TREATMENT_UPDATED" } }), 1);
+    assert.equal(await prisma.auditLog.count({ where: { action: "TREATMENT_DISABLED" } }), 1);
+    assert.equal(await prisma.auditLog.count({ where: { action: "OPTION_CREATED" } }), 1);
+    assert.equal(await prisma.auditLog.count({ where: { action: "OPTION_UPDATED" } }), 1);
+    assert.equal(await prisma.auditLog.count({ where: { action: "OPTION_DISABLED" } }), 1);
     await prisma.staffAccount.update({ where: { id: staff.id }, data: { authVersion: 2 } });
     assert.equal(await (await call("session")).json(), null);
     assert.equal((await protectedGet("/api/manage/staff")).status, 401);
@@ -233,7 +292,7 @@ async function main() {
       assert.equal(cookie(), beforeFailureCookie);
     } finally { await pg.query(`ALTER TABLE "${schema}"."UnavailableSession" RENAME TO "AppSession"`); }
     assert.equal((await call("signout", { csrfToken: logoutCsrf.csrfToken })).status, 200);
-    console.log("Auth integration passed: HTTP page/API authorization, staff creation and permission revocation, signed expired session, JWT refresh boundary, role separation, CSRF, rate limits and DB-failure handling (isolated schema).");
+    console.log("Integration passed: authentication, staff permissions, catalog CRUD, validation and stale-write rejection over HTTP (isolated schema).");
   } finally {
     if (server && server.exitCode === null) { server.kill("SIGTERM"); await once(server, "exit"); }
     await prisma?.$disconnect();
