@@ -1,8 +1,8 @@
 # 詳細設計：Epic 2 開発環境とデータ基盤
 
-更新日：2026-09-19
+更新日：2026-09-28
 
-状態：Task 2.1.1〜2.1.4・2.2.1完了。基本モデルの定義・検証結果は第9章。DBへの適用は未実施。次はTask 2.2.2。ブラウザ目視・修正後のGitHub CI再実行は未確認。
+状態：Task 2.1.1〜2.1.4・2.2.1〜2.2.2完了。基本モデルは第9章、予約スナップショット・履歴参照の定義と検証結果は第10章。DBへの適用は未実施。次はTask 2.2.3。ブラウザ目視・修正後のGitHub CI再実行は未確認。
 
 ## 1. 文書の範囲
 
@@ -490,3 +490,99 @@ npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script -
 ### 9.8 完了判断と次のTask
 
 Task 2.2.1の基本モデル・必須関連・状態・認証構成に必要な保存先・型を定義し、検証と生成を完了した。Story 2.2全体は未完了。次はTask 2.2.2で、予約時点の氏名・連絡先・メニュー／オプションの名称・時間・料金を保存する列と、履歴を保持する参照関係を具体化する。
+
+## 10. Task 2.2.2：予約スナップショットと履歴参照の定義
+
+### 10.1 今回の実装範囲
+
+2026-09-28、`prisma/schema.prisma`のReservationへ9項目、ReservationOptionへ3項目を追加した。予約時点の値と現在の会員・マスタ情報を区別するため、複写項目には`Snapshot`接尾辞を付ける。既存の必須FK・Restrict・オプションの複合主キーを維持し、追跡済みのPrisma Clientを再生成した。
+
+今回は保存先と参照関係の定義まで。以下の複写・更新・表示方針は後続サービスの実装契約であり、予約APIや画面が完成したことを意味しない。migration・seed・DB適用はTask 2.2.4で行う。
+
+### 10.2 複写項目と型
+
+すべて非nullable・デフォルト値なし。空文字や0を自動補完して複写漏れを隠さず、作成時に明示的な値を要求する。名称等の上限は第9章の複写元と一致させる。
+
+| 保存先 | 項目 | 複写元 | 型・単位 |
+| --- | --- | --- | --- |
+| Reservation | `memberLastNameSnapshot` | Member.lastName | String / varchar(100) |
+| Reservation | `memberFirstNameSnapshot` | Member.firstName | String / varchar(100) |
+| Reservation | `memberEmailSnapshot` | Member.email（配送用） | String / varchar(254) |
+| Reservation | `memberPhoneNumberSnapshot` | Member.phoneNumber | String / varchar(11)、先頭0を保持 |
+| Reservation | `treatmentNameSnapshot` | Treatment.name | String / varchar(100) |
+| Reservation | `treatmentDurationMinutesSnapshot` | Treatment.durationMinutes | Int / integer、分 |
+| Reservation | `treatmentPriceYenSnapshot` | Treatment.priceYen | Int / integer、税込円 |
+| Reservation | `roomNameSnapshot` | Room.name | String / varchar(100) |
+| Reservation | `therapistNameSnapshot` | Therapist.name | String / varchar(100) |
+| ReservationOption | `optionNameSnapshot` | Option.name | String / varchar(100) |
+| ReservationOption | `optionDurationMinutesSnapshot` | Option.durationMinutes | Int / integer、分。0分を許容 |
+| ReservationOption | `optionPriceYenSnapshot` | Option.priceYen | Int / integer、税込円。0円を許容 |
+
+部屋・施術者の名称も複写し、改名後に過去の割当表示が変わらないようにする。IDは同一資源の追跡、名称は予約内容の表示に使う。
+
+郵便番号・年代はMemberだけに保持し、予約へ複写しない。現時点の予約受付・連絡・履歴表示には必要なく、予約時点の地域・年代別分析も要件にないため。後から会員の現在値を参照しても「予約時点の値」とは扱わない。認証用のハッシュ、メール・氏名照合キー、会員状態も複写しない。予約権限は常に現在の会員状態で判定する。
+
+### 10.3 参照関係と退会・無効化後の扱い
+
+| 参照元 → 参照先 | 必須性・制約 | 履歴保持 |
+| --- | --- | --- |
+| Reservation → Member | memberId必須、削除・ID更新Restrict | 退会・復旧でも同じ会員IDを保持 |
+| Reservation → Treatment | treatmentId必須、削除・ID更新Restrict | メニュー無効化後も関連と複写値を保持 |
+| Reservation → Room / Therapist | 各ID必須、削除・ID更新Restrict | 無効化で割当FKや枠を自動削除しない。影響予約の要調整は後続Task |
+| ReservationOption → Reservation / Option | 各ID必須、削除・ID更新Restrict | オプション無効化後も選択履歴を保持 |
+
+`@@id([reservationId, optionId])`により同じオプションは1予約につき1件。選択しない場合はReservationOptionを0件とし、NULLやダミーの明細を作らない。
+
+会員は退会状態・削除フラグ、マスタはisActive=falseで扱う。過去の予約取得に参照先のACTIVE／isActive=true条件を付けて履歴を消さず、保存済みのSnapshotを表示する。無効なマスタは新規候補・新規割当から除外する。取消・完了・退会でも予約本体とオプション明細は保持し、取消時に解放するのは占有枠である。
+
+Restrictは参照される行の物理削除・ID更新を阻止する定義であり、参照のない予約の物理削除やSnapshotのUPDATEを禁止するものではない。論理削除・履歴保持・更新可能な状態の制限はサービス層でも実装する。今回のSchemaだけで履歴の不変性まで保証したとは扱わない。
+
+### 10.4 後続の保存・変更・表示処理の契約
+
+- 新規予約時、サーバーが会員と選択マスタの有効性を検証し、同じトランザクション内で値を複写する。クライアント送信の氏名・単価・名称をそのまま信用しない。予約本体・選択明細・占有枠をまとめて保存する（Story 4.2）。
+- 合計時間はメニューの時間Snapshot＋選択オプションの時間Snapshotの総和、合計料金も同様に算出し、既存のtotalDurationMinutes／totalPriceYenへ保存する。終了時刻・枠数は第9章の計算規則を使う（Story 4.1）。履歴表示時に現在のマスタ料金から再計算しない。
+- 会員プロフィール・マスタの編集、退会・無効化では既存予約のSnapshotを一括更新しない。備考・状態だけの更新でも複写し直さない。
+- 明示的な予約変更では、変更対象となるメニュー・オプション・割当先のIDとSnapshotを一緒に保存する。変更していない項目は保持し、日時のみの変更で料金や連絡先を自動的に現在値へ置き換えない。選択を変える際は、新たに選ぶ項目の現在値と保持する項目のSnapshotから合計を算出し、確定前に内容を確認する。
+- 予約を変更しても会員IDと予約時点の氏名・連絡先は維持する。Snapshotは最新の確定済み予約内容であり、変更前の各版をすべて格納するものではない。変更前後・操作者・理由はTask 2.2.5の操作記録とStory 4.2で記録する。完了・取消済みを変更可能にするAPIは今回追加しない。
+- 保存済みの連絡先は履歴用であり、認証・会員確認・パスワード再設定の送信先決定には使わない。通知用途ごとの宛先取得と送信時の確認はStory 3.4で実装する。
+
+### 10.5 ハンズオン手順と検証結果
+
+1. `prisma/schema.prisma`のReservationとReservationOptionで、必須FKとSnapshotの役割を比較する。
+2. 「全身60分・6,000円」に「延長10分・1,000円」「ホットストーン0分・500円」を選ぶ例を読む。予約にはメニュー60分・6,000円、各明細には10分・1,000円と0分・500円を複写し、合計70分・7,500円・2枠を保存する。09:00開始なら施術終了10:10、占有終了11:00となる。
+3. その後メニューが90分・8,000円へ改定されても、保存済み予約は70分・7,500円のままとなる設計を確認する。これは設計例であり、実DB操作の結果ではない。
+4. 以下を実行し、SQLのSnapshot列と末尾の外部キー定義を確認する。`migrate diff`はSQL出力だけで、DBへの適用は行わない。
+
+```bash
+npm run check
+npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script --config prisma7.config.ts --output /private/tmp/booking-task222-schema.sql
+```
+
+2026-09-28、Node.js 22.23.1／Prisma 7.10.0で確認した。
+
+| 確認 | 結果 |
+| --- | --- |
+| `prisma format --config prisma7.config.ts` | 整形成功 |
+| `npm run check` | Schema検証・Client生成・lint・型チェック・既存14テスト成功 |
+| `migrate diff --from-empty` | SQL生成成功。DB接続・適用なし |
+| 生成SQLの12列 | 全てNOT NULL・デフォルトなし。文字数上限・INTEGER型を確認 |
+| 生成ClientのCreateInput / UncheckedCreateInput | Reservationの9項目・ReservationOptionの3項目が双方で必須であることを確認 |
+| 履歴関連の外部キー6本 | 全てON DELETE RESTRICT / ON UPDATE RESTRICT。明細の複合主キーも維持 |
+| 手書きファイルの差分 | README・本書・Schemaの`git diff --check`成功 |
+
+SQL・生成型は一時的なNodeスクリプトで機械照合した。既存14テストは接続先制限等を対象とし、予約履歴のDB動作を検証するテストではない。生成物は従来どおり手編集せず、生成コメントの行末空白は手書き差分と区別する。
+
+今回、DBへの接続・データ更新、migration・seed、build・ブラウザ・GitHub CIは実行していない。Schema変更を理由に稼働中のDBや既存.envを変更していない。
+
+### 10.6 後続Taskの検証と完了判断
+
+Task 2.2.4では以下を実DBで確認する。PrismaのIntは負値も許すため、型だけで業務制約が完成したとは扱わない。
+
+- Snapshot欠落のINSERTを拒否し、氏名・名称の長さ、電話・メール書式、メニュー1〜1380分、オプション0〜1380分、料金0〜1,000,000円のCHECKを追加・確認する。合計時間・料金にも第9章の範囲を適用する。
+- 予約・明細を作成後に会員の氏名・連絡先、マスタの名称・時間・料金を更新／無効化しても、複写値とFKが維持されることを確認する。
+- 参照中の会員・メニュー・部屋・施術者・オプションの削除とID更新を拒否し、明細がある予約の連鎖削除を起こさないことを確認する。
+- 0分・0円のオプションを保存でき、同じ予約への同一オプション重複は複合主キーで拒否することを確認する。
+
+親の合計と明細の総和は複数行にまたがるため単純な行CHECKだけでは保証できない。Story 4.1／4.2で計算・トランザクション・変更競合を実装し、会員／マスタ更新後の表示、日時だけの変更、選択変更、取消・退会時の履歴保持を統合テストする。
+
+Task 2.2.2の項目・参照関係の定義と静的検証は完了。Story 2.2全体は未完了。次はTask 2.2.3でReservationSlot、部屋・施術者それぞれの枠一意制約、検索用インデックスを定義する。

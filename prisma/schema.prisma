@@ -1,5 +1,5 @@
-// Task 2.2.1: base models. No migration has been applied yet.
-// Snapshots, slot constraints and operational history follow in Tasks 2.2.2–2.2.6.
+// Tasks 2.2.1–2.2.2: base models and snapshots. No migration has been applied yet.
+// Slot constraints and operational history follow in Tasks 2.2.3–2.2.6.
 
 generator client {
   provider = "prisma-client"
@@ -149,25 +149,36 @@ model Option {
 }
 
 model Reservation {
-  id                   String            @id @default(uuid()) @db.Uuid
-  memberId             String            @db.Uuid
-  treatmentId          String            @db.Uuid
-  roomId               String            @db.Uuid
-  therapistId          String            @db.Uuid
-  status               ReservationStatus @default(CONFIRMED)
+  id                               String            @id @default(uuid()) @db.Uuid
+  memberId                         String            @db.Uuid
+  treatmentId                      String            @db.Uuid
+  roomId                           String            @db.Uuid
+  therapistId                      String            @db.Uuid
+  // Copy on booking; profile/master edits must not refresh these snapshots.
+  memberLastNameSnapshot           String            @db.VarChar(100)
+  memberFirstNameSnapshot          String            @db.VarChar(100)
+  memberEmailSnapshot              String            @db.VarChar(254)
+  memberPhoneNumberSnapshot        String            @db.VarChar(11)
+  treatmentNameSnapshot            String            @db.VarChar(100)
+  treatmentDurationMinutesSnapshot Int
+  treatmentPriceYenSnapshot        Int
+  roomNameSnapshot                 String            @db.VarChar(100)
+  therapistNameSnapshot            String            @db.VarChar(100)
+  status                           ReservationStatus @default(CONFIRMED)
   // Asia/Tokyo calendar date; time instants below are stored as timestamptz.
-  businessDate         DateTime          @db.Date
-  startsAt             DateTime          @db.Timestamptz(3)
-  treatmentEndsAt      DateTime          @db.Timestamptz(3)
-  occupiesUntil        DateTime          @db.Timestamptz(3)
-  totalDurationMinutes Int
-  totalPriceYen        Int
-  slotCount            Int
-  notes                String?           @db.VarChar(1000)
-  version              Int               @default(1)
-  createdAt            DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt            DateTime          @updatedAt @db.Timestamptz(3)
+  businessDate                     DateTime          @db.Date
+  startsAt                         DateTime          @db.Timestamptz(3)
+  treatmentEndsAt                  DateTime          @db.Timestamptz(3)
+  occupiesUntil                    DateTime          @db.Timestamptz(3)
+  totalDurationMinutes             Int
+  totalPriceYen                    Int
+  slotCount                        Int
+  notes                            String?           @db.VarChar(1000)
+  version                          Int               @default(1)
+  createdAt                        DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt                        DateTime          @updatedAt @db.Timestamptz(3)
 
+  // Retain mandatory references after withdrawal/deactivation; never cascade history.
   member    Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   treatment Treatment           @relation(fields: [treatmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   room      Room                @relation(fields: [roomId], references: [id], onDelete: Restrict, onUpdate: Restrict)
@@ -175,10 +186,13 @@ model Reservation {
   options   ReservationOption[]
 }
 
-// Snapshot fields are added in Task 2.2.2 before the first migration.
+// Keep each selected option's agreed values independently of its current master.
 model ReservationOption {
-  reservationId String @db.Uuid
-  optionId      String @db.Uuid
+  reservationId                 String @db.Uuid
+  optionId                      String @db.Uuid
+  optionNameSnapshot            String @db.VarChar(100)
+  optionDurationMinutesSnapshot Int
+  optionPriceYenSnapshot        Int
 
   reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   option      Option      @relation(fields: [optionId], references: [id], onDelete: Restrict, onUpdate: Restrict)

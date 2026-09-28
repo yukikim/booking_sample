@@ -20,40 +20,80 @@ export type ReservationOptionModel = runtime.Types.Result.DefaultSelection<Prism
 
 export type AggregateReservationOption = {
   _count: ReservationOptionCountAggregateOutputType | null
+  _avg: ReservationOptionAvgAggregateOutputType | null
+  _sum: ReservationOptionSumAggregateOutputType | null
   _min: ReservationOptionMinAggregateOutputType | null
   _max: ReservationOptionMaxAggregateOutputType | null
+}
+
+export type ReservationOptionAvgAggregateOutputType = {
+  optionDurationMinutesSnapshot: number | null
+  optionPriceYenSnapshot: number | null
+}
+
+export type ReservationOptionSumAggregateOutputType = {
+  optionDurationMinutesSnapshot: number | null
+  optionPriceYenSnapshot: number | null
 }
 
 export type ReservationOptionMinAggregateOutputType = {
   reservationId: string | null
   optionId: string | null
+  optionNameSnapshot: string | null
+  optionDurationMinutesSnapshot: number | null
+  optionPriceYenSnapshot: number | null
 }
 
 export type ReservationOptionMaxAggregateOutputType = {
   reservationId: string | null
   optionId: string | null
+  optionNameSnapshot: string | null
+  optionDurationMinutesSnapshot: number | null
+  optionPriceYenSnapshot: number | null
 }
 
 export type ReservationOptionCountAggregateOutputType = {
   reservationId: number
   optionId: number
+  optionNameSnapshot: number
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
   _all: number
 }
 
 
+export type ReservationOptionAvgAggregateInputType = {
+  optionDurationMinutesSnapshot?: true
+  optionPriceYenSnapshot?: true
+}
+
+export type ReservationOptionSumAggregateInputType = {
+  optionDurationMinutesSnapshot?: true
+  optionPriceYenSnapshot?: true
+}
+
 export type ReservationOptionMinAggregateInputType = {
   reservationId?: true
   optionId?: true
+  optionNameSnapshot?: true
+  optionDurationMinutesSnapshot?: true
+  optionPriceYenSnapshot?: true
 }
 
 export type ReservationOptionMaxAggregateInputType = {
   reservationId?: true
   optionId?: true
+  optionNameSnapshot?: true
+  optionDurationMinutesSnapshot?: true
+  optionPriceYenSnapshot?: true
 }
 
 export type ReservationOptionCountAggregateInputType = {
   reservationId?: true
   optionId?: true
+  optionNameSnapshot?: true
+  optionDurationMinutesSnapshot?: true
+  optionPriceYenSnapshot?: true
   _all?: true
 }
 
@@ -95,6 +135,18 @@ export type ReservationOptionAggregateArgs<ExtArgs extends runtime.Types.Extensi
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ReservationOptionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ReservationOptionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ReservationOptionMinAggregateInputType
@@ -125,6 +177,8 @@ export type ReservationOptionGroupByArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   _count?: ReservationOptionCountAggregateInputType | true
+  _avg?: ReservationOptionAvgAggregateInputType
+  _sum?: ReservationOptionSumAggregateInputType
   _min?: ReservationOptionMinAggregateInputType
   _max?: ReservationOptionMaxAggregateInputType
 }
@@ -132,7 +186,12 @@ export type ReservationOptionGroupByArgs<ExtArgs extends runtime.Types.Extension
 export type ReservationOptionGroupByOutputType = {
   reservationId: string
   optionId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
   _count: ReservationOptionCountAggregateOutputType | null
+  _avg: ReservationOptionAvgAggregateOutputType | null
+  _sum: ReservationOptionSumAggregateOutputType | null
   _min: ReservationOptionMinAggregateOutputType | null
   _max: ReservationOptionMaxAggregateOutputType | null
 }
@@ -158,6 +217,9 @@ export type ReservationOptionWhereInput = {
   NOT?: Prisma.ReservationOptionWhereInput | Prisma.ReservationOptionWhereInput[]
   reservationId?: Prisma.UuidFilter<"ReservationOption"> | string
   optionId?: Prisma.UuidFilter<"ReservationOption"> | string
+  optionNameSnapshot?: Prisma.StringFilter<"ReservationOption"> | string
+  optionDurationMinutesSnapshot?: Prisma.IntFilter<"ReservationOption"> | number
+  optionPriceYenSnapshot?: Prisma.IntFilter<"ReservationOption"> | number
   reservation?: Prisma.XOR<Prisma.ReservationScalarRelationFilter, Prisma.ReservationWhereInput>
   option?: Prisma.XOR<Prisma.OptionScalarRelationFilter, Prisma.OptionWhereInput>
 }
@@ -165,6 +227,9 @@ export type ReservationOptionWhereInput = {
 export type ReservationOptionOrderByWithRelationInput = {
   reservationId?: Prisma.SortOrder
   optionId?: Prisma.SortOrder
+  optionNameSnapshot?: Prisma.SortOrder
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
   reservation?: Prisma.ReservationOrderByWithRelationInput
   option?: Prisma.OptionOrderByWithRelationInput
 }
@@ -176,6 +241,9 @@ export type ReservationOptionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ReservationOptionWhereInput | Prisma.ReservationOptionWhereInput[]
   reservationId?: Prisma.UuidFilter<"ReservationOption"> | string
   optionId?: Prisma.UuidFilter<"ReservationOption"> | string
+  optionNameSnapshot?: Prisma.StringFilter<"ReservationOption"> | string
+  optionDurationMinutesSnapshot?: Prisma.IntFilter<"ReservationOption"> | number
+  optionPriceYenSnapshot?: Prisma.IntFilter<"ReservationOption"> | number
   reservation?: Prisma.XOR<Prisma.ReservationScalarRelationFilter, Prisma.ReservationWhereInput>
   option?: Prisma.XOR<Prisma.OptionScalarRelationFilter, Prisma.OptionWhereInput>
 }, "reservationId_optionId">
@@ -183,9 +251,14 @@ export type ReservationOptionWhereUniqueInput = Prisma.AtLeast<{
 export type ReservationOptionOrderByWithAggregationInput = {
   reservationId?: Prisma.SortOrder
   optionId?: Prisma.SortOrder
+  optionNameSnapshot?: Prisma.SortOrder
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
   _count?: Prisma.ReservationOptionCountOrderByAggregateInput
+  _avg?: Prisma.ReservationOptionAvgOrderByAggregateInput
   _max?: Prisma.ReservationOptionMaxOrderByAggregateInput
   _min?: Prisma.ReservationOptionMinOrderByAggregateInput
+  _sum?: Prisma.ReservationOptionSumOrderByAggregateInput
 }
 
 export type ReservationOptionScalarWhereWithAggregatesInput = {
@@ -194,9 +267,15 @@ export type ReservationOptionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ReservationOptionScalarWhereWithAggregatesInput | Prisma.ReservationOptionScalarWhereWithAggregatesInput[]
   reservationId?: Prisma.UuidWithAggregatesFilter<"ReservationOption"> | string
   optionId?: Prisma.UuidWithAggregatesFilter<"ReservationOption"> | string
+  optionNameSnapshot?: Prisma.StringWithAggregatesFilter<"ReservationOption"> | string
+  optionDurationMinutesSnapshot?: Prisma.IntWithAggregatesFilter<"ReservationOption"> | number
+  optionPriceYenSnapshot?: Prisma.IntWithAggregatesFilter<"ReservationOption"> | number
 }
 
 export type ReservationOptionCreateInput = {
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
   reservation: Prisma.ReservationCreateNestedOneWithoutOptionsInput
   option: Prisma.OptionCreateNestedOneWithoutReservationOptionsInput
 }
@@ -204,9 +283,15 @@ export type ReservationOptionCreateInput = {
 export type ReservationOptionUncheckedCreateInput = {
   reservationId: string
   optionId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
 }
 
 export type ReservationOptionUpdateInput = {
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
   reservation?: Prisma.ReservationUpdateOneRequiredWithoutOptionsNestedInput
   option?: Prisma.OptionUpdateOneRequiredWithoutReservationOptionsNestedInput
 }
@@ -214,20 +299,31 @@ export type ReservationOptionUpdateInput = {
 export type ReservationOptionUncheckedUpdateInput = {
   reservationId?: Prisma.StringFieldUpdateOperationsInput | string
   optionId?: Prisma.StringFieldUpdateOperationsInput | string
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ReservationOptionCreateManyInput = {
   reservationId: string
   optionId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
 }
 
 export type ReservationOptionUpdateManyMutationInput = {
-
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ReservationOptionUncheckedUpdateManyInput = {
   reservationId?: Prisma.StringFieldUpdateOperationsInput | string
   optionId?: Prisma.StringFieldUpdateOperationsInput | string
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ReservationOptionListRelationFilter = {
@@ -248,16 +344,35 @@ export type ReservationOptionReservationIdOptionIdCompoundUniqueInput = {
 export type ReservationOptionCountOrderByAggregateInput = {
   reservationId?: Prisma.SortOrder
   optionId?: Prisma.SortOrder
+  optionNameSnapshot?: Prisma.SortOrder
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
+}
+
+export type ReservationOptionAvgOrderByAggregateInput = {
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
 }
 
 export type ReservationOptionMaxOrderByAggregateInput = {
   reservationId?: Prisma.SortOrder
   optionId?: Prisma.SortOrder
+  optionNameSnapshot?: Prisma.SortOrder
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
 }
 
 export type ReservationOptionMinOrderByAggregateInput = {
   reservationId?: Prisma.SortOrder
   optionId?: Prisma.SortOrder
+  optionNameSnapshot?: Prisma.SortOrder
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
+}
+
+export type ReservationOptionSumOrderByAggregateInput = {
+  optionDurationMinutesSnapshot?: Prisma.SortOrder
+  optionPriceYenSnapshot?: Prisma.SortOrder
 }
 
 export type ReservationOptionCreateNestedManyWithoutOptionInput = {
@@ -345,11 +460,17 @@ export type ReservationOptionUncheckedUpdateManyWithoutReservationNestedInput = 
 }
 
 export type ReservationOptionCreateWithoutOptionInput = {
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
   reservation: Prisma.ReservationCreateNestedOneWithoutOptionsInput
 }
 
 export type ReservationOptionUncheckedCreateWithoutOptionInput = {
   reservationId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
 }
 
 export type ReservationOptionCreateOrConnectWithoutOptionInput = {
@@ -384,14 +505,23 @@ export type ReservationOptionScalarWhereInput = {
   NOT?: Prisma.ReservationOptionScalarWhereInput | Prisma.ReservationOptionScalarWhereInput[]
   reservationId?: Prisma.UuidFilter<"ReservationOption"> | string
   optionId?: Prisma.UuidFilter<"ReservationOption"> | string
+  optionNameSnapshot?: Prisma.StringFilter<"ReservationOption"> | string
+  optionDurationMinutesSnapshot?: Prisma.IntFilter<"ReservationOption"> | number
+  optionPriceYenSnapshot?: Prisma.IntFilter<"ReservationOption"> | number
 }
 
 export type ReservationOptionCreateWithoutReservationInput = {
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
   option: Prisma.OptionCreateNestedOneWithoutReservationOptionsInput
 }
 
 export type ReservationOptionUncheckedCreateWithoutReservationInput = {
   optionId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
 }
 
 export type ReservationOptionCreateOrConnectWithoutReservationInput = {
@@ -422,34 +552,58 @@ export type ReservationOptionUpdateManyWithWhereWithoutReservationInput = {
 
 export type ReservationOptionCreateManyOptionInput = {
   reservationId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
 }
 
 export type ReservationOptionUpdateWithoutOptionInput = {
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
   reservation?: Prisma.ReservationUpdateOneRequiredWithoutOptionsNestedInput
 }
 
 export type ReservationOptionUncheckedUpdateWithoutOptionInput = {
   reservationId?: Prisma.StringFieldUpdateOperationsInput | string
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ReservationOptionUncheckedUpdateManyWithoutOptionInput = {
   reservationId?: Prisma.StringFieldUpdateOperationsInput | string
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ReservationOptionCreateManyReservationInput = {
   optionId: string
+  optionNameSnapshot: string
+  optionDurationMinutesSnapshot: number
+  optionPriceYenSnapshot: number
 }
 
 export type ReservationOptionUpdateWithoutReservationInput = {
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
   option?: Prisma.OptionUpdateOneRequiredWithoutReservationOptionsNestedInput
 }
 
 export type ReservationOptionUncheckedUpdateWithoutReservationInput = {
   optionId?: Prisma.StringFieldUpdateOperationsInput | string
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ReservationOptionUncheckedUpdateManyWithoutReservationInput = {
   optionId?: Prisma.StringFieldUpdateOperationsInput | string
+  optionNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  optionDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  optionPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -457,6 +611,9 @@ export type ReservationOptionUncheckedUpdateManyWithoutReservationInput = {
 export type ReservationOptionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   reservationId?: boolean
   optionId?: boolean
+  optionNameSnapshot?: boolean
+  optionDurationMinutesSnapshot?: boolean
+  optionPriceYenSnapshot?: boolean
   reservation?: boolean | Prisma.ReservationDefaultArgs<ExtArgs>
   option?: boolean | Prisma.OptionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservationOption"]>
@@ -464,6 +621,9 @@ export type ReservationOptionSelect<ExtArgs extends runtime.Types.Extensions.Int
 export type ReservationOptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   reservationId?: boolean
   optionId?: boolean
+  optionNameSnapshot?: boolean
+  optionDurationMinutesSnapshot?: boolean
+  optionPriceYenSnapshot?: boolean
   reservation?: boolean | Prisma.ReservationDefaultArgs<ExtArgs>
   option?: boolean | Prisma.OptionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservationOption"]>
@@ -471,6 +631,9 @@ export type ReservationOptionSelectCreateManyAndReturn<ExtArgs extends runtime.T
 export type ReservationOptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   reservationId?: boolean
   optionId?: boolean
+  optionNameSnapshot?: boolean
+  optionDurationMinutesSnapshot?: boolean
+  optionPriceYenSnapshot?: boolean
   reservation?: boolean | Prisma.ReservationDefaultArgs<ExtArgs>
   option?: boolean | Prisma.OptionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservationOption"]>
@@ -478,9 +641,12 @@ export type ReservationOptionSelectUpdateManyAndReturn<ExtArgs extends runtime.T
 export type ReservationOptionSelectScalar = {
   reservationId?: boolean
   optionId?: boolean
+  optionNameSnapshot?: boolean
+  optionDurationMinutesSnapshot?: boolean
+  optionPriceYenSnapshot?: boolean
 }
 
-export type ReservationOptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"reservationId" | "optionId", ExtArgs["result"]["reservationOption"]>
+export type ReservationOptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"reservationId" | "optionId" | "optionNameSnapshot" | "optionDurationMinutesSnapshot" | "optionPriceYenSnapshot", ExtArgs["result"]["reservationOption"]>
 export type ReservationOptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reservation?: boolean | Prisma.ReservationDefaultArgs<ExtArgs>
   option?: boolean | Prisma.OptionDefaultArgs<ExtArgs>
@@ -503,6 +669,9 @@ export type $ReservationOptionPayload<ExtArgs extends runtime.Types.Extensions.I
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     reservationId: string
     optionId: string
+    optionNameSnapshot: string
+    optionDurationMinutesSnapshot: number
+    optionPriceYenSnapshot: number
   }, ExtArgs["result"]["reservationOption"]>
   composites: {}
 }
@@ -930,6 +1099,9 @@ export interface Prisma__ReservationOptionClient<T, Null = never, ExtArgs extend
 export interface ReservationOptionFieldRefs {
   readonly reservationId: Prisma.FieldRef<"ReservationOption", 'String'>
   readonly optionId: Prisma.FieldRef<"ReservationOption", 'String'>
+  readonly optionNameSnapshot: Prisma.FieldRef<"ReservationOption", 'String'>
+  readonly optionDurationMinutesSnapshot: Prisma.FieldRef<"ReservationOption", 'Int'>
+  readonly optionPriceYenSnapshot: Prisma.FieldRef<"ReservationOption", 'Int'>
 }
     
 

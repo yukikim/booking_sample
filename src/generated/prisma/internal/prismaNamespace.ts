@@ -1324,6 +1324,15 @@ export const ReservationScalarFieldEnum = {
   treatmentId: 'treatmentId',
   roomId: 'roomId',
   therapistId: 'therapistId',
+  memberLastNameSnapshot: 'memberLastNameSnapshot',
+  memberFirstNameSnapshot: 'memberFirstNameSnapshot',
+  memberEmailSnapshot: 'memberEmailSnapshot',
+  memberPhoneNumberSnapshot: 'memberPhoneNumberSnapshot',
+  treatmentNameSnapshot: 'treatmentNameSnapshot',
+  treatmentDurationMinutesSnapshot: 'treatmentDurationMinutesSnapshot',
+  treatmentPriceYenSnapshot: 'treatmentPriceYenSnapshot',
+  roomNameSnapshot: 'roomNameSnapshot',
+  therapistNameSnapshot: 'therapistNameSnapshot',
   status: 'status',
   businessDate: 'businessDate',
   startsAt: 'startsAt',
@@ -1343,7 +1352,10 @@ export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[key
 
 export const ReservationOptionScalarFieldEnum = {
   reservationId: 'reservationId',
-  optionId: 'optionId'
+  optionId: 'optionId',
+  optionNameSnapshot: 'optionNameSnapshot',
+  optionDurationMinutesSnapshot: 'optionDurationMinutesSnapshot',
+  optionPriceYenSnapshot: 'optionPriceYenSnapshot'
 } as const
 
 export type ReservationOptionScalarFieldEnum = (typeof ReservationOptionScalarFieldEnum)[keyof typeof ReservationOptionScalarFieldEnum]

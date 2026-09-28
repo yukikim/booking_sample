@@ -27,6 +27,8 @@ export type AggregateReservation = {
 }
 
 export type ReservationAvgAggregateOutputType = {
+  treatmentDurationMinutesSnapshot: number | null
+  treatmentPriceYenSnapshot: number | null
   totalDurationMinutes: number | null
   totalPriceYen: number | null
   slotCount: number | null
@@ -34,6 +36,8 @@ export type ReservationAvgAggregateOutputType = {
 }
 
 export type ReservationSumAggregateOutputType = {
+  treatmentDurationMinutesSnapshot: number | null
+  treatmentPriceYenSnapshot: number | null
   totalDurationMinutes: number | null
   totalPriceYen: number | null
   slotCount: number | null
@@ -46,6 +50,15 @@ export type ReservationMinAggregateOutputType = {
   treatmentId: string | null
   roomId: string | null
   therapistId: string | null
+  memberLastNameSnapshot: string | null
+  memberFirstNameSnapshot: string | null
+  memberEmailSnapshot: string | null
+  memberPhoneNumberSnapshot: string | null
+  treatmentNameSnapshot: string | null
+  treatmentDurationMinutesSnapshot: number | null
+  treatmentPriceYenSnapshot: number | null
+  roomNameSnapshot: string | null
+  therapistNameSnapshot: string | null
   status: $Enums.ReservationStatus | null
   businessDate: Date | null
   startsAt: Date | null
@@ -66,6 +79,15 @@ export type ReservationMaxAggregateOutputType = {
   treatmentId: string | null
   roomId: string | null
   therapistId: string | null
+  memberLastNameSnapshot: string | null
+  memberFirstNameSnapshot: string | null
+  memberEmailSnapshot: string | null
+  memberPhoneNumberSnapshot: string | null
+  treatmentNameSnapshot: string | null
+  treatmentDurationMinutesSnapshot: number | null
+  treatmentPriceYenSnapshot: number | null
+  roomNameSnapshot: string | null
+  therapistNameSnapshot: string | null
   status: $Enums.ReservationStatus | null
   businessDate: Date | null
   startsAt: Date | null
@@ -86,6 +108,15 @@ export type ReservationCountAggregateOutputType = {
   treatmentId: number
   roomId: number
   therapistId: number
+  memberLastNameSnapshot: number
+  memberFirstNameSnapshot: number
+  memberEmailSnapshot: number
+  memberPhoneNumberSnapshot: number
+  treatmentNameSnapshot: number
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: number
+  therapistNameSnapshot: number
   status: number
   businessDate: number
   startsAt: number
@@ -103,6 +134,8 @@ export type ReservationCountAggregateOutputType = {
 
 
 export type ReservationAvgAggregateInputType = {
+  treatmentDurationMinutesSnapshot?: true
+  treatmentPriceYenSnapshot?: true
   totalDurationMinutes?: true
   totalPriceYen?: true
   slotCount?: true
@@ -110,6 +143,8 @@ export type ReservationAvgAggregateInputType = {
 }
 
 export type ReservationSumAggregateInputType = {
+  treatmentDurationMinutesSnapshot?: true
+  treatmentPriceYenSnapshot?: true
   totalDurationMinutes?: true
   totalPriceYen?: true
   slotCount?: true
@@ -122,6 +157,15 @@ export type ReservationMinAggregateInputType = {
   treatmentId?: true
   roomId?: true
   therapistId?: true
+  memberLastNameSnapshot?: true
+  memberFirstNameSnapshot?: true
+  memberEmailSnapshot?: true
+  memberPhoneNumberSnapshot?: true
+  treatmentNameSnapshot?: true
+  treatmentDurationMinutesSnapshot?: true
+  treatmentPriceYenSnapshot?: true
+  roomNameSnapshot?: true
+  therapistNameSnapshot?: true
   status?: true
   businessDate?: true
   startsAt?: true
@@ -142,6 +186,15 @@ export type ReservationMaxAggregateInputType = {
   treatmentId?: true
   roomId?: true
   therapistId?: true
+  memberLastNameSnapshot?: true
+  memberFirstNameSnapshot?: true
+  memberEmailSnapshot?: true
+  memberPhoneNumberSnapshot?: true
+  treatmentNameSnapshot?: true
+  treatmentDurationMinutesSnapshot?: true
+  treatmentPriceYenSnapshot?: true
+  roomNameSnapshot?: true
+  therapistNameSnapshot?: true
   status?: true
   businessDate?: true
   startsAt?: true
@@ -162,6 +215,15 @@ export type ReservationCountAggregateInputType = {
   treatmentId?: true
   roomId?: true
   therapistId?: true
+  memberLastNameSnapshot?: true
+  memberFirstNameSnapshot?: true
+  memberEmailSnapshot?: true
+  memberPhoneNumberSnapshot?: true
+  treatmentNameSnapshot?: true
+  treatmentDurationMinutesSnapshot?: true
+  treatmentPriceYenSnapshot?: true
+  roomNameSnapshot?: true
+  therapistNameSnapshot?: true
   status?: true
   businessDate?: true
   startsAt?: true
@@ -269,6 +331,15 @@ export type ReservationGroupByOutputType = {
   treatmentId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status: $Enums.ReservationStatus
   businessDate: Date
   startsAt: Date
@@ -312,6 +383,15 @@ export type ReservationWhereInput = {
   treatmentId?: Prisma.UuidFilter<"Reservation"> | string
   roomId?: Prisma.UuidFilter<"Reservation"> | string
   therapistId?: Prisma.UuidFilter<"Reservation"> | string
+  memberLastNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberFirstNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberEmailSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberPhoneNumberSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  treatmentNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFilter<"Reservation"> | number
+  treatmentPriceYenSnapshot?: Prisma.IntFilter<"Reservation"> | number
+  roomNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  therapistNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   startsAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
@@ -337,6 +417,15 @@ export type ReservationOrderByWithRelationInput = {
   treatmentId?: Prisma.SortOrder
   roomId?: Prisma.SortOrder
   therapistId?: Prisma.SortOrder
+  memberLastNameSnapshot?: Prisma.SortOrder
+  memberFirstNameSnapshot?: Prisma.SortOrder
+  memberEmailSnapshot?: Prisma.SortOrder
+  memberPhoneNumberSnapshot?: Prisma.SortOrder
+  treatmentNameSnapshot?: Prisma.SortOrder
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
+  roomNameSnapshot?: Prisma.SortOrder
+  therapistNameSnapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   businessDate?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
@@ -365,6 +454,15 @@ export type ReservationWhereUniqueInput = Prisma.AtLeast<{
   treatmentId?: Prisma.UuidFilter<"Reservation"> | string
   roomId?: Prisma.UuidFilter<"Reservation"> | string
   therapistId?: Prisma.UuidFilter<"Reservation"> | string
+  memberLastNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberFirstNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberEmailSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberPhoneNumberSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  treatmentNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFilter<"Reservation"> | number
+  treatmentPriceYenSnapshot?: Prisma.IntFilter<"Reservation"> | number
+  roomNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  therapistNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   startsAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
@@ -390,6 +488,15 @@ export type ReservationOrderByWithAggregationInput = {
   treatmentId?: Prisma.SortOrder
   roomId?: Prisma.SortOrder
   therapistId?: Prisma.SortOrder
+  memberLastNameSnapshot?: Prisma.SortOrder
+  memberFirstNameSnapshot?: Prisma.SortOrder
+  memberEmailSnapshot?: Prisma.SortOrder
+  memberPhoneNumberSnapshot?: Prisma.SortOrder
+  treatmentNameSnapshot?: Prisma.SortOrder
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
+  roomNameSnapshot?: Prisma.SortOrder
+  therapistNameSnapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   businessDate?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
@@ -418,6 +525,15 @@ export type ReservationScalarWhereWithAggregatesInput = {
   treatmentId?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
   roomId?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
   therapistId?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
+  memberLastNameSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  memberFirstNameSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  memberEmailSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  memberPhoneNumberSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  treatmentNameSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntWithAggregatesFilter<"Reservation"> | number
+  treatmentPriceYenSnapshot?: Prisma.IntWithAggregatesFilter<"Reservation"> | number
+  roomNameSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  therapistNameSnapshot?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
   status?: Prisma.EnumReservationStatusWithAggregatesFilter<"Reservation"> | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
   startsAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
@@ -434,6 +550,15 @@ export type ReservationScalarWhereWithAggregatesInput = {
 
 export type ReservationCreateInput = {
   id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -459,6 +584,15 @@ export type ReservationUncheckedCreateInput = {
   treatmentId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -476,6 +610,15 @@ export type ReservationUncheckedCreateInput = {
 
 export type ReservationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -501,6 +644,15 @@ export type ReservationUncheckedUpdateInput = {
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -522,6 +674,15 @@ export type ReservationCreateManyInput = {
   treatmentId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -538,6 +699,15 @@ export type ReservationCreateManyInput = {
 
 export type ReservationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -558,6 +728,15 @@ export type ReservationUncheckedUpdateManyInput = {
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -588,6 +767,15 @@ export type ReservationCountOrderByAggregateInput = {
   treatmentId?: Prisma.SortOrder
   roomId?: Prisma.SortOrder
   therapistId?: Prisma.SortOrder
+  memberLastNameSnapshot?: Prisma.SortOrder
+  memberFirstNameSnapshot?: Prisma.SortOrder
+  memberEmailSnapshot?: Prisma.SortOrder
+  memberPhoneNumberSnapshot?: Prisma.SortOrder
+  treatmentNameSnapshot?: Prisma.SortOrder
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
+  roomNameSnapshot?: Prisma.SortOrder
+  therapistNameSnapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   businessDate?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
@@ -603,6 +791,8 @@ export type ReservationCountOrderByAggregateInput = {
 }
 
 export type ReservationAvgOrderByAggregateInput = {
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
   totalDurationMinutes?: Prisma.SortOrder
   totalPriceYen?: Prisma.SortOrder
   slotCount?: Prisma.SortOrder
@@ -615,6 +805,15 @@ export type ReservationMaxOrderByAggregateInput = {
   treatmentId?: Prisma.SortOrder
   roomId?: Prisma.SortOrder
   therapistId?: Prisma.SortOrder
+  memberLastNameSnapshot?: Prisma.SortOrder
+  memberFirstNameSnapshot?: Prisma.SortOrder
+  memberEmailSnapshot?: Prisma.SortOrder
+  memberPhoneNumberSnapshot?: Prisma.SortOrder
+  treatmentNameSnapshot?: Prisma.SortOrder
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
+  roomNameSnapshot?: Prisma.SortOrder
+  therapistNameSnapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   businessDate?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
@@ -635,6 +834,15 @@ export type ReservationMinOrderByAggregateInput = {
   treatmentId?: Prisma.SortOrder
   roomId?: Prisma.SortOrder
   therapistId?: Prisma.SortOrder
+  memberLastNameSnapshot?: Prisma.SortOrder
+  memberFirstNameSnapshot?: Prisma.SortOrder
+  memberEmailSnapshot?: Prisma.SortOrder
+  memberPhoneNumberSnapshot?: Prisma.SortOrder
+  treatmentNameSnapshot?: Prisma.SortOrder
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
+  roomNameSnapshot?: Prisma.SortOrder
+  therapistNameSnapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   businessDate?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
@@ -650,6 +858,8 @@ export type ReservationMinOrderByAggregateInput = {
 }
 
 export type ReservationSumOrderByAggregateInput = {
+  treatmentDurationMinutesSnapshot?: Prisma.SortOrder
+  treatmentPriceYenSnapshot?: Prisma.SortOrder
   totalDurationMinutes?: Prisma.SortOrder
   totalPriceYen?: Prisma.SortOrder
   slotCount?: Prisma.SortOrder
@@ -849,6 +1059,15 @@ export type ReservationUpdateOneRequiredWithoutOptionsNestedInput = {
 
 export type ReservationCreateWithoutMemberInput = {
   id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -872,6 +1091,15 @@ export type ReservationUncheckedCreateWithoutMemberInput = {
   treatmentId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -922,6 +1150,15 @@ export type ReservationScalarWhereInput = {
   treatmentId?: Prisma.UuidFilter<"Reservation"> | string
   roomId?: Prisma.UuidFilter<"Reservation"> | string
   therapistId?: Prisma.UuidFilter<"Reservation"> | string
+  memberLastNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberFirstNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberEmailSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  memberPhoneNumberSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  treatmentNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFilter<"Reservation"> | number
+  treatmentPriceYenSnapshot?: Prisma.IntFilter<"Reservation"> | number
+  roomNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
+  therapistNameSnapshot?: Prisma.StringFilter<"Reservation"> | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   startsAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
@@ -938,6 +1175,15 @@ export type ReservationScalarWhereInput = {
 
 export type ReservationCreateWithoutRoomInput = {
   id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -961,6 +1207,15 @@ export type ReservationUncheckedCreateWithoutRoomInput = {
   memberId: string
   treatmentId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1004,6 +1259,15 @@ export type ReservationUpdateManyWithWhereWithoutRoomInput = {
 
 export type ReservationCreateWithoutTherapistInput = {
   id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1027,6 +1291,15 @@ export type ReservationUncheckedCreateWithoutTherapistInput = {
   memberId: string
   treatmentId: string
   roomId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1070,6 +1343,15 @@ export type ReservationUpdateManyWithWhereWithoutTherapistInput = {
 
 export type ReservationCreateWithoutTreatmentInput = {
   id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1093,6 +1375,15 @@ export type ReservationUncheckedCreateWithoutTreatmentInput = {
   memberId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1136,6 +1427,15 @@ export type ReservationUpdateManyWithWhereWithoutTreatmentInput = {
 
 export type ReservationCreateWithoutOptionsInput = {
   id?: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1160,6 +1460,15 @@ export type ReservationUncheckedCreateWithoutOptionsInput = {
   treatmentId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1192,6 +1501,15 @@ export type ReservationUpdateToOneWithWhereWithoutOptionsInput = {
 
 export type ReservationUpdateWithoutOptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1216,6 +1534,15 @@ export type ReservationUncheckedUpdateWithoutOptionsInput = {
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1235,6 +1562,15 @@ export type ReservationCreateManyMemberInput = {
   treatmentId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1251,6 +1587,15 @@ export type ReservationCreateManyMemberInput = {
 
 export type ReservationUpdateWithoutMemberInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1274,6 +1619,15 @@ export type ReservationUncheckedUpdateWithoutMemberInput = {
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1294,6 +1648,15 @@ export type ReservationUncheckedUpdateManyWithoutMemberInput = {
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1313,6 +1676,15 @@ export type ReservationCreateManyRoomInput = {
   memberId: string
   treatmentId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1329,6 +1701,15 @@ export type ReservationCreateManyRoomInput = {
 
 export type ReservationUpdateWithoutRoomInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1352,6 +1733,15 @@ export type ReservationUncheckedUpdateWithoutRoomInput = {
   memberId?: Prisma.StringFieldUpdateOperationsInput | string
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1372,6 +1762,15 @@ export type ReservationUncheckedUpdateManyWithoutRoomInput = {
   memberId?: Prisma.StringFieldUpdateOperationsInput | string
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1391,6 +1790,15 @@ export type ReservationCreateManyTherapistInput = {
   memberId: string
   treatmentId: string
   roomId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1407,6 +1815,15 @@ export type ReservationCreateManyTherapistInput = {
 
 export type ReservationUpdateWithoutTherapistInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1430,6 +1847,15 @@ export type ReservationUncheckedUpdateWithoutTherapistInput = {
   memberId?: Prisma.StringFieldUpdateOperationsInput | string
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1450,6 +1876,15 @@ export type ReservationUncheckedUpdateManyWithoutTherapistInput = {
   memberId?: Prisma.StringFieldUpdateOperationsInput | string
   treatmentId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1469,6 +1904,15 @@ export type ReservationCreateManyTreatmentInput = {
   memberId: string
   roomId: string
   therapistId: string
+  memberLastNameSnapshot: string
+  memberFirstNameSnapshot: string
+  memberEmailSnapshot: string
+  memberPhoneNumberSnapshot: string
+  treatmentNameSnapshot: string
+  treatmentDurationMinutesSnapshot: number
+  treatmentPriceYenSnapshot: number
+  roomNameSnapshot: string
+  therapistNameSnapshot: string
   status?: $Enums.ReservationStatus
   businessDate: Date | string
   startsAt: Date | string
@@ -1485,6 +1929,15 @@ export type ReservationCreateManyTreatmentInput = {
 
 export type ReservationUpdateWithoutTreatmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1508,6 +1961,15 @@ export type ReservationUncheckedUpdateWithoutTreatmentInput = {
   memberId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1528,6 +1990,15 @@ export type ReservationUncheckedUpdateManyWithoutTreatmentInput = {
   memberId?: Prisma.StringFieldUpdateOperationsInput | string
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   therapistId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberLastNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberFirstNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberEmailSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  memberPhoneNumberSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  treatmentDurationMinutesSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  treatmentPriceYenSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  roomNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  therapistNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   businessDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1579,6 +2050,15 @@ export type ReservationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   treatmentId?: boolean
   roomId?: boolean
   therapistId?: boolean
+  memberLastNameSnapshot?: boolean
+  memberFirstNameSnapshot?: boolean
+  memberEmailSnapshot?: boolean
+  memberPhoneNumberSnapshot?: boolean
+  treatmentNameSnapshot?: boolean
+  treatmentDurationMinutesSnapshot?: boolean
+  treatmentPriceYenSnapshot?: boolean
+  roomNameSnapshot?: boolean
+  therapistNameSnapshot?: boolean
   status?: boolean
   businessDate?: boolean
   startsAt?: boolean
@@ -1605,6 +2085,15 @@ export type ReservationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   treatmentId?: boolean
   roomId?: boolean
   therapistId?: boolean
+  memberLastNameSnapshot?: boolean
+  memberFirstNameSnapshot?: boolean
+  memberEmailSnapshot?: boolean
+  memberPhoneNumberSnapshot?: boolean
+  treatmentNameSnapshot?: boolean
+  treatmentDurationMinutesSnapshot?: boolean
+  treatmentPriceYenSnapshot?: boolean
+  roomNameSnapshot?: boolean
+  therapistNameSnapshot?: boolean
   status?: boolean
   businessDate?: boolean
   startsAt?: boolean
@@ -1629,6 +2118,15 @@ export type ReservationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   treatmentId?: boolean
   roomId?: boolean
   therapistId?: boolean
+  memberLastNameSnapshot?: boolean
+  memberFirstNameSnapshot?: boolean
+  memberEmailSnapshot?: boolean
+  memberPhoneNumberSnapshot?: boolean
+  treatmentNameSnapshot?: boolean
+  treatmentDurationMinutesSnapshot?: boolean
+  treatmentPriceYenSnapshot?: boolean
+  roomNameSnapshot?: boolean
+  therapistNameSnapshot?: boolean
   status?: boolean
   businessDate?: boolean
   startsAt?: boolean
@@ -1653,6 +2151,15 @@ export type ReservationSelectScalar = {
   treatmentId?: boolean
   roomId?: boolean
   therapistId?: boolean
+  memberLastNameSnapshot?: boolean
+  memberFirstNameSnapshot?: boolean
+  memberEmailSnapshot?: boolean
+  memberPhoneNumberSnapshot?: boolean
+  treatmentNameSnapshot?: boolean
+  treatmentDurationMinutesSnapshot?: boolean
+  treatmentPriceYenSnapshot?: boolean
+  roomNameSnapshot?: boolean
+  therapistNameSnapshot?: boolean
   status?: boolean
   businessDate?: boolean
   startsAt?: boolean
@@ -1667,7 +2174,7 @@ export type ReservationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "treatmentId" | "roomId" | "therapistId" | "status" | "businessDate" | "startsAt" | "treatmentEndsAt" | "occupiesUntil" | "totalDurationMinutes" | "totalPriceYen" | "slotCount" | "notes" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["reservation"]>
+export type ReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "treatmentId" | "roomId" | "therapistId" | "memberLastNameSnapshot" | "memberFirstNameSnapshot" | "memberEmailSnapshot" | "memberPhoneNumberSnapshot" | "treatmentNameSnapshot" | "treatmentDurationMinutesSnapshot" | "treatmentPriceYenSnapshot" | "roomNameSnapshot" | "therapistNameSnapshot" | "status" | "businessDate" | "startsAt" | "treatmentEndsAt" | "occupiesUntil" | "totalDurationMinutes" | "totalPriceYen" | "slotCount" | "notes" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["reservation"]>
 export type ReservationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   treatment?: boolean | Prisma.TreatmentDefaultArgs<ExtArgs>
@@ -1704,6 +2211,15 @@ export type $ReservationPayload<ExtArgs extends runtime.Types.Extensions.Interna
     treatmentId: string
     roomId: string
     therapistId: string
+    memberLastNameSnapshot: string
+    memberFirstNameSnapshot: string
+    memberEmailSnapshot: string
+    memberPhoneNumberSnapshot: string
+    treatmentNameSnapshot: string
+    treatmentDurationMinutesSnapshot: number
+    treatmentPriceYenSnapshot: number
+    roomNameSnapshot: string
+    therapistNameSnapshot: string
     status: $Enums.ReservationStatus
     businessDate: Date
     startsAt: Date
@@ -2149,6 +2665,15 @@ export interface ReservationFieldRefs {
   readonly treatmentId: Prisma.FieldRef<"Reservation", 'String'>
   readonly roomId: Prisma.FieldRef<"Reservation", 'String'>
   readonly therapistId: Prisma.FieldRef<"Reservation", 'String'>
+  readonly memberLastNameSnapshot: Prisma.FieldRef<"Reservation", 'String'>
+  readonly memberFirstNameSnapshot: Prisma.FieldRef<"Reservation", 'String'>
+  readonly memberEmailSnapshot: Prisma.FieldRef<"Reservation", 'String'>
+  readonly memberPhoneNumberSnapshot: Prisma.FieldRef<"Reservation", 'String'>
+  readonly treatmentNameSnapshot: Prisma.FieldRef<"Reservation", 'String'>
+  readonly treatmentDurationMinutesSnapshot: Prisma.FieldRef<"Reservation", 'Int'>
+  readonly treatmentPriceYenSnapshot: Prisma.FieldRef<"Reservation", 'Int'>
+  readonly roomNameSnapshot: Prisma.FieldRef<"Reservation", 'String'>
+  readonly therapistNameSnapshot: Prisma.FieldRef<"Reservation", 'String'>
   readonly status: Prisma.FieldRef<"Reservation", 'ReservationStatus'>
   readonly businessDate: Prisma.FieldRef<"Reservation", 'DateTime'>
   readonly startsAt: Prisma.FieldRef<"Reservation", 'DateTime'>
