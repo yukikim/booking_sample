@@ -1,3 +1,4 @@
+import { seedSchedules } from "./seed-schedules";
 import type { PrismaClient } from "../src/generated/prisma/client";
 
 export const seedIds = {
@@ -28,5 +29,6 @@ export async function seedDevelopment(prisma: PrismaClient): Promise<void> {
       const id = seedIds.options[i];
       await tx.option.upsert({ where: { id }, update: {}, create: { id, name, durationMinutes, priceYen } });
     }
+    await seedSchedules(tx, seedIds.therapists);
   });
 }

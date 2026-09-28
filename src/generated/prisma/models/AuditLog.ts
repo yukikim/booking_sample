@@ -234,6 +234,7 @@ export type AuditLogWhereInput = {
   cancelledReservation?: Prisma.XOR<Prisma.ReservationNullableScalarRelationFilter, Prisma.ReservationWhereInput> | null
   notices?: Prisma.ReservationChangeNoticeListRelationFilter
   confirmedDeliveries?: Prisma.EmailDeliveryListRelationFilter
+  settingChanges?: Prisma.ScheduleSettingChangeListRelationFilter
 }
 
 export type AuditLogOrderByWithRelationInput = {
@@ -256,6 +257,7 @@ export type AuditLogOrderByWithRelationInput = {
   cancelledReservation?: Prisma.ReservationOrderByWithRelationInput
   notices?: Prisma.ReservationChangeNoticeOrderByRelationAggregateInput
   confirmedDeliveries?: Prisma.EmailDeliveryOrderByRelationAggregateInput
+  settingChanges?: Prisma.ScheduleSettingChangeOrderByRelationAggregateInput
 }
 
 export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
@@ -281,6 +283,7 @@ export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
   cancelledReservation?: Prisma.XOR<Prisma.ReservationNullableScalarRelationFilter, Prisma.ReservationWhereInput> | null
   notices?: Prisma.ReservationChangeNoticeListRelationFilter
   confirmedDeliveries?: Prisma.EmailDeliveryListRelationFilter
+  settingChanges?: Prisma.ScheduleSettingChangeListRelationFilter
 }, "id" | "requestKey">
 
 export type AuditLogOrderByWithAggregationInput = {
@@ -334,6 +337,7 @@ export type AuditLogCreateInput = {
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateInput = {
@@ -353,6 +357,7 @@ export type AuditLogUncheckedCreateInput = {
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUpdateInput = {
@@ -372,6 +377,7 @@ export type AuditLogUpdateInput = {
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateInput = {
@@ -391,6 +397,7 @@ export type AuditLogUncheckedUpdateInput = {
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogCreateManyInput = {
@@ -698,6 +705,20 @@ export type EnumActorTypeFieldUpdateOperationsInput = {
   set?: $Enums.ActorType
 }
 
+export type AuditLogCreateNestedOneWithoutSettingChangesInput = {
+  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutSettingChangesInput, Prisma.AuditLogUncheckedCreateWithoutSettingChangesInput>
+  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutSettingChangesInput
+  connect?: Prisma.AuditLogWhereUniqueInput
+}
+
+export type AuditLogUpdateOneRequiredWithoutSettingChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.AuditLogCreateWithoutSettingChangesInput, Prisma.AuditLogUncheckedCreateWithoutSettingChangesInput>
+  connectOrCreate?: Prisma.AuditLogCreateOrConnectWithoutSettingChangesInput
+  upsert?: Prisma.AuditLogUpsertWithoutSettingChangesInput
+  connect?: Prisma.AuditLogWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuditLogUpdateToOneWithWhereWithoutSettingChangesInput, Prisma.AuditLogUpdateWithoutSettingChangesInput>, Prisma.AuditLogUncheckedUpdateWithoutSettingChangesInput>
+}
+
 export type AuditLogCreateWithoutActorMemberInput = {
   id?: string
   requestKey: string
@@ -714,6 +735,7 @@ export type AuditLogCreateWithoutActorMemberInput = {
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutActorMemberInput = {
@@ -732,6 +754,7 @@ export type AuditLogUncheckedCreateWithoutActorMemberInput = {
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutActorMemberInput = {
@@ -793,6 +816,7 @@ export type AuditLogCreateWithoutActorStaffInput = {
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutActorStaffInput = {
@@ -811,6 +835,7 @@ export type AuditLogUncheckedCreateWithoutActorStaffInput = {
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutActorStaffInput = {
@@ -855,6 +880,7 @@ export type AuditLogCreateWithoutActorAdminInput = {
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutActorAdminInput = {
@@ -873,6 +899,7 @@ export type AuditLogUncheckedCreateWithoutActorAdminInput = {
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutActorAdminInput = {
@@ -917,6 +944,7 @@ export type AuditLogCreateWithoutCancelledReservationInput = {
   reviews?: Prisma.MemberReviewCreateNestedManyWithoutDecisionAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutCancelledReservationInput = {
@@ -935,6 +963,7 @@ export type AuditLogUncheckedCreateWithoutCancelledReservationInput = {
   reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutDecisionAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutCancelledReservationInput = {
@@ -969,6 +998,7 @@ export type AuditLogUpdateWithoutCancelledReservationInput = {
   reviews?: Prisma.MemberReviewUpdateManyWithoutDecisionAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutCancelledReservationInput = {
@@ -987,6 +1017,7 @@ export type AuditLogUncheckedUpdateWithoutCancelledReservationInput = {
   reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutDecisionAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogCreateWithoutMemberEventsInput = {
@@ -1005,6 +1036,7 @@ export type AuditLogCreateWithoutMemberEventsInput = {
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutMemberEventsInput = {
@@ -1023,6 +1055,7 @@ export type AuditLogUncheckedCreateWithoutMemberEventsInput = {
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutMemberEventsInput = {
@@ -1057,6 +1090,7 @@ export type AuditLogUpdateWithoutMemberEventsInput = {
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutMemberEventsInput = {
@@ -1075,6 +1109,7 @@ export type AuditLogUncheckedUpdateWithoutMemberEventsInput = {
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogCreateWithoutReviewsInput = {
@@ -1093,6 +1128,7 @@ export type AuditLogCreateWithoutReviewsInput = {
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutReviewsInput = {
@@ -1111,6 +1147,7 @@ export type AuditLogUncheckedCreateWithoutReviewsInput = {
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutReviewsInput = {
@@ -1145,6 +1182,7 @@ export type AuditLogUpdateWithoutReviewsInput = {
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutReviewsInput = {
@@ -1163,6 +1201,7 @@ export type AuditLogUncheckedUpdateWithoutReviewsInput = {
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogCreateWithoutNoticesInput = {
@@ -1181,6 +1220,7 @@ export type AuditLogCreateWithoutNoticesInput = {
   reviews?: Prisma.MemberReviewCreateNestedManyWithoutDecisionAuditInput
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutNoticesInput = {
@@ -1199,6 +1239,7 @@ export type AuditLogUncheckedCreateWithoutNoticesInput = {
   reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutDecisionAuditInput
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutNoticesInput = {
@@ -1233,6 +1274,7 @@ export type AuditLogUpdateWithoutNoticesInput = {
   reviews?: Prisma.MemberReviewUpdateManyWithoutDecisionAuditNestedInput
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutNoticesInput = {
@@ -1251,6 +1293,7 @@ export type AuditLogUncheckedUpdateWithoutNoticesInput = {
   reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutDecisionAuditNestedInput
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogCreateWithoutConfirmedDeliveriesInput = {
@@ -1269,6 +1312,7 @@ export type AuditLogCreateWithoutConfirmedDeliveriesInput = {
   reviews?: Prisma.MemberReviewCreateNestedManyWithoutDecisionAuditInput
   cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogUncheckedCreateWithoutConfirmedDeliveriesInput = {
@@ -1287,6 +1331,7 @@ export type AuditLogUncheckedCreateWithoutConfirmedDeliveriesInput = {
   reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutDecisionAuditInput
   cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
   notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutAuditInput
 }
 
 export type AuditLogCreateOrConnectWithoutConfirmedDeliveriesInput = {
@@ -1321,6 +1366,7 @@ export type AuditLogUpdateWithoutConfirmedDeliveriesInput = {
   reviews?: Prisma.MemberReviewUpdateManyWithoutDecisionAuditNestedInput
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutConfirmedDeliveriesInput = {
@@ -1339,6 +1385,99 @@ export type AuditLogUncheckedUpdateWithoutConfirmedDeliveriesInput = {
   reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutDecisionAuditNestedInput
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
+}
+
+export type AuditLogCreateWithoutSettingChangesInput = {
+  id?: string
+  requestKey: string
+  actorType: $Enums.ActorType
+  action: string
+  targetType: string
+  targetId: string
+  changes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  actorMember?: Prisma.MemberCreateNestedOneWithoutActorLogsInput
+  actorStaff?: Prisma.StaffAccountCreateNestedOneWithoutActorLogsInput
+  actorAdmin?: Prisma.AdminAccountCreateNestedOneWithoutActorLogsInput
+  memberEvents?: Prisma.MemberLifecycleEventCreateNestedManyWithoutAuditInput
+  reviews?: Prisma.MemberReviewCreateNestedManyWithoutDecisionAuditInput
+  cancelledReservation?: Prisma.ReservationCreateNestedOneWithoutCancellationAuditInput
+  notices?: Prisma.ReservationChangeNoticeCreateNestedManyWithoutChangeAuditInput
+  confirmedDeliveries?: Prisma.EmailDeliveryCreateNestedManyWithoutConfirmationAuditInput
+}
+
+export type AuditLogUncheckedCreateWithoutSettingChangesInput = {
+  id?: string
+  requestKey: string
+  actorType: $Enums.ActorType
+  actorMemberId?: string | null
+  actorStaffId?: string | null
+  actorAdminId?: string | null
+  action: string
+  targetType: string
+  targetId: string
+  changes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  memberEvents?: Prisma.MemberLifecycleEventUncheckedCreateNestedManyWithoutAuditInput
+  reviews?: Prisma.MemberReviewUncheckedCreateNestedManyWithoutDecisionAuditInput
+  cancelledReservation?: Prisma.ReservationUncheckedCreateNestedOneWithoutCancellationAuditInput
+  notices?: Prisma.ReservationChangeNoticeUncheckedCreateNestedManyWithoutChangeAuditInput
+  confirmedDeliveries?: Prisma.EmailDeliveryUncheckedCreateNestedManyWithoutConfirmationAuditInput
+}
+
+export type AuditLogCreateOrConnectWithoutSettingChangesInput = {
+  where: Prisma.AuditLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuditLogCreateWithoutSettingChangesInput, Prisma.AuditLogUncheckedCreateWithoutSettingChangesInput>
+}
+
+export type AuditLogUpsertWithoutSettingChangesInput = {
+  update: Prisma.XOR<Prisma.AuditLogUpdateWithoutSettingChangesInput, Prisma.AuditLogUncheckedUpdateWithoutSettingChangesInput>
+  create: Prisma.XOR<Prisma.AuditLogCreateWithoutSettingChangesInput, Prisma.AuditLogUncheckedCreateWithoutSettingChangesInput>
+  where?: Prisma.AuditLogWhereInput
+}
+
+export type AuditLogUpdateToOneWithWhereWithoutSettingChangesInput = {
+  where?: Prisma.AuditLogWhereInput
+  data: Prisma.XOR<Prisma.AuditLogUpdateWithoutSettingChangesInput, Prisma.AuditLogUncheckedUpdateWithoutSettingChangesInput>
+}
+
+export type AuditLogUpdateWithoutSettingChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestKey?: Prisma.StringFieldUpdateOperationsInput | string
+  actorType?: Prisma.EnumActorTypeFieldUpdateOperationsInput | $Enums.ActorType
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  targetType?: Prisma.StringFieldUpdateOperationsInput | string
+  targetId?: Prisma.StringFieldUpdateOperationsInput | string
+  changes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  actorMember?: Prisma.MemberUpdateOneWithoutActorLogsNestedInput
+  actorStaff?: Prisma.StaffAccountUpdateOneWithoutActorLogsNestedInput
+  actorAdmin?: Prisma.AdminAccountUpdateOneWithoutActorLogsNestedInput
+  memberEvents?: Prisma.MemberLifecycleEventUpdateManyWithoutAuditNestedInput
+  reviews?: Prisma.MemberReviewUpdateManyWithoutDecisionAuditNestedInput
+  cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
+  notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
+  confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+}
+
+export type AuditLogUncheckedUpdateWithoutSettingChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestKey?: Prisma.StringFieldUpdateOperationsInput | string
+  actorType?: Prisma.EnumActorTypeFieldUpdateOperationsInput | $Enums.ActorType
+  actorMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorAdminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  targetType?: Prisma.StringFieldUpdateOperationsInput | string
+  targetId?: Prisma.StringFieldUpdateOperationsInput | string
+  changes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberEvents?: Prisma.MemberLifecycleEventUncheckedUpdateManyWithoutAuditNestedInput
+  reviews?: Prisma.MemberReviewUncheckedUpdateManyWithoutDecisionAuditNestedInput
+  cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
+  notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
+  confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
 }
 
 export type AuditLogCreateManyActorMemberInput = {
@@ -1370,6 +1509,7 @@ export type AuditLogUpdateWithoutActorMemberInput = {
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutActorMemberInput = {
@@ -1388,6 +1528,7 @@ export type AuditLogUncheckedUpdateWithoutActorMemberInput = {
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateManyWithoutActorMemberInput = {
@@ -1432,6 +1573,7 @@ export type AuditLogUpdateWithoutActorStaffInput = {
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutActorStaffInput = {
@@ -1450,6 +1592,7 @@ export type AuditLogUncheckedUpdateWithoutActorStaffInput = {
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateManyWithoutActorStaffInput = {
@@ -1494,6 +1637,7 @@ export type AuditLogUpdateWithoutActorAdminInput = {
   cancelledReservation?: Prisma.ReservationUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateWithoutActorAdminInput = {
@@ -1512,6 +1656,7 @@ export type AuditLogUncheckedUpdateWithoutActorAdminInput = {
   cancelledReservation?: Prisma.ReservationUncheckedUpdateOneWithoutCancellationAuditNestedInput
   notices?: Prisma.ReservationChangeNoticeUncheckedUpdateManyWithoutChangeAuditNestedInput
   confirmedDeliveries?: Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutAuditNestedInput
 }
 
 export type AuditLogUncheckedUpdateManyWithoutActorAdminInput = {
@@ -1537,6 +1682,7 @@ export type AuditLogCountOutputType = {
   reviews: number
   notices: number
   confirmedDeliveries: number
+  settingChanges: number
 }
 
 export type AuditLogCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1544,6 +1690,7 @@ export type AuditLogCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   reviews?: boolean | AuditLogCountOutputTypeCountReviewsArgs
   notices?: boolean | AuditLogCountOutputTypeCountNoticesArgs
   confirmedDeliveries?: boolean | AuditLogCountOutputTypeCountConfirmedDeliveriesArgs
+  settingChanges?: boolean | AuditLogCountOutputTypeCountSettingChangesArgs
 }
 
 /**
@@ -1584,6 +1731,13 @@ export type AuditLogCountOutputTypeCountConfirmedDeliveriesArgs<ExtArgs extends 
   where?: Prisma.EmailDeliveryWhereInput
 }
 
+/**
+ * AuditLogCountOutputType without action
+ */
+export type AuditLogCountOutputTypeCountSettingChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ScheduleSettingChangeWhereInput
+}
+
 
 export type AuditLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1605,6 +1759,7 @@ export type AuditLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   cancelledReservation?: boolean | Prisma.AuditLog$cancelledReservationArgs<ExtArgs>
   notices?: boolean | Prisma.AuditLog$noticesArgs<ExtArgs>
   confirmedDeliveries?: boolean | Prisma.AuditLog$confirmedDeliveriesArgs<ExtArgs>
+  settingChanges?: boolean | Prisma.AuditLog$settingChangesArgs<ExtArgs>
   _count?: boolean | Prisma.AuditLogCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["auditLog"]>
 
@@ -1666,6 +1821,7 @@ export type AuditLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   cancelledReservation?: boolean | Prisma.AuditLog$cancelledReservationArgs<ExtArgs>
   notices?: boolean | Prisma.AuditLog$noticesArgs<ExtArgs>
   confirmedDeliveries?: boolean | Prisma.AuditLog$confirmedDeliveriesArgs<ExtArgs>
+  settingChanges?: boolean | Prisma.AuditLog$settingChangesArgs<ExtArgs>
   _count?: boolean | Prisma.AuditLogCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AuditLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1690,6 +1846,7 @@ export type $AuditLogPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     cancelledReservation: Prisma.$ReservationPayload<ExtArgs> | null
     notices: Prisma.$ReservationChangeNoticePayload<ExtArgs>[]
     confirmedDeliveries: Prisma.$EmailDeliveryPayload<ExtArgs>[]
+    settingChanges: Prisma.$ScheduleSettingChangePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2105,6 +2262,7 @@ export interface Prisma__AuditLogClient<T, Null = never, ExtArgs extends runtime
   cancelledReservation<T extends Prisma.AuditLog$cancelledReservationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuditLog$cancelledReservationArgs<ExtArgs>>): Prisma.Prisma__ReservationClient<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notices<T extends Prisma.AuditLog$noticesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuditLog$noticesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationChangeNoticePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   confirmedDeliveries<T extends Prisma.AuditLog$confirmedDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuditLog$confirmedDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  settingChanges<T extends Prisma.AuditLog$settingChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuditLog$settingChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleSettingChangePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2715,6 +2873,30 @@ export type AuditLog$confirmedDeliveriesArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.EmailDeliveryScalarFieldEnum | Prisma.EmailDeliveryScalarFieldEnum[]
+}
+
+/**
+ * AuditLog.settingChanges
+ */
+export type AuditLog$settingChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScheduleSettingChange
+   */
+  select?: Prisma.ScheduleSettingChangeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScheduleSettingChange
+   */
+  omit?: Prisma.ScheduleSettingChangeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScheduleSettingChangeInclude<ExtArgs> | null
+  where?: Prisma.ScheduleSettingChangeWhereInput
+  orderBy?: Prisma.ScheduleSettingChangeOrderByWithRelationInput | Prisma.ScheduleSettingChangeOrderByWithRelationInput[]
+  cursor?: Prisma.ScheduleSettingChangeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ScheduleSettingChangeScalarFieldEnum | Prisma.ScheduleSettingChangeScalarFieldEnum[]
 }
 
 /**

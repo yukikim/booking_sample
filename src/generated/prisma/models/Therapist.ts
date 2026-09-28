@@ -184,6 +184,7 @@ export type TherapistWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Therapist"> | Date | string
   reservations?: Prisma.ReservationListRelationFilter
   schedules?: Prisma.TherapistScheduleListRelationFilter
+  schedulePlans?: Prisma.SchedulePlanListRelationFilter
 }
 
 export type TherapistOrderByWithRelationInput = {
@@ -194,6 +195,7 @@ export type TherapistOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
   schedules?: Prisma.TherapistScheduleOrderByRelationAggregateInput
+  schedulePlans?: Prisma.SchedulePlanOrderByRelationAggregateInput
 }
 
 export type TherapistWhereUniqueInput = Prisma.AtLeast<{
@@ -207,6 +209,7 @@ export type TherapistWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Therapist"> | Date | string
   reservations?: Prisma.ReservationListRelationFilter
   schedules?: Prisma.TherapistScheduleListRelationFilter
+  schedulePlans?: Prisma.SchedulePlanListRelationFilter
 }, "id">
 
 export type TherapistOrderByWithAggregationInput = {
@@ -239,6 +242,7 @@ export type TherapistCreateInput = {
   updatedAt?: Date | string
   reservations?: Prisma.ReservationCreateNestedManyWithoutTherapistInput
   schedules?: Prisma.TherapistScheduleCreateNestedManyWithoutTherapistInput
+  schedulePlans?: Prisma.SchedulePlanCreateNestedManyWithoutTherapistInput
 }
 
 export type TherapistUncheckedCreateInput = {
@@ -249,6 +253,7 @@ export type TherapistUncheckedCreateInput = {
   updatedAt?: Date | string
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutTherapistInput
   schedules?: Prisma.TherapistScheduleUncheckedCreateNestedManyWithoutTherapistInput
+  schedulePlans?: Prisma.SchedulePlanUncheckedCreateNestedManyWithoutTherapistInput
 }
 
 export type TherapistUpdateInput = {
@@ -259,6 +264,7 @@ export type TherapistUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reservations?: Prisma.ReservationUpdateManyWithoutTherapistNestedInput
   schedules?: Prisma.TherapistScheduleUpdateManyWithoutTherapistNestedInput
+  schedulePlans?: Prisma.SchedulePlanUpdateManyWithoutTherapistNestedInput
 }
 
 export type TherapistUncheckedUpdateInput = {
@@ -269,6 +275,7 @@ export type TherapistUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutTherapistNestedInput
   schedules?: Prisma.TherapistScheduleUncheckedUpdateManyWithoutTherapistNestedInput
+  schedulePlans?: Prisma.SchedulePlanUncheckedUpdateManyWithoutTherapistNestedInput
 }
 
 export type TherapistCreateManyInput = {
@@ -324,6 +331,11 @@ export type TherapistScalarRelationFilter = {
   isNot?: Prisma.TherapistWhereInput
 }
 
+export type TherapistNullableScalarRelationFilter = {
+  is?: Prisma.TherapistWhereInput | null
+  isNot?: Prisma.TherapistWhereInput | null
+}
+
 export type TherapistCreateNestedOneWithoutReservationsInput = {
   create?: Prisma.XOR<Prisma.TherapistCreateWithoutReservationsInput, Prisma.TherapistUncheckedCreateWithoutReservationsInput>
   connectOrCreate?: Prisma.TherapistCreateOrConnectWithoutReservationsInput
@@ -352,6 +364,22 @@ export type TherapistUpdateOneRequiredWithoutSchedulesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TherapistUpdateToOneWithWhereWithoutSchedulesInput, Prisma.TherapistUpdateWithoutSchedulesInput>, Prisma.TherapistUncheckedUpdateWithoutSchedulesInput>
 }
 
+export type TherapistCreateNestedOneWithoutSchedulePlansInput = {
+  create?: Prisma.XOR<Prisma.TherapistCreateWithoutSchedulePlansInput, Prisma.TherapistUncheckedCreateWithoutSchedulePlansInput>
+  connectOrCreate?: Prisma.TherapistCreateOrConnectWithoutSchedulePlansInput
+  connect?: Prisma.TherapistWhereUniqueInput
+}
+
+export type TherapistUpdateOneWithoutSchedulePlansNestedInput = {
+  create?: Prisma.XOR<Prisma.TherapistCreateWithoutSchedulePlansInput, Prisma.TherapistUncheckedCreateWithoutSchedulePlansInput>
+  connectOrCreate?: Prisma.TherapistCreateOrConnectWithoutSchedulePlansInput
+  upsert?: Prisma.TherapistUpsertWithoutSchedulePlansInput
+  disconnect?: Prisma.TherapistWhereInput | boolean
+  delete?: Prisma.TherapistWhereInput | boolean
+  connect?: Prisma.TherapistWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TherapistUpdateToOneWithWhereWithoutSchedulePlansInput, Prisma.TherapistUpdateWithoutSchedulePlansInput>, Prisma.TherapistUncheckedUpdateWithoutSchedulePlansInput>
+}
+
 export type TherapistCreateWithoutReservationsInput = {
   id?: string
   name: string
@@ -359,6 +387,7 @@ export type TherapistCreateWithoutReservationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   schedules?: Prisma.TherapistScheduleCreateNestedManyWithoutTherapistInput
+  schedulePlans?: Prisma.SchedulePlanCreateNestedManyWithoutTherapistInput
 }
 
 export type TherapistUncheckedCreateWithoutReservationsInput = {
@@ -368,6 +397,7 @@ export type TherapistUncheckedCreateWithoutReservationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   schedules?: Prisma.TherapistScheduleUncheckedCreateNestedManyWithoutTherapistInput
+  schedulePlans?: Prisma.SchedulePlanUncheckedCreateNestedManyWithoutTherapistInput
 }
 
 export type TherapistCreateOrConnectWithoutReservationsInput = {
@@ -393,6 +423,7 @@ export type TherapistUpdateWithoutReservationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   schedules?: Prisma.TherapistScheduleUpdateManyWithoutTherapistNestedInput
+  schedulePlans?: Prisma.SchedulePlanUpdateManyWithoutTherapistNestedInput
 }
 
 export type TherapistUncheckedUpdateWithoutReservationsInput = {
@@ -402,6 +433,7 @@ export type TherapistUncheckedUpdateWithoutReservationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   schedules?: Prisma.TherapistScheduleUncheckedUpdateManyWithoutTherapistNestedInput
+  schedulePlans?: Prisma.SchedulePlanUncheckedUpdateManyWithoutTherapistNestedInput
 }
 
 export type TherapistCreateWithoutSchedulesInput = {
@@ -411,6 +443,7 @@ export type TherapistCreateWithoutSchedulesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   reservations?: Prisma.ReservationCreateNestedManyWithoutTherapistInput
+  schedulePlans?: Prisma.SchedulePlanCreateNestedManyWithoutTherapistInput
 }
 
 export type TherapistUncheckedCreateWithoutSchedulesInput = {
@@ -420,6 +453,7 @@ export type TherapistUncheckedCreateWithoutSchedulesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutTherapistInput
+  schedulePlans?: Prisma.SchedulePlanUncheckedCreateNestedManyWithoutTherapistInput
 }
 
 export type TherapistCreateOrConnectWithoutSchedulesInput = {
@@ -445,6 +479,7 @@ export type TherapistUpdateWithoutSchedulesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reservations?: Prisma.ReservationUpdateManyWithoutTherapistNestedInput
+  schedulePlans?: Prisma.SchedulePlanUpdateManyWithoutTherapistNestedInput
 }
 
 export type TherapistUncheckedUpdateWithoutSchedulesInput = {
@@ -454,6 +489,63 @@ export type TherapistUncheckedUpdateWithoutSchedulesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutTherapistNestedInput
+  schedulePlans?: Prisma.SchedulePlanUncheckedUpdateManyWithoutTherapistNestedInput
+}
+
+export type TherapistCreateWithoutSchedulePlansInput = {
+  id?: string
+  name: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  reservations?: Prisma.ReservationCreateNestedManyWithoutTherapistInput
+  schedules?: Prisma.TherapistScheduleCreateNestedManyWithoutTherapistInput
+}
+
+export type TherapistUncheckedCreateWithoutSchedulePlansInput = {
+  id?: string
+  name: string
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutTherapistInput
+  schedules?: Prisma.TherapistScheduleUncheckedCreateNestedManyWithoutTherapistInput
+}
+
+export type TherapistCreateOrConnectWithoutSchedulePlansInput = {
+  where: Prisma.TherapistWhereUniqueInput
+  create: Prisma.XOR<Prisma.TherapistCreateWithoutSchedulePlansInput, Prisma.TherapistUncheckedCreateWithoutSchedulePlansInput>
+}
+
+export type TherapistUpsertWithoutSchedulePlansInput = {
+  update: Prisma.XOR<Prisma.TherapistUpdateWithoutSchedulePlansInput, Prisma.TherapistUncheckedUpdateWithoutSchedulePlansInput>
+  create: Prisma.XOR<Prisma.TherapistCreateWithoutSchedulePlansInput, Prisma.TherapistUncheckedCreateWithoutSchedulePlansInput>
+  where?: Prisma.TherapistWhereInput
+}
+
+export type TherapistUpdateToOneWithWhereWithoutSchedulePlansInput = {
+  where?: Prisma.TherapistWhereInput
+  data: Prisma.XOR<Prisma.TherapistUpdateWithoutSchedulePlansInput, Prisma.TherapistUncheckedUpdateWithoutSchedulePlansInput>
+}
+
+export type TherapistUpdateWithoutSchedulePlansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservations?: Prisma.ReservationUpdateManyWithoutTherapistNestedInput
+  schedules?: Prisma.TherapistScheduleUpdateManyWithoutTherapistNestedInput
+}
+
+export type TherapistUncheckedUpdateWithoutSchedulePlansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutTherapistNestedInput
+  schedules?: Prisma.TherapistScheduleUncheckedUpdateManyWithoutTherapistNestedInput
 }
 
 
@@ -464,11 +556,13 @@ export type TherapistUncheckedUpdateWithoutSchedulesInput = {
 export type TherapistCountOutputType = {
   reservations: number
   schedules: number
+  schedulePlans: number
 }
 
 export type TherapistCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reservations?: boolean | TherapistCountOutputTypeCountReservationsArgs
   schedules?: boolean | TherapistCountOutputTypeCountSchedulesArgs
+  schedulePlans?: boolean | TherapistCountOutputTypeCountSchedulePlansArgs
 }
 
 /**
@@ -495,6 +589,13 @@ export type TherapistCountOutputTypeCountSchedulesArgs<ExtArgs extends runtime.T
   where?: Prisma.TherapistScheduleWhereInput
 }
 
+/**
+ * TherapistCountOutputType without action
+ */
+export type TherapistCountOutputTypeCountSchedulePlansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SchedulePlanWhereInput
+}
+
 
 export type TherapistSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -504,6 +605,7 @@ export type TherapistSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   updatedAt?: boolean
   reservations?: boolean | Prisma.Therapist$reservationsArgs<ExtArgs>
   schedules?: boolean | Prisma.Therapist$schedulesArgs<ExtArgs>
+  schedulePlans?: boolean | Prisma.Therapist$schedulePlansArgs<ExtArgs>
   _count?: boolean | Prisma.TherapistCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["therapist"]>
 
@@ -535,6 +637,7 @@ export type TherapistOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type TherapistInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reservations?: boolean | Prisma.Therapist$reservationsArgs<ExtArgs>
   schedules?: boolean | Prisma.Therapist$schedulesArgs<ExtArgs>
+  schedulePlans?: boolean | Prisma.Therapist$schedulePlansArgs<ExtArgs>
   _count?: boolean | Prisma.TherapistCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TherapistIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -545,6 +648,7 @@ export type $TherapistPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
     schedules: Prisma.$TherapistSchedulePayload<ExtArgs>[]
+    schedulePlans: Prisma.$SchedulePlanPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -948,6 +1052,7 @@ export interface Prisma__TherapistClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   reservations<T extends Prisma.Therapist$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Therapist$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   schedules<T extends Prisma.Therapist$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Therapist$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TherapistSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  schedulePlans<T extends Prisma.Therapist$schedulePlansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Therapist$schedulePlansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SchedulePlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1420,6 +1525,30 @@ export type Therapist$schedulesArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.TherapistScheduleScalarFieldEnum | Prisma.TherapistScheduleScalarFieldEnum[]
+}
+
+/**
+ * Therapist.schedulePlans
+ */
+export type Therapist$schedulePlansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SchedulePlan
+   */
+  select?: Prisma.SchedulePlanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SchedulePlan
+   */
+  omit?: Prisma.SchedulePlanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SchedulePlanInclude<ExtArgs> | null
+  where?: Prisma.SchedulePlanWhereInput
+  orderBy?: Prisma.SchedulePlanOrderByWithRelationInput | Prisma.SchedulePlanOrderByWithRelationInput[]
+  cursor?: Prisma.SchedulePlanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SchedulePlanScalarFieldEnum | Prisma.SchedulePlanScalarFieldEnum[]
 }
 
 /**

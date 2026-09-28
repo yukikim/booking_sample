@@ -562,6 +562,40 @@ export type EnumRateLimitScopeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRateLimitScopeFilter<$PrismaModel>
 }
 
+export type EnumScheduleKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleKind | Prisma.EnumScheduleKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleKindFilter<$PrismaModel> | $Enums.ScheduleKind
+}
+
+export type EnumScheduleKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleKind | Prisma.EnumScheduleKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleKindWithAggregatesFilter<$PrismaModel> | $Enums.ScheduleKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumScheduleKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumScheduleKindFilter<$PrismaModel>
+}
+
+export type EnumScheduleChangeActionFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleChangeAction | Prisma.EnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleChangeActionFilter<$PrismaModel> | $Enums.ScheduleChangeAction
+}
+
+export type EnumScheduleChangeActionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleChangeAction | Prisma.EnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleChangeActionWithAggregatesFilter<$PrismaModel> | $Enums.ScheduleChangeAction
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumScheduleChangeActionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumScheduleChangeActionFilter<$PrismaModel>
+}
+
 export type NestedUuidFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -1090,6 +1124,40 @@ export type NestedEnumRateLimitScopeWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRateLimitScopeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRateLimitScopeFilter<$PrismaModel>
+}
+
+export type NestedEnumScheduleKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleKind | Prisma.EnumScheduleKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleKindFilter<$PrismaModel> | $Enums.ScheduleKind
+}
+
+export type NestedEnumScheduleKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleKind | Prisma.EnumScheduleKindFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleKind[] | Prisma.ListEnumScheduleKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleKindWithAggregatesFilter<$PrismaModel> | $Enums.ScheduleKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumScheduleKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumScheduleKindFilter<$PrismaModel>
+}
+
+export type NestedEnumScheduleChangeActionFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleChangeAction | Prisma.EnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleChangeActionFilter<$PrismaModel> | $Enums.ScheduleChangeAction
+}
+
+export type NestedEnumScheduleChangeActionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ScheduleChangeAction | Prisma.EnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  in?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ScheduleChangeAction[] | Prisma.ListEnumScheduleChangeActionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumScheduleChangeActionWithAggregatesFilter<$PrismaModel> | $Enums.ScheduleChangeAction
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumScheduleChangeActionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumScheduleChangeActionFilter<$PrismaModel>
 }
 
 

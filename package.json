@@ -19,7 +19,7 @@
     "audit:dependencies": "npm audit --audit-level=high",
     "db:migrate": "node --import tsx scripts/migrate-local.ts",
     "db:seed": "node --import tsx prisma/seed.ts",
-    "test:db": "node --import tsx scripts/verify-database.ts"
+    "test:db": "node --conditions=react-server --import tsx scripts/verify-database.ts"
   },
   "dependencies": {
     "@next/env": "16.3.5",

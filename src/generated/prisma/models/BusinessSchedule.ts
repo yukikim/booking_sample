@@ -159,12 +159,14 @@ export type BusinessScheduleWhereInput = {
   id?: Prisma.UuidFilter<"BusinessSchedule"> | string
   createdAt?: Prisma.DateTimeFilter<"BusinessSchedule"> | Date | string
   days?: Prisma.BusinessDayListRelationFilter
+  settingChanges?: Prisma.ScheduleSettingChangeListRelationFilter
 }
 
 export type BusinessScheduleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   days?: Prisma.BusinessDayOrderByRelationAggregateInput
+  settingChanges?: Prisma.ScheduleSettingChangeOrderByRelationAggregateInput
 }
 
 export type BusinessScheduleWhereUniqueInput = Prisma.AtLeast<{
@@ -174,6 +176,7 @@ export type BusinessScheduleWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.BusinessScheduleWhereInput | Prisma.BusinessScheduleWhereInput[]
   createdAt?: Prisma.DateTimeFilter<"BusinessSchedule"> | Date | string
   days?: Prisma.BusinessDayListRelationFilter
+  settingChanges?: Prisma.ScheduleSettingChangeListRelationFilter
 }, "id">
 
 export type BusinessScheduleOrderByWithAggregationInput = {
@@ -196,24 +199,28 @@ export type BusinessScheduleCreateInput = {
   id?: string
   createdAt?: Date | string
   days?: Prisma.BusinessDayCreateNestedManyWithoutScheduleInput
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutBusinessScheduleInput
 }
 
 export type BusinessScheduleUncheckedCreateInput = {
   id?: string
   createdAt?: Date | string
   days?: Prisma.BusinessDayUncheckedCreateNestedManyWithoutScheduleInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutBusinessScheduleInput
 }
 
 export type BusinessScheduleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BusinessDayUpdateManyWithoutScheduleNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutBusinessScheduleNestedInput
 }
 
 export type BusinessScheduleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BusinessDayUncheckedUpdateManyWithoutScheduleNestedInput
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutBusinessScheduleNestedInput
 }
 
 export type BusinessScheduleCreateManyInput = {
@@ -251,6 +258,11 @@ export type BusinessScheduleScalarRelationFilter = {
   isNot?: Prisma.BusinessScheduleWhereInput
 }
 
+export type BusinessScheduleNullableScalarRelationFilter = {
+  is?: Prisma.BusinessScheduleWhereInput | null
+  isNot?: Prisma.BusinessScheduleWhereInput | null
+}
+
 export type BusinessScheduleCreateNestedOneWithoutDaysInput = {
   create?: Prisma.XOR<Prisma.BusinessScheduleCreateWithoutDaysInput, Prisma.BusinessScheduleUncheckedCreateWithoutDaysInput>
   connectOrCreate?: Prisma.BusinessScheduleCreateOrConnectWithoutDaysInput
@@ -265,14 +277,32 @@ export type BusinessScheduleUpdateOneRequiredWithoutDaysNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.BusinessScheduleUpdateToOneWithWhereWithoutDaysInput, Prisma.BusinessScheduleUpdateWithoutDaysInput>, Prisma.BusinessScheduleUncheckedUpdateWithoutDaysInput>
 }
 
+export type BusinessScheduleCreateNestedOneWithoutSettingChangesInput = {
+  create?: Prisma.XOR<Prisma.BusinessScheduleCreateWithoutSettingChangesInput, Prisma.BusinessScheduleUncheckedCreateWithoutSettingChangesInput>
+  connectOrCreate?: Prisma.BusinessScheduleCreateOrConnectWithoutSettingChangesInput
+  connect?: Prisma.BusinessScheduleWhereUniqueInput
+}
+
+export type BusinessScheduleUpdateOneWithoutSettingChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.BusinessScheduleCreateWithoutSettingChangesInput, Prisma.BusinessScheduleUncheckedCreateWithoutSettingChangesInput>
+  connectOrCreate?: Prisma.BusinessScheduleCreateOrConnectWithoutSettingChangesInput
+  upsert?: Prisma.BusinessScheduleUpsertWithoutSettingChangesInput
+  disconnect?: Prisma.BusinessScheduleWhereInput | boolean
+  delete?: Prisma.BusinessScheduleWhereInput | boolean
+  connect?: Prisma.BusinessScheduleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BusinessScheduleUpdateToOneWithWhereWithoutSettingChangesInput, Prisma.BusinessScheduleUpdateWithoutSettingChangesInput>, Prisma.BusinessScheduleUncheckedUpdateWithoutSettingChangesInput>
+}
+
 export type BusinessScheduleCreateWithoutDaysInput = {
   id?: string
   createdAt?: Date | string
+  settingChanges?: Prisma.ScheduleSettingChangeCreateNestedManyWithoutBusinessScheduleInput
 }
 
 export type BusinessScheduleUncheckedCreateWithoutDaysInput = {
   id?: string
   createdAt?: Date | string
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedCreateNestedManyWithoutBusinessScheduleInput
 }
 
 export type BusinessScheduleCreateOrConnectWithoutDaysInput = {
@@ -294,11 +324,53 @@ export type BusinessScheduleUpdateToOneWithWhereWithoutDaysInput = {
 export type BusinessScheduleUpdateWithoutDaysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settingChanges?: Prisma.ScheduleSettingChangeUpdateManyWithoutBusinessScheduleNestedInput
 }
 
 export type BusinessScheduleUncheckedUpdateWithoutDaysInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settingChanges?: Prisma.ScheduleSettingChangeUncheckedUpdateManyWithoutBusinessScheduleNestedInput
+}
+
+export type BusinessScheduleCreateWithoutSettingChangesInput = {
+  id?: string
+  createdAt?: Date | string
+  days?: Prisma.BusinessDayCreateNestedManyWithoutScheduleInput
+}
+
+export type BusinessScheduleUncheckedCreateWithoutSettingChangesInput = {
+  id?: string
+  createdAt?: Date | string
+  days?: Prisma.BusinessDayUncheckedCreateNestedManyWithoutScheduleInput
+}
+
+export type BusinessScheduleCreateOrConnectWithoutSettingChangesInput = {
+  where: Prisma.BusinessScheduleWhereUniqueInput
+  create: Prisma.XOR<Prisma.BusinessScheduleCreateWithoutSettingChangesInput, Prisma.BusinessScheduleUncheckedCreateWithoutSettingChangesInput>
+}
+
+export type BusinessScheduleUpsertWithoutSettingChangesInput = {
+  update: Prisma.XOR<Prisma.BusinessScheduleUpdateWithoutSettingChangesInput, Prisma.BusinessScheduleUncheckedUpdateWithoutSettingChangesInput>
+  create: Prisma.XOR<Prisma.BusinessScheduleCreateWithoutSettingChangesInput, Prisma.BusinessScheduleUncheckedCreateWithoutSettingChangesInput>
+  where?: Prisma.BusinessScheduleWhereInput
+}
+
+export type BusinessScheduleUpdateToOneWithWhereWithoutSettingChangesInput = {
+  where?: Prisma.BusinessScheduleWhereInput
+  data: Prisma.XOR<Prisma.BusinessScheduleUpdateWithoutSettingChangesInput, Prisma.BusinessScheduleUncheckedUpdateWithoutSettingChangesInput>
+}
+
+export type BusinessScheduleUpdateWithoutSettingChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  days?: Prisma.BusinessDayUpdateManyWithoutScheduleNestedInput
+}
+
+export type BusinessScheduleUncheckedUpdateWithoutSettingChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  days?: Prisma.BusinessDayUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
 
@@ -308,10 +380,12 @@ export type BusinessScheduleUncheckedUpdateWithoutDaysInput = {
 
 export type BusinessScheduleCountOutputType = {
   days: number
+  settingChanges: number
 }
 
 export type BusinessScheduleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   days?: boolean | BusinessScheduleCountOutputTypeCountDaysArgs
+  settingChanges?: boolean | BusinessScheduleCountOutputTypeCountSettingChangesArgs
 }
 
 /**
@@ -331,11 +405,19 @@ export type BusinessScheduleCountOutputTypeCountDaysArgs<ExtArgs extends runtime
   where?: Prisma.BusinessDayWhereInput
 }
 
+/**
+ * BusinessScheduleCountOutputType without action
+ */
+export type BusinessScheduleCountOutputTypeCountSettingChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ScheduleSettingChangeWhereInput
+}
+
 
 export type BusinessScheduleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   createdAt?: boolean
   days?: boolean | Prisma.BusinessSchedule$daysArgs<ExtArgs>
+  settingChanges?: boolean | Prisma.BusinessSchedule$settingChangesArgs<ExtArgs>
   _count?: boolean | Prisma.BusinessScheduleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["businessSchedule"]>
 
@@ -357,6 +439,7 @@ export type BusinessScheduleSelectScalar = {
 export type BusinessScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt", ExtArgs["result"]["businessSchedule"]>
 export type BusinessScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   days?: boolean | Prisma.BusinessSchedule$daysArgs<ExtArgs>
+  settingChanges?: boolean | Prisma.BusinessSchedule$settingChangesArgs<ExtArgs>
   _count?: boolean | Prisma.BusinessScheduleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BusinessScheduleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -366,6 +449,7 @@ export type $BusinessSchedulePayload<ExtArgs extends runtime.Types.Extensions.In
   name: "BusinessSchedule"
   objects: {
     days: Prisma.$BusinessDayPayload<ExtArgs>[]
+    settingChanges: Prisma.$ScheduleSettingChangePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -765,6 +849,7 @@ readonly fields: BusinessScheduleFieldRefs;
 export interface Prisma__BusinessScheduleClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   days<T extends Prisma.BusinessSchedule$daysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BusinessSchedule$daysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BusinessDayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  settingChanges<T extends Prisma.BusinessSchedule$settingChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BusinessSchedule$settingChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleSettingChangePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1210,6 +1295,30 @@ export type BusinessSchedule$daysArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.BusinessDayScalarFieldEnum | Prisma.BusinessDayScalarFieldEnum[]
+}
+
+/**
+ * BusinessSchedule.settingChanges
+ */
+export type BusinessSchedule$settingChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScheduleSettingChange
+   */
+  select?: Prisma.ScheduleSettingChangeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScheduleSettingChange
+   */
+  omit?: Prisma.ScheduleSettingChangeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScheduleSettingChangeInclude<ExtArgs> | null
+  where?: Prisma.ScheduleSettingChangeWhereInput
+  orderBy?: Prisma.ScheduleSettingChangeOrderByWithRelationInput | Prisma.ScheduleSettingChangeOrderByWithRelationInput[]
+  cursor?: Prisma.ScheduleSettingChangeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ScheduleSettingChangeScalarFieldEnum | Prisma.ScheduleSettingChangeScalarFieldEnum[]
 }
 
 /**

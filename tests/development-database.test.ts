@@ -10,7 +10,7 @@ for (const script of ["scripts/migrate-local.ts", "prisma/seed.ts", "scripts/ver
     ["non-public schema", local.replace("public", "unexpected")],
   ]) {
     test(`${script} rejects ${name} before DB access without disclosing credentials`, () => {
-      const result = spawnSync(process.execPath, ["--import", "tsx", script], {
+      const result = spawnSync(process.execPath, ["--conditions=react-server", "--import", "tsx", script], {
         env: { ...process.env, DATABASE_URL: local, DIRECT_URL: direct }, encoding: "utf8", timeout: 10000,
       });
       assert.equal(result.status, 1);

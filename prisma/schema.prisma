@@ -1,5 +1,5 @@
-// Tasks 2.2.1–2.2.5: booking foundation and operational models.
-// Row CHECKs live in migrations. Effective-dated settings follow in 2.2.6.
+// Tasks 2.2.1–2.2.6: booking, operations and effective-dated settings.
+// SQL-only constraints and history protection are maintained in migrations.
 
 generator client {
   provider = "prisma-client"
@@ -136,8 +136,9 @@ model Therapist {
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
-  reservations Reservation[]
-  schedules    TherapistSchedule[]
+  reservations  Reservation[]
+  schedules     TherapistSchedule[]
+  schedulePlans SchedulePlan[]
 }
 
 model Treatment {
@@ -438,12 +439,13 @@ model MemberReviewMatch {
   @@index([matchedMemberId])
 }
 
-// Immutable content containers. Effective dates/revisions come in Task 2.2.6.
-// Neither container is a current setting until selected by that later model.
+// Content becomes immutable when referenced by a ScheduleSettingChange.
+// Resolve the latest revision per effective date before excluding cancellations.
 model BusinessSchedule {
-  id        String        @id @default(uuid()) @db.Uuid
-  createdAt DateTime      @default(now()) @db.Timestamptz(3)
-  days      BusinessDay[]
+  id             String                  @id @default(uuid()) @db.Uuid
+  createdAt      DateTime                @default(now()) @db.Timestamptz(3)
+  days           BusinessDay[]
+  settingChanges ScheduleSettingChange[]
 }
 
 model BusinessDay {
@@ -459,11 +461,12 @@ model BusinessDay {
 }
 
 model TherapistSchedule {
-  id          String           @id @default(uuid()) @db.Uuid
-  therapistId String           @db.Uuid
-  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
-  therapist   Therapist        @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  breaks      TherapistBreak[]
+  id             String                  @id @default(uuid()) @db.Uuid
+  therapistId    String                  @db.Uuid
+  createdAt      DateTime                @default(now()) @db.Timestamptz(3)
+  therapist      Therapist               @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  breaks         TherapistBreak[]
+  settingChanges ScheduleSettingChange[]
 
   @@index([therapistId])
 }
@@ -579,6 +582,7 @@ model AuditLog {
   cancelledReservation Reservation?
   notices              ReservationChangeNotice[]
   confirmedDeliveries  EmailDelivery[]
+  settingChanges       ScheduleSettingChange[]
 
   @@index([targetType, targetId, createdAt])
   @@index([actorMemberId, createdAt])
@@ -605,4 +609,75 @@ model RateLimitEvent {
   bucket     RateLimitBucket @relation(fields: [scope, keyDigest], references: [scope, keyDigest], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([scope, keyDigest, occurredAt])
+}
+
+enum ScheduleKind {
+  BUSINESS_WEEKLY
+  BUSINESS_DATE
+  THERAPIST_BREAK
+}
+
+enum ScheduleChangeAction {
+  CREATE
+  REVISE
+  CANCEL
+}
+
+// SQL partial unique index covers business kind+date when therapistId is null.
+model SchedulePlan {
+  id            String                  @id @default(uuid()) @db.Uuid
+  kind          ScheduleKind
+  effectiveDate DateTime                @db.Date
+  therapistId   String?                 @db.Uuid
+  createdAt     DateTime                @default(now()) @db.Timestamptz(3)
+  therapist     Therapist?              @relation(fields: [therapistId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  changes       ScheduleSettingChange[]
+
+  @@unique([therapistId, effectiveDate])
+  @@index([kind, effectiveDate])
+}
+
+// Append-only chain: cancellation is a new revision, never deletion of a head.
+model ScheduleSettingChange {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  planId              String                 @db.Uuid
+  revision            Int
+  action              ScheduleChangeAction
+  previousId          String?                @unique @db.Uuid
+  businessScheduleId  String?                @db.Uuid
+  therapistScheduleId String?                @db.Uuid
+  businessOverrideId  String?                @db.Uuid
+  auditId             String                 @unique @db.Uuid
+  reason              String                 @db.VarChar(1000)
+  createdAt           DateTime               @default(now()) @db.Timestamptz(3)
+  plan                SchedulePlan           @relation(fields: [planId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  previous            ScheduleSettingChange? @relation("SettingChain", fields: [previousId, planId], references: [id, planId], onDelete: Restrict, onUpdate: Restrict)
+  next                ScheduleSettingChange? @relation("SettingChain")
+  businessSchedule    BusinessSchedule?      @relation(fields: [businessScheduleId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  therapistSchedule   TherapistSchedule?     @relation(fields: [therapistScheduleId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  businessOverride    BusinessDateOverride?  @relation(fields: [businessOverrideId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  audit               AuditLog               @relation(fields: [auditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, planId])
+  @@unique([previousId, planId])
+  @@unique([planId, revision])
+  @@index([businessScheduleId])
+  @@index([therapistScheduleId])
+  @@index([businessOverrideId])
+}
+
+model BusinessDateOverride {
+  id             String                  @id @default(uuid()) @db.Uuid
+  isOpen         Boolean
+  opensAt        DateTime?               @db.Time(0)
+  closesAt       DateTime                @db.Time(0)
+  createdAt      DateTime                @default(now()) @db.Timestamptz(3)
+  settingChanges ScheduleSettingChange[]
+}
+
+// Singleton lock/version row for settings and later booking write transactions.
+model StoreSettingState {
+  id        Int      @id @default(1) @db.SmallInt
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }

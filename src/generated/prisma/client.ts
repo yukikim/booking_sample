@@ -171,3 +171,23 @@ export type RateLimitBucket = Prisma.RateLimitBucketModel
  * 
  */
 export type RateLimitEvent = Prisma.RateLimitEventModel
+/**
+ * Model SchedulePlan
+ * 
+ */
+export type SchedulePlan = Prisma.SchedulePlanModel
+/**
+ * Model ScheduleSettingChange
+ * 
+ */
+export type ScheduleSettingChange = Prisma.ScheduleSettingChangeModel
+/**
+ * Model BusinessDateOverride
+ * 
+ */
+export type BusinessDateOverride = Prisma.BusinessDateOverrideModel
+/**
+ * Model StoreSettingState
+ * 
+ */
+export type StoreSettingState = Prisma.StoreSettingStateModel

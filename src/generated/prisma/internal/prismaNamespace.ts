@@ -422,7 +422,11 @@ export const ModelName = {
   EmailDeliveryAttempt: 'EmailDeliveryAttempt',
   AuditLog: 'AuditLog',
   RateLimitBucket: 'RateLimitBucket',
-  RateLimitEvent: 'RateLimitEvent'
+  RateLimitEvent: 'RateLimitEvent',
+  SchedulePlan: 'SchedulePlan',
+  ScheduleSettingChange: 'ScheduleSettingChange',
+  BusinessDateOverride: 'BusinessDateOverride',
+  StoreSettingState: 'StoreSettingState'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -438,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "staffAccount" | "adminAccount" | "appSession" | "room" | "therapist" | "treatment" | "option" | "reservation" | "reservationOption" | "reservationSlot" | "staffPermission" | "authToken" | "memberLifecycleEvent" | "memberReview" | "memberReviewMatch" | "businessSchedule" | "businessDay" | "therapistSchedule" | "therapistBreak" | "reservationChangeNotice" | "emailDelivery" | "emailDeliveryAttempt" | "auditLog" | "rateLimitBucket" | "rateLimitEvent"
+    modelProps: "member" | "staffAccount" | "adminAccount" | "appSession" | "room" | "therapist" | "treatment" | "option" | "reservation" | "reservationOption" | "reservationSlot" | "staffPermission" | "authToken" | "memberLifecycleEvent" | "memberReview" | "memberReviewMatch" | "businessSchedule" | "businessDay" | "therapistSchedule" | "therapistBreak" | "reservationChangeNotice" | "emailDelivery" | "emailDeliveryAttempt" | "auditLog" | "rateLimitBucket" | "rateLimitEvent" | "schedulePlan" | "scheduleSettingChange" | "businessDateOverride" | "storeSettingState"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2366,6 +2370,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SchedulePlan: {
+      payload: Prisma.$SchedulePlanPayload<ExtArgs>
+      fields: Prisma.SchedulePlanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SchedulePlanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SchedulePlanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>
+        }
+        findFirst: {
+          args: Prisma.SchedulePlanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SchedulePlanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>
+        }
+        findMany: {
+          args: Prisma.SchedulePlanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>[]
+        }
+        create: {
+          args: Prisma.SchedulePlanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>
+        }
+        createMany: {
+          args: Prisma.SchedulePlanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SchedulePlanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>[]
+        }
+        delete: {
+          args: Prisma.SchedulePlanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>
+        }
+        update: {
+          args: Prisma.SchedulePlanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>
+        }
+        deleteMany: {
+          args: Prisma.SchedulePlanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SchedulePlanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SchedulePlanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>[]
+        }
+        upsert: {
+          args: Prisma.SchedulePlanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SchedulePlanPayload>
+        }
+        aggregate: {
+          args: Prisma.SchedulePlanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSchedulePlan>
+        }
+        groupBy: {
+          args: Prisma.SchedulePlanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SchedulePlanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SchedulePlanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SchedulePlanCountAggregateOutputType> | number
+        }
+      }
+    }
+    ScheduleSettingChange: {
+      payload: Prisma.$ScheduleSettingChangePayload<ExtArgs>
+      fields: Prisma.ScheduleSettingChangeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ScheduleSettingChangeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ScheduleSettingChangeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>
+        }
+        findFirst: {
+          args: Prisma.ScheduleSettingChangeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ScheduleSettingChangeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>
+        }
+        findMany: {
+          args: Prisma.ScheduleSettingChangeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>[]
+        }
+        create: {
+          args: Prisma.ScheduleSettingChangeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>
+        }
+        createMany: {
+          args: Prisma.ScheduleSettingChangeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ScheduleSettingChangeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>[]
+        }
+        delete: {
+          args: Prisma.ScheduleSettingChangeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>
+        }
+        update: {
+          args: Prisma.ScheduleSettingChangeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>
+        }
+        deleteMany: {
+          args: Prisma.ScheduleSettingChangeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ScheduleSettingChangeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ScheduleSettingChangeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>[]
+        }
+        upsert: {
+          args: Prisma.ScheduleSettingChangeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScheduleSettingChangePayload>
+        }
+        aggregate: {
+          args: Prisma.ScheduleSettingChangeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateScheduleSettingChange>
+        }
+        groupBy: {
+          args: Prisma.ScheduleSettingChangeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleSettingChangeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ScheduleSettingChangeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScheduleSettingChangeCountAggregateOutputType> | number
+        }
+      }
+    }
+    BusinessDateOverride: {
+      payload: Prisma.$BusinessDateOverridePayload<ExtArgs>
+      fields: Prisma.BusinessDateOverrideFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BusinessDateOverrideFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BusinessDateOverrideFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>
+        }
+        findFirst: {
+          args: Prisma.BusinessDateOverrideFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BusinessDateOverrideFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>
+        }
+        findMany: {
+          args: Prisma.BusinessDateOverrideFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>[]
+        }
+        create: {
+          args: Prisma.BusinessDateOverrideCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>
+        }
+        createMany: {
+          args: Prisma.BusinessDateOverrideCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BusinessDateOverrideCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>[]
+        }
+        delete: {
+          args: Prisma.BusinessDateOverrideDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>
+        }
+        update: {
+          args: Prisma.BusinessDateOverrideUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>
+        }
+        deleteMany: {
+          args: Prisma.BusinessDateOverrideDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BusinessDateOverrideUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BusinessDateOverrideUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>[]
+        }
+        upsert: {
+          args: Prisma.BusinessDateOverrideUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BusinessDateOverridePayload>
+        }
+        aggregate: {
+          args: Prisma.BusinessDateOverrideAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBusinessDateOverride>
+        }
+        groupBy: {
+          args: Prisma.BusinessDateOverrideGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BusinessDateOverrideGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BusinessDateOverrideCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BusinessDateOverrideCountAggregateOutputType> | number
+        }
+      }
+    }
+    StoreSettingState: {
+      payload: Prisma.$StoreSettingStatePayload<ExtArgs>
+      fields: Prisma.StoreSettingStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StoreSettingStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StoreSettingStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>
+        }
+        findFirst: {
+          args: Prisma.StoreSettingStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StoreSettingStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>
+        }
+        findMany: {
+          args: Prisma.StoreSettingStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>[]
+        }
+        create: {
+          args: Prisma.StoreSettingStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>
+        }
+        createMany: {
+          args: Prisma.StoreSettingStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StoreSettingStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>[]
+        }
+        delete: {
+          args: Prisma.StoreSettingStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>
+        }
+        update: {
+          args: Prisma.StoreSettingStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.StoreSettingStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StoreSettingStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StoreSettingStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.StoreSettingStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreSettingStatePayload>
+        }
+        aggregate: {
+          args: Prisma.StoreSettingStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStoreSettingState>
+        }
+        groupBy: {
+          args: Prisma.StoreSettingStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoreSettingStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StoreSettingStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoreSettingStateCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2776,6 +3076,54 @@ export const RateLimitEventScalarFieldEnum = {
 export type RateLimitEventScalarFieldEnum = (typeof RateLimitEventScalarFieldEnum)[keyof typeof RateLimitEventScalarFieldEnum]
 
 
+export const SchedulePlanScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  effectiveDate: 'effectiveDate',
+  therapistId: 'therapistId',
+  createdAt: 'createdAt'
+} as const
+
+export type SchedulePlanScalarFieldEnum = (typeof SchedulePlanScalarFieldEnum)[keyof typeof SchedulePlanScalarFieldEnum]
+
+
+export const ScheduleSettingChangeScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  revision: 'revision',
+  action: 'action',
+  previousId: 'previousId',
+  businessScheduleId: 'businessScheduleId',
+  therapistScheduleId: 'therapistScheduleId',
+  businessOverrideId: 'businessOverrideId',
+  auditId: 'auditId',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleSettingChangeScalarFieldEnum = (typeof ScheduleSettingChangeScalarFieldEnum)[keyof typeof ScheduleSettingChangeScalarFieldEnum]
+
+
+export const BusinessDateOverrideScalarFieldEnum = {
+  id: 'id',
+  isOpen: 'isOpen',
+  opensAt: 'opensAt',
+  closesAt: 'closesAt',
+  createdAt: 'createdAt'
+} as const
+
+export type BusinessDateOverrideScalarFieldEnum = (typeof BusinessDateOverrideScalarFieldEnum)[keyof typeof BusinessDateOverrideScalarFieldEnum]
+
+
+export const StoreSettingStateScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoreSettingStateScalarFieldEnum = (typeof StoreSettingStateScalarFieldEnum)[keyof typeof StoreSettingStateScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3097,6 +3445,34 @@ export type ListEnumRateLimitScopeFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'ScheduleKind'
+ */
+export type EnumScheduleKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleKind'>
+    
+
+
+/**
+ * Reference to a field of type 'ScheduleKind[]'
+ */
+export type ListEnumScheduleKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ScheduleChangeAction'
+ */
+export type EnumScheduleChangeActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleChangeAction'>
+    
+
+
+/**
+ * Reference to a field of type 'ScheduleChangeAction[]'
+ */
+export type ListEnumScheduleChangeActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ScheduleChangeAction[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -3286,6 +3662,10 @@ export type GlobalOmitConfig = {
   auditLog?: Prisma.AuditLogOmit
   rateLimitBucket?: Prisma.RateLimitBucketOmit
   rateLimitEvent?: Prisma.RateLimitEventOmit
+  schedulePlan?: Prisma.SchedulePlanOmit
+  scheduleSettingChange?: Prisma.ScheduleSettingChangeOmit
+  businessDateOverride?: Prisma.BusinessDateOverrideOmit
+  storeSettingState?: Prisma.StoreSettingStateOmit
 }
 
 /* Types for Logging */

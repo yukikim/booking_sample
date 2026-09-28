@@ -76,7 +76,11 @@ export const ModelName = {
   EmailDeliveryAttempt: 'EmailDeliveryAttempt',
   AuditLog: 'AuditLog',
   RateLimitBucket: 'RateLimitBucket',
-  RateLimitEvent: 'RateLimitEvent'
+  RateLimitEvent: 'RateLimitEvent',
+  SchedulePlan: 'SchedulePlan',
+  ScheduleSettingChange: 'ScheduleSettingChange',
+  BusinessDateOverride: 'BusinessDateOverride',
+  StoreSettingState: 'StoreSettingState'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -464,6 +468,54 @@ export const RateLimitEventScalarFieldEnum = {
 } as const
 
 export type RateLimitEventScalarFieldEnum = (typeof RateLimitEventScalarFieldEnum)[keyof typeof RateLimitEventScalarFieldEnum]
+
+
+export const SchedulePlanScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  effectiveDate: 'effectiveDate',
+  therapistId: 'therapistId',
+  createdAt: 'createdAt'
+} as const
+
+export type SchedulePlanScalarFieldEnum = (typeof SchedulePlanScalarFieldEnum)[keyof typeof SchedulePlanScalarFieldEnum]
+
+
+export const ScheduleSettingChangeScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  revision: 'revision',
+  action: 'action',
+  previousId: 'previousId',
+  businessScheduleId: 'businessScheduleId',
+  therapistScheduleId: 'therapistScheduleId',
+  businessOverrideId: 'businessOverrideId',
+  auditId: 'auditId',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleSettingChangeScalarFieldEnum = (typeof ScheduleSettingChangeScalarFieldEnum)[keyof typeof ScheduleSettingChangeScalarFieldEnum]
+
+
+export const BusinessDateOverrideScalarFieldEnum = {
+  id: 'id',
+  isOpen: 'isOpen',
+  opensAt: 'opensAt',
+  closesAt: 'closesAt',
+  createdAt: 'createdAt'
+} as const
+
+export type BusinessDateOverrideScalarFieldEnum = (typeof BusinessDateOverrideScalarFieldEnum)[keyof typeof BusinessDateOverrideScalarFieldEnum]
+
+
+export const StoreSettingStateScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoreSettingStateScalarFieldEnum = (typeof StoreSettingStateScalarFieldEnum)[keyof typeof StoreSettingStateScalarFieldEnum]
 
 
 export const SortOrder = {

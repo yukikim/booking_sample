@@ -175,3 +175,21 @@ export const RateLimitScope = {
 } as const
 
 export type RateLimitScope = (typeof RateLimitScope)[keyof typeof RateLimitScope]
+
+
+export const ScheduleKind = {
+  BUSINESS_WEEKLY: 'BUSINESS_WEEKLY',
+  BUSINESS_DATE: 'BUSINESS_DATE',
+  THERAPIST_BREAK: 'THERAPIST_BREAK'
+} as const
+
+export type ScheduleKind = (typeof ScheduleKind)[keyof typeof ScheduleKind]
+
+
+export const ScheduleChangeAction = {
+  CREATE: 'CREATE',
+  REVISE: 'REVISE',
+  CANCEL: 'CANCEL'
+} as const
+
+export type ScheduleChangeAction = (typeof ScheduleChangeAction)[keyof typeof ScheduleChangeAction]

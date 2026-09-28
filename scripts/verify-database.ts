@@ -1,3 +1,4 @@
+import { verifyEffectiveSchedules } from "./lib/verify-effective-schedules";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { Client, type DatabaseError } from "pg";
@@ -225,6 +226,7 @@ async function main() {
         if(round===0) {
           await verifyConstraints(db,schema,connectionString);
           passed += await verifyOperationalModels(db, checked);
+          passed += await verifyEffectiveSchedules(db, prisma, checked);
           const names=(await db.query("SELECT conname FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname=$1 AND contype='c'",[schema])).rows.map(r=>r.conname).sort();
           assert.deepEqual(names,[...checked].filter(n=>n.endsWith("_check")).sort());
         }
