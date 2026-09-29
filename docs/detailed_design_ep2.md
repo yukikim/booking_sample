@@ -813,7 +813,7 @@ Task 2.2.4のmigration・開発用初期データ・ローカル適用・空ス�
 
 2026-09-28、基本11モデルへ運用・曜日設定の15モデルを追加し、計26モデル・14enumとした。Memberへ更新版・復旧世代、Reservationへ施術実績・取消情報を追加した。`20260928010000_operational_models`を新規migrationとして作成し、既存の初回migrationは変更していない。
 
-モデルと制約・保存可能性の確認がこのTaskの範囲。認可、トークン発行／暗号化、SMTP、設定の有効版取得、退会・取消等の業務APIはまだ実装していない。DB検証の条件付きSQLを、そのまま完成済みのサービスと扱わない。
+モデルと制約・保存可能性の確認がこのTaskの範囲。認可、トークン発行／暗号化、Resend APIによる配信、設定の有効版取得、退会・取消等の業務APIはこの時点ではまだ実装していない。DB検証の条件付きSQLを、そのまま完成済みのサービスと扱わない。
 
 ### 13.2 スタッフ権限と操作記録
 
@@ -884,14 +884,14 @@ ReservationへactualStartedAt／actualCompletedAt／cancelledAt、cancellationKi
 | 保存する状態・情報 | 扱い |
 | --- | --- |
 | PENDING / SENDING / RETRY_WAIT | 未処理。宛先必須。認証メールは暗号化ペイロードも必須 |
-| ACCEPTED | SMTP受付済み。acceptedAt・closedAtと1回以上の試行を必須とし、顧客対応完了とは区別 |
+| ACCEPTED | Resend API受付済み。acceptedAt・closedAtと1回以上の試行を必須とし、顧客対応完了・到達とは区別 |
 | FAILED / UNKNOWN / CANCELLED / EXPIRED | 自動送信対象外。UNKNOWNへnextAttemptAtを設定できない。closedAtは運用確認後に設定可能 |
 | attemptCount | 0〜4。初回＋最大3回再試行。RETRY_WAITは1〜3回の時点だけ許可 |
 | leaseId / leaseExpiresAt | SENDINGだけ必須。版・状態を条件に取得し、処理権を持つworkerだけが結果を保存する契約 |
 | encryptedPayload / payloadKeyId / payloadExpiresAt | 3項目一体で保存・消去。再試行不要な状態には残さない。専用鍵の方式・暗号処理はStory 3.4で実装 |
 | EmailDeliveryAttempt | deliveryId＋attemptNumberを一意化。処理権ID、開始／終了、結果、整形済みerrorCodeだけを保存 |
 
-1・5・30分後の再試行時刻計算、期限時刻での停止、SMTP直前の主体・トークン・予約版確認、処理権の競合制御、結果不明時の運用はStory 3.4で実装する。今回のCHECKは任意の状態遷移をすべて禁止するものではない。
+1・5・30分後の再試行時刻計算、期限時刻での停止、Resend API要求直前の主体・トークン・予約版確認、処理権の競合制御、結果不明時の運用はStory 3.4で実装する。APIの冪等キーには消さない送信要求キーを用いるが、Resend側の保持期間は24時間のため、DBの一意制約も維持する。今回のCHECKは任意の状態遷移をすべて禁止するものではない。
 
 closedAt＋90日で配送宛先・試行詳細を消去しても、requestKey・対象参照・種別・受付／終了時刻・最終状態は残す。暗号化ペイロードはそれより早く、遅くとも有効期限までに消去・利用停止する。試行詳細の削除でEmailDelivery本体を消さず、通知の最小限の事実を維持する。
 
@@ -927,7 +927,7 @@ closedAt＋90日で配送宛先・試行詳細を消去しても、requestKey・
 
 ハンズオンは第12.5節と同じ`npm run check` → `npm run db:migrate` → `npm run db:seed` → `npm run db:check` → `npm run test:db`を使う。新しいDB検証は`scripts/lib/verify-operational-models.ts`に分離して既存コマンドへ組み込んだ。通常seedは変更せず、運用レコードを本番的な初期値として捏造しない。
 
-トークン消費・処理権取得は検証用SQLの条件付き更新を確認したもので、認証・配信workerは未実装。実際の暗号化・SMTP通信、ブラウザ・本番環境・変更後のGitHub CI実行は未確認。今回build・依存監査は再実行していない。
+トークン消費・処理権取得は検証用SQLの条件付き更新を確認したもので、このTask時点では認証・配信workerは未実装。実際の暗号化・Resend API配信、ブラウザ・本番環境・変更後のGitHub CI実行は未確認。今回build・依存監査は再実行していない。
 
 ### 13.9 完了判断と次のTask
 

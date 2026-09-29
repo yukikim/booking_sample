@@ -1,5 +1,5 @@
 import { loadEnvConfig } from "@next/env";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { randomUUID } from "node:crypto";
 import { getPrisma, setTransactionSchema } from "../src/lib/prisma";
 import { decryptMailPayload } from "../src/lib/member/mail";
@@ -7,13 +7,12 @@ import { decryptMailPayload } from "../src/lib/member/mail";
 loadEnvConfig(process.cwd());
 
 async function main() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT);
-  const from = process.env.SMTP_FROM;
-  if (!host || !Number.isInteger(port) || port < 1 || port > 65535 || !from) throw new Error("SMTP configuration unavailable.");
-  const transport = nodemailer.createTransport({ host, port, secure: port === 465, requireTLS: port !== 465, auth: process.env.SMTP_USER && process.env.SMTP_PASSWORD ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD } : undefined, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 });
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM;
+  if (!apiKey || !from) throw new Error("Resend configuration unavailable.");
+  const resend = new Resend(apiKey);
   const db = getPrisma();
-  // A crashed sender may have reached SMTP; close its lease without resending.
+  // A crashed sender may have reached Resend; close its lease without resending.
   await db.$transaction(async (tx) => {
     await setTransactionSchema(tx);
     const stale = await tx.emailDelivery.findMany({ where: { status: "SENDING", leaseExpiresAt: { lt: new Date() } }, select: { id: true, attemptCount: true } });
@@ -41,14 +40,15 @@ async function main() {
       const attemptNumber = delivery.attemptCount + 1;
       await tx.emailDelivery.update({ where: { id }, data: { status: "SENDING", leaseId, leaseExpiresAt: new Date(now.getTime() + 60_000), attemptCount: attemptNumber, nextAttemptAt: null } });
       await tx.emailDeliveryAttempt.create({ data: { deliveryId: id, attemptNumber, leaseId, startedAt: now } });
-      return { expired: false as const, id, leaseId, attemptNumber, encryptedPayload: delivery.encryptedPayload };
+      return { expired: false as const, id, requestKey: delivery.requestKey, leaseId, attemptNumber, encryptedPayload: delivery.encryptedPayload };
     });
     if (!claimed) break;
     handled++;
     if (claimed.expired) continue;
     const payload = decryptMailPayload(claimed.encryptedPayload);
     try {
-      await transport.sendMail({ from, ...payload });
+      const { data, error } = await resend.emails.send({ from, ...payload }, { idempotencyKey: claimed.requestKey });
+      if (error || !data) throw new Error("Resend request was not accepted.");
       await db.$transaction(async (tx) => {
         await setTransactionSchema(tx);
         const now = new Date();
@@ -56,16 +56,15 @@ async function main() {
         await tx.emailDeliveryAttempt.update({ where: { deliveryId_attemptNumber: { deliveryId: claimed.id, attemptNumber: claimed.attemptNumber } }, data: { result: "ACCEPTED", finishedAt: now } });
       });
     } catch {
-      // SMTP errors after DATA can be ambiguous. Never resend automatically here.
+      // Network failures can leave the Resend result ambiguous. Never resend automatically here.
       await db.$transaction(async (tx) => {
         await setTransactionSchema(tx);
         const now = new Date();
         await tx.emailDelivery.updateMany({ where: { id: claimed.id, leaseId: claimed.leaseId, status: "SENDING" }, data: { status: "UNKNOWN", closedAt: now, encryptedPayload: null, payloadKeyId: null, payloadExpiresAt: null, leaseId: null, leaseExpiresAt: null } });
-        await tx.emailDeliveryAttempt.update({ where: { deliveryId_attemptNumber: { deliveryId: claimed.id, attemptNumber: claimed.attemptNumber } }, data: { result: "UNKNOWN", finishedAt: now, errorCode: "SMTP_UNCERTAIN" } });
+        await tx.emailDeliveryAttempt.update({ where: { deliveryId_attemptNumber: { deliveryId: claimed.id, attemptNumber: claimed.attemptNumber } }, data: { result: "UNKNOWN", finishedAt: now, errorCode: "RESEND_UNCERTAIN" } });
       });
     }
   }
-  await transport.close();
   await db.$disconnect();
   process.stdout.write(`processed ${handled} delivery requests\n`);
 }

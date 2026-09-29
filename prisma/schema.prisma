@@ -553,7 +553,7 @@ model EmailDeliveryAttempt {
   result        EmailAttemptResult @default(STARTED)
   startedAt     DateTime           @default(now()) @db.Timestamptz(3)
   finishedAt    DateTime?          @db.Timestamptz(3)
-  // Sanitized code only, never SMTP response bodies or tokens.
+  // Sanitized code only, never Resend response bodies or tokens.
   errorCode     String?            @db.VarChar(100)
   delivery      EmailDelivery      @relation(fields: [deliveryId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 

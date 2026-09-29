@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 
 type Mode = "register" | "resend" | "confirm" | "reset-request" | "reset";
@@ -12,11 +12,14 @@ const settings = {
 };
 
 export function MemberForm({ mode }: { mode: Mode }) {
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState<string | null>(null);
+  const tokenRead = useRef(false);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   useEffect(() => {
     if (mode !== "confirm" && mode !== "reset") return;
+    if (tokenRead.current) return;
+    tokenRead.current = true;
     const value = new URLSearchParams(window.location.hash.slice(1)).get("token") ?? "";
     queueMicrotask(() => setToken(value));
     if (value) window.history.replaceState(null, "", window.location.pathname);
@@ -34,7 +37,7 @@ export function MemberForm({ mode }: { mode: Mode }) {
   const emailField = mode === "register" || mode === "resend" || mode === "reset-request";
   const passwordField = mode === "register" || mode === "confirm" || mode === "reset";
   return <main className="mx-auto max-w-md space-y-5 p-8"><h1 className="text-2xl font-bold">{settings[mode].title}</h1>
-    {(mode === "confirm" || mode === "reset") && !token && <p role="alert">リンクが見つかりません。メールのリンクから開いてください。</p>}
+    {(mode === "confirm" || mode === "reset") && token === "" && <p role="alert">リンクが見つかりません。メールのリンクから開いてください。</p>}
     <form onSubmit={submit} className="flex flex-col gap-4">
       {emailField && <label className="flex flex-col gap-1">メールアドレス<input name="email" type="email" required maxLength={254} autoComplete="email" className="rounded border p-2" /></label>}
       {mode === "register" && <>
