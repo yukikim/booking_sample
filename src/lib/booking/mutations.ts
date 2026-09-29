@@ -13,6 +13,7 @@ import { getEffectiveBusinessDay } from "@/lib/schedules/effective";
 import { parseBusinessDate } from "@/lib/schedules/calendar";
 import { tokyoInstant } from "./availability-core";
 import { parseAvailabilityRequest, revalidateAtSave, type AvailabilityRequest } from "./availability";
+import { lockBookingState } from "./lock";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Actor = { role: SessionClaims["role"]; id: string; claims?: SessionClaims };
@@ -95,10 +96,6 @@ async function confirmMemberSession(tx: Prisma.TransactionClient, actor: Actor) 
   await tx.$queryRaw`SELECT id FROM "AppSession" WHERE id = ${actor.claims.sid}::uuid FOR UPDATE`;
   if (!await resolveSession(actor.claims, new Date(), tx)) throw new BookingError(401, "Unauthorized");
 }
-async function lockSettings(tx: Prisma.TransactionClient) {
-  await tx.storeSettingState.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
-  await tx.$queryRaw`SELECT id FROM "StoreSettingState" WHERE id = 1 FOR UPDATE`;
-}
 async function bookableMember(tx: Prisma.TransactionClient, id: string) {
   await tx.$queryRaw`SELECT id FROM "Member" WHERE id = ${id}::uuid FOR UPDATE`;
   const row = await tx.member.findUnique({ where: { id } });
@@ -177,7 +174,7 @@ export async function createReservation(request: Request, value: unknown) {
     await setTransactionSchema(tx);
     const actor = await authorize(tx, request, "RESERVATION_CREATE", false);
     if (actor.role === "MEMBER" && input.memberId !== undefined || actor.role !== "MEMBER" && !input.memberId) throw new BookingError(400, "InvalidInput");
-    await lockSettings(tx);
+    await lockBookingState(tx);
     if (actor.role !== "MEMBER") {
       const repeated = await replay(tx, actor, "RESERVATION_CREATED", input.requestKey, hash);
       if (repeated) return repeated;
@@ -206,7 +203,7 @@ export async function changeReservation(request: Request, id: string, value: unk
   return getPrisma().$transaction(async tx => {
     await setTransactionSchema(tx);
     const actor = await authorize(tx, request, "RESERVATION_UPDATE", input.storeException);
-    await lockSettings(tx);
+    await lockBookingState(tx);
     if (actor.role !== "MEMBER") {
       const repeated = await replay(tx, actor, "RESERVATION_CHANGED", input.requestKey, hash);
       if (repeated) return repeated;
@@ -247,7 +244,7 @@ export async function cancelReservation(request: Request, id: string, value: unk
   return getPrisma().$transaction(async tx => {
     await setTransactionSchema(tx);
     const actor = await authorize(tx, request, "RESERVATION_CANCEL", input.storeException);
-    await lockSettings(tx);
+    await lockBookingState(tx);
     if (actor.role !== "MEMBER") {
       const repeated = await replay(tx, actor, "RESERVATION_CANCELLED", input.requestKey, hash);
       if (repeated) return repeated;
