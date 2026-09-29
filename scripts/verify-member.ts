@@ -72,8 +72,11 @@ async function main() {
     const details = { email: "first@example.test", lastName: "山田", firstName: "花子", phoneNumber: "09012345678", postalCode: "123-4567", ageBand: 30, password };
     const firstRegistration = await post("register", details);
     assert.equal(firstRegistration.status, 200, `${await firstRegistration.text()}\n${output}`);
-    assert.equal((await post("register", { ...details, lastName: "別人" })).status, 200);
+    const duplicateRegistration = await post("register", { ...details, lastName: "別人" });
+    assert.equal(duplicateRegistration.status, 409);
+    assert.equal((await duplicateRegistration.json()).error, "EmailAlreadyRegistered");
     assert.equal(await db.member.count({ where: { emailKey: details.email } }), 1);
+    assert.equal(await db.emailDelivery.count({ where: { recipient: details.email } }), 1);
     let member = await db.member.findUniqueOrThrow({ where: { emailKey: details.email } });
     assert.equal(member.status, "PENDING_EMAIL");
     assert.equal(member.lastName, "山田");
@@ -135,7 +138,9 @@ async function main() {
     await db.member.update({ where: { id: member.id }, data: { status: "WITHDRAWN", isDeleted: true } });
     assert.equal(await (await auth("session", undefined, memberCookie)).json(), null);
     assert.doesNotMatch(await (await fetch(`${origin}/account`, { headers: { cookie: memberCookie } })).text(), /ログイン中です/);
-    assert.equal((await post("register", details)).status, 200);
+    const withdrawnRegistration = await post("register", details);
+    assert.equal(withdrawnRegistration.status, 409);
+    assert.equal((await withdrawnRegistration.json()).error, "EmailAlreadyRegistered");
     assert.equal(await db.member.count({ where: { emailKey: details.email } }), 1);
     // Fresh active account: successful reset invalidates its live session.
     await db.member.update({ where: { id: member.id }, data: { status: "ACTIVE", isDeleted: false } });

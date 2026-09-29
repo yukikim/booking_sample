@@ -32,7 +32,7 @@ export function MemberForm({ mode }: { mode: Mode }) {
     try {
       const response = await fetch(settings[mode].endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, ...(["confirm", "restore", "reset"].includes(mode) ? { token } : {}), ...(mode === "register" ? { ageBand: Number(input.ageBand) } : {}) }) });
       const result = await response.json();
-      setMessage(response.ok ? ["confirm", "restore", "reset"].includes(mode) ? "手続きが完了しました。ログインしてください。審査が必要な場合は承認後にログインできます。" : "受付しました。対象のメールアドレスに届く案内をご確認ください。" : response.status === 429 ? "試行回数の上限に達しました。時間をおいて再試行してください。" : result.error === "InvalidOrExpiredLink" ? "リンクが無効または期限切れです。新しいリンクを依頼してください。" : response.status === 400 ? "入力内容を確認してください。" : "現在処理できません。時間をおいて再試行してください。");
+      setMessage(response.ok ? ["confirm", "restore", "reset"].includes(mode) ? "手続きが完了しました。ログインしてください。審査が必要な場合は承認後にログインできます。" : "受付しました。対象のメールアドレスに届く案内をご確認ください。" : result.error === "EmailAlreadyRegistered" ? "このメールアドレスは既に登録されています。確認が未完了なら「確認メール再送」を、登録済みならログインまたはパスワード再設定をご利用ください。" : response.status === 429 ? "試行回数の上限に達しました。時間をおいて再試行してください。" : result.error === "InvalidOrExpiredLink" ? "リンクが無効または期限切れです。新しいリンクを依頼してください。" : response.status === 400 ? "入力内容を確認してください。" : "現在処理できません。時間をおいて再試行してください。");
     } catch { setMessage("現在処理できません。時間をおいて再試行してください。"); }
     finally { setPending(false); }
   }

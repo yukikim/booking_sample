@@ -7,6 +7,7 @@ async function main() {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM?.trim();
   const domain = from?.match(/@([A-Za-z0-9.-]+)>?$/)?.[1]?.toLowerCase();
+  console.log('アドレス: '+domain)
   if (!apiKey || !domain) { process.stdout.write("sender configuration: missing\n"); process.exitCode = 1; return; }
   if (domain === "resend.dev") { process.stdout.write("sender domain: Resend test sender; custom domain not verified\n"); process.exitCode = 1; return; }
   const resend = new Resend(apiKey);

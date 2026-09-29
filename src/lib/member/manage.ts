@@ -10,24 +10,29 @@ import { dispatchMailAfterResponse } from "@/lib/mail/immediate";
 import { parseRegistration } from "./identity";
 
 export class MemberInputError extends Error { constructor(readonly status: 400 | 409 = 400) { super("Invalid member operation"); } }
+class MemberAlreadyRegistered extends MemberInputError { constructor() { super(409); } }
 const accepted = () => Response.json({ accepted: true }, { headers: { "Cache-Control": "no-store" } });
 
 export async function registerMember(request: Request) {
   checkMutationOrigin(request);
   const input = parseRegistration(await readJsonBody(request));
   if (!input) throw new MemberInputError();
-  if (!await consumeMailRequest(input.emailKey, request)) return accepted();
+  if (!await consumeMailRequest(input.emailKey, request)) {
+    if (await getPrisma().member.findUnique({ where: { emailKey: input.emailKey }, select: { id: true } })) throw new MemberAlreadyRegistered();
+    throw new MailRateLimited();
+  }
   const hash = await hashPassword(input.password);
   try {
     const deliveryId = await getPrisma().$transaction(async (tx) => {
       await setTransactionSchema(tx);
-      if (await tx.member.findUnique({ where: { emailKey: input.emailKey }, select: { id: true } })) return null;
+      if (await tx.member.findUnique({ where: { emailKey: input.emailKey }, select: { id: true } })) throw new MemberAlreadyRegistered();
       const member = await tx.member.create({ data: { email: input.email, emailKey: input.emailKey, lastName: input.lastName, firstName: input.firstName, lastNameKey: input.lastNameKey, firstNameKey: input.firstNameKey, phoneNumber: input.phoneNumber, postalCode: input.postalCode, ageBand: input.ageBand, passwordHash: hash, status: "PENDING_EMAIL" } });
       return issueMemberMail(tx, member, "MEMBERSHIP_CONFIRM");
     });
     if (deliveryId) dispatchMailAfterResponse(deliveryId);
   } catch (error) {
-    if (!(error && typeof error === "object" && "code" in error && error.code === "P2002")) throw error;
+    if (error && typeof error === "object" && "code" in error && error.code === "P2002" && await getPrisma().member.findUnique({ where: { emailKey: input.emailKey }, select: { id: true } })) throw new MemberAlreadyRegistered();
+    throw error;
   }
   return accepted();
 }
@@ -94,5 +99,5 @@ export async function consumeMemberLink(request: Request, purpose: "MEMBERSHIP_C
 
 export function memberFailure(error: unknown) {
   const status = error instanceof MailRateLimited || error instanceof TokenRateLimited ? 429 : error instanceof MemberInputError ? error.status : error && typeof error === "object" && "status" in error && (error.status === 400 || error.status === 403) ? error.status : 503;
-  return Response.json({ error: status === 429 ? "RateLimited" : status === 409 ? "InvalidOrExpiredLink" : status === 403 ? "Forbidden" : status === 400 ? "InvalidInput" : "TemporarilyUnavailable" }, { status, headers: { "Cache-Control": "no-store", ...(status === 429 ? { "Retry-After": error instanceof TokenRateLimited ? "900" : "3600" } : {}) } });
+  return Response.json({ error: error instanceof MemberAlreadyRegistered ? "EmailAlreadyRegistered" : status === 429 ? "RateLimited" : status === 409 ? "InvalidOrExpiredLink" : status === 403 ? "Forbidden" : status === 400 ? "InvalidInput" : "TemporarilyUnavailable" }, { status, headers: { "Cache-Control": "no-store", ...(status === 429 ? { "Retry-After": error instanceof TokenRateLimited ? "900" : "3600" } : {}) } });
 }
