@@ -6,7 +6,7 @@ import { getEffectiveBusinessDay, getEffectiveTherapistBreak } from "@/lib/sched
 import { parseBusinessDate } from "@/lib/schedules/calendar";
 import { assignAt, bookingWindow, calculateTotals, tokyoInstant, type Assignment, type Occupancy, type Resource } from "./availability-core";
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type AvailabilityRequest = { date: string; treatmentId: string; optionIds: string[] };
 
 export function parseAvailabilityRequest(value: unknown): AvailabilityRequest {
@@ -17,7 +17,7 @@ export function parseAvailabilityRequest(value: unknown): AvailabilityRequest {
   return { date: row.date, treatmentId: row.treatmentId, optionIds: row.optionIds as string[] };
 }
 
-export async function evaluateAvailability(tx: Prisma.TransactionClient, input: AvailabilityRequest, now: Date) {
+export async function evaluateAvailability(tx: Prisma.TransactionClient, input: AvailabilityRequest, now: Date, flags: { excludeReservationId?: string; ignoreBookingWindow?: boolean } = {}) {
   const date = parseBusinessDate(input.date);
   const previousDate = new Date(date.getTime() - 86_400_000).toISOString().slice(0, 10);
   const [business, previous, treatment, options, rooms, therapists, reservations, overruns] = await Promise.all([
@@ -26,14 +26,14 @@ export async function evaluateAvailability(tx: Prisma.TransactionClient, input: 
     tx.option.findMany({ where: { id: { in: input.optionIds } } }),
     tx.room.findMany({ where: { isActive: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] }),
     tx.therapist.findMany({ where: { isActive: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] }),
-    tx.reservation.findMany({ where: { businessDate: date, status: { in: ["CONFIRMED", "IN_PROGRESS", "COMPLETED"] } }, select: { roomId: true, therapistId: true, startsAt: true, occupiesUntil: true, status: true } }),
-    tx.reservation.findMany({ where: { status: "IN_PROGRESS", occupiesUntil: { lte: now } }, select: { roomId: true, therapistId: true, startsAt: true, occupiesUntil: true, status: true } }),
+    tx.reservation.findMany({ where: { businessDate: date, status: { in: ["CONFIRMED", "IN_PROGRESS", "COMPLETED"] }, ...(flags.excludeReservationId ? { id: { not: flags.excludeReservationId } } : {}) }, select: { roomId: true, therapistId: true, startsAt: true, occupiesUntil: true, status: true } }),
+    tx.reservation.findMany({ where: { status: "IN_PROGRESS", occupiesUntil: { lte: now }, ...(flags.excludeReservationId ? { id: { not: flags.excludeReservationId } } : {}) }, select: { roomId: true, therapistId: true, startsAt: true, occupiesUntil: true, status: true } }),
   ]);
   if (!treatment?.isActive || options.length !== input.optionIds.length || options.some(option => !option.isActive)) throw new Error("Inactive or missing menu selection.");
   const totals = calculateTotals(treatment, options);
   const closesAt = business?.closesAt.getUTCHours();
   const opensAt = business?.opensAt?.getUTCHours();
-  const allowed = Boolean(business?.isOpen && opensAt !== undefined && closesAt !== undefined && previous && bookingWindow(input.date, previous.closesAt.getUTCHours(), now.getTime()));
+  const allowed = Boolean(business?.isOpen && opensAt !== undefined && closesAt !== undefined && (flags.ignoreBookingWindow || previous && bookingWindow(input.date, previous.closesAt.getUTCHours(), now.getTime())));
   const result: { totals: typeof totals; times: Assignment[] } = { totals, times: [] };
   if (!allowed || opensAt === undefined || closesAt === undefined) return result;
   const rest = await Promise.all(therapists.map(person => getEffectiveTherapistBreak(tx, person.id, input.date)));
@@ -56,7 +56,7 @@ export async function findAvailability(input: AvailabilityRequest, now = new Dat
 }
 
 /** Call immediately before inserting reservation and slots in the same transaction. */
-export async function revalidateAtSave(tx: Prisma.TransactionClient, input: AvailabilityRequest, startsAt: string, now = new Date()) {
-  const result = await evaluateAvailability(tx, input, now);
+export async function revalidateAtSave(tx: Prisma.TransactionClient, input: AvailabilityRequest, startsAt: string, now = new Date(), options: { excludeReservationId?: string; ignoreBookingWindow?: boolean } = {}) {
+  const result = await evaluateAvailability(tx, input, now, options);
   return { totals: result.totals, assignment: result.times.find(time => time.startsAt === startsAt) ?? null };
 }
