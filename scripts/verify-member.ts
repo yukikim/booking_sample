@@ -33,6 +33,10 @@ async function main() {
     process.env.AUTH_SECRET = randomBytes(32).toString("hex");
     process.env.AUTH_RATE_LIMIT_SECRET = randomBytes(32).toString("hex");
     process.env.MAIL_PAYLOAD_KEY = randomBytes(32).toString("base64");
+    process.env.RESEND_FROM = "mail@example.test";
+    process.env.RESEND_API_KEY = "re_test_local_only";
+    process.env.MAIL_TEST_DISABLE_IMMEDIATE = "1";
+    process.env.CRON_SECRET = randomBytes(24).toString("base64url");
     process.env.ADMIN_EMAIL = "admin@example.test";
     process.env.ADMIN_PASSWORD = randomBytes(24).toString("base64url");
     process.env.ADMIN_AUTH_VERSION = "1";
@@ -50,6 +54,7 @@ async function main() {
     if (!ready) process.stderr.write(output.replaceAll(process.env.ADMIN_PASSWORD, "[redacted]"));
     assert(ready, "Test server did not become ready");
     const { decryptMailPayload } = await import("../src/lib/member/mail");
+    const { runMailBatch } = await import("../src/lib/mail/worker");
     const { resolveSession } = await import("../src/lib/auth/session");
     const { getToken, encode } = await import("next-auth/jwt");
     const jar = new Map<string,string>();
@@ -75,6 +80,11 @@ async function main() {
     assert.match((await (await login(details.email,password)).json()).url, /CredentialsSignin/);
     const firstToken = await tokenFor(details.email);
     assert(firstToken);
+    const firstDelivery = await db.emailDelivery.findFirstOrThrow({ where: { recipient: details.email }, select: { id: true } });
+    const sentKeys: string[] = [];
+    await Promise.all([runMailBatch(async (payload, key) => { assert.equal(payload.to, details.email); sentKeys.push(key); return { kind: "ACCEPTED" }; }, 1, db, firstDelivery.id), runMailBatch(async (_payload, key) => { sentKeys.push(key); return { kind: "ACCEPTED" }; }, 1, db, firstDelivery.id)]);
+    assert.equal(sentKeys.length, 1);
+    assert.equal((await db.emailDelivery.findFirstOrThrow({ where: { recipient: details.email } })).status, "ACCEPTED");
     await db.rateLimitBucket.updateMany({ where: { scope: "MAIL_ADDRESS" }, data: { lastAttemptAt: new Date(0) } });
     assert.equal((await post("resend", { email: details.email })).status, 200);
     const confirmation = await tokenFor(details.email);
@@ -105,6 +115,7 @@ async function main() {
     assert.equal((await post("reset-request", { email: details.email })).status, 200);
     assert.equal((await post("reset-request", { email: "unknown@example.test" })).status, 200);
     const reset = await tokenFor(details.email);
+    assert.equal((await runMailBatch(async (payload) => { assert.equal(payload.to, details.email); assert.match(payload.text, /パスワード再設定/); return { kind: "ACCEPTED" }; }, 1, db)).attempted, 1);
     await db.authToken.update({ where: { digest: (await import("../src/lib/member/mail")).tokenDigest(reset) }, data: { createdAt: new Date(Date.now()-30*60_000), expiresAt: new Date(Date.now()-1000) } });
     assert.equal((await post("reset", { token: reset, password: "reset-password-123456" })).status, 409);
     const expired = await db.authToken.findUniqueOrThrow({ where: { digest: (await import("../src/lib/member/mail")).tokenDigest(reset) } });
@@ -139,6 +150,64 @@ async function main() {
     assert.equal((await auth("signout", { csrfToken: csrf.csrfToken, callbackUrl: "/login" })).status, 200);
     assert.equal(await (await auth("session")).json(), null);
     assert.equal((await post("register", { ...details, ageBand: 10 })).status, 400);
+    await db.emailDelivery.updateMany({ where: { status: { in: ["PENDING", "RETRY_WAIT"] } }, data: { status: "CANCELLED", encryptedPayload: null, payloadKeyId: null, payloadExpiresAt: null, nextAttemptAt: null, closedAt: new Date() } });
+    await db.member.update({ where: { id: member.id }, data: { status: "WITHDRAWN", isDeleted: true, version: { increment: 1 } } });
+    await db.rateLimitBucket.updateMany({ where: { scope: "MAIL_ADDRESS" }, data: { lastAttemptAt: new Date(0) } });
+    const adminCsrf = await (await auth("csrf")).json();
+    assert.equal((await auth("callback/admin", { email: process.env.ADMIN_EMAIL!, password: process.env.ADMIN_PASSWORD!, csrfToken: adminCsrf.csrfToken, callbackUrl: "/manage" })).status, 200);
+    const withdrawn = await db.member.findUniqueOrThrow({ where: { id: member.id } });
+    const restoreResponse = await fetch(`${origin}/api/manage/members/${member.id}/restore`, { method: "POST", headers: { cookie: cookie(), origin, "content-type": "application/json" }, body: JSON.stringify({ expectedVersion: withdrawn.version, reason: "本人からの復旧依頼" }) });
+    assert.equal(restoreResponse.status, 200, await restoreResponse.text());
+    const restore1 = await tokenFor(details.email);
+    assert.equal((await db.member.findUniqueOrThrow({ where: { id: member.id } })).status, "RESTORE_PENDING");
+    assert.equal((await runMailBatch(async (payload) => { assert.equal(payload.to, details.email); assert.match(payload.text, /復旧確認/); return { kind: "ACCEPTED" }; }, 1, db)).attempted, 1);
+    await db.rateLimitBucket.updateMany({ where: { scope: "MAIL_ADDRESS" }, data: { lastAttemptAt: new Date(0) } });
+    assert.equal((await post("restore-resend", { email: details.email })).status, 200);
+    const restore2 = await tokenFor(details.email);
+    assert.notEqual(restore1, restore2);
+    assert.equal((await post("restore", { token: restore1, password: "restored-password-123456" })).status, 409);
+    assert.equal((await post("restore", { token: restore2, password: "restored-password-123456" })).status, 200);
+    assert.equal((await post("restore", { token: restore2, password: "restored-password-123456" })).status, 409);
+    assert.equal((await db.member.findUniqueOrThrow({ where: { id: member.id } })).status, "ACTIVE");
+    assert.equal(await db.memberLifecycleEvent.count({ where: { memberId: member.id, kind: { in: ["RESTORE_REQUESTED", "RESTORE_COMPLETED"] } } }), 2);
+    await db.emailDelivery.updateMany({ where: { status: { in: ["PENDING", "RETRY_WAIT"] } }, data: { status: "CANCELLED", encryptedPayload: null, payloadKeyId: null, payloadExpiresAt: null, nextAttemptAt: null, closedAt: new Date() } });
+    const mailCase = { ...details, email: "mail-case@example.test" };
+    assert.equal((await post("register", mailCase)).status, 200);
+    const queued = await db.emailDelivery.findFirstOrThrow({ where: { recipient: mailCase.email } });
+    for (let i = 1; i <= 4; i++) {
+      const result = await runMailBatch(async (_payload, key) => { assert.equal(key, queued.requestKey); return { kind: "TRANSIENT", code: "RATE_LIMITED" }; }, 1, db);
+      assert.equal(result.attempted, 1);
+      const delivery: { status: string } = await db.emailDelivery.findUniqueOrThrow({ where: { id: queued.id }, select: { status: true } });
+      assert.equal(delivery.status, i < 4 ? "RETRY_WAIT" : "FAILED");
+      if (i < 4) {
+        const timing = await db.emailDelivery.findUniqueOrThrow({ where: { id: queued.id }, select: { nextAttemptAt: true, updatedAt: true } });
+        assert(Math.abs(timing.nextAttemptAt!.getTime() - timing.updatedAt.getTime() - [60_000, 5 * 60_000, 30 * 60_000][i-1]) < 2000);
+      }
+      if (i < 4) await db.emailDelivery.update({ where: { id: queued.id }, data: { nextAttemptAt: new Date() } });
+    }
+    assert.equal(await db.emailDeliveryAttempt.count({ where: { deliveryId: queued.id } }), 4);
+    assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: queued.id } })).encryptedPayload, null);
+    assert.equal((await post("register", { ...details, email: "unknown-result@example.test" })).status, 200);
+    const unknownCase = await db.emailDelivery.findFirstOrThrow({ where: { recipient: "unknown-result@example.test" } });
+    assert.equal((await runMailBatch(async () => ({ kind: "UNKNOWN", code: "NETWORK_UNCERTAIN" }), 1, db)).attempted, 1);
+    assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: unknownCase.id } })).status, "UNKNOWN");
+    assert.equal((await runMailBatch(async () => { throw new Error("Must not retry unknown"); }, 1, db)).attempted, 0);
+    assert.equal((await post("register", { ...details, email: "expired-mail@example.test" })).status, 200);
+    const expiredMail = await db.emailDelivery.findFirstOrThrow({ where: { recipient: "expired-mail@example.test" }, include: { token: true } });
+    await db.authToken.update({ where: { id: expiredMail.tokenId! }, data: { createdAt: new Date(Date.now() - 23 * 60 * 60_000), expiresAt: new Date(Date.now() - 1000) } });
+    assert.equal((await runMailBatch(async () => { throw new Error("Expired token must not send"); }, 1, db)).attempted, 0);
+    assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: expiredMail.id } })).status, "EXPIRED");
+    assert.equal((await post("register", { ...details, email: "stale-lease@example.test" })).status, 200);
+    const staleMail = await db.emailDelivery.findFirstOrThrow({ where: { recipient: "stale-lease@example.test" } });
+    const leaseId = randomUUID();
+    await db.emailDelivery.update({ where: { id: staleMail.id }, data: { createdAt: new Date(Date.now() - 2 * 60_000), status: "SENDING", attemptCount: 1, nextAttemptAt: null, leaseId, leaseExpiresAt: new Date(Date.now() - 1000) } });
+    await db.emailDeliveryAttempt.create({ data: { deliveryId: staleMail.id, attemptNumber: 1, leaseId, startedAt: new Date(Date.now() - 90_000) } });
+    const staleRun = await runMailBatch(async () => { throw new Error("Uncertain prior send must not retry"); }, 1, db);
+    assert.equal(staleRun.stale, 1);
+    assert.equal(staleRun.attempted, 0);
+    assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: staleMail.id } })).status, "UNKNOWN");
+    assert.equal((await fetch(`${origin}/api/cron/mail`)).status, 401);
+    assert.equal((await fetch(`${origin}/api/cron/mail`, { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } })).status, 200);
     process.stdout.write("Member registration, review, auth boundaries, expiry, reset and logout passed.\n");
   } finally {
     if (server) { server.kill("SIGTERM"); await once(server,"exit").catch(()=>{}); }

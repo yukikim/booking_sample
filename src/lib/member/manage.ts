@@ -1,10 +1,12 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { getPrisma, setTransactionSchema } from "@/lib/prisma";
 import { emailKey, validPassword } from "@/lib/auth/policy";
 import { hashPassword } from "@/lib/auth/password";
 import { checkMutationOrigin, readJsonBody } from "@/lib/auth/store-mutation";
 import { consumeMailRequest, consumeTokenAttempt, MailRateLimited, TokenRateLimited } from "@/lib/auth/rate-limit";
 import { issueMemberMail, tokenDigest, validRawToken } from "./mail";
+import { dispatchMailAfterResponse } from "@/lib/mail/immediate";
 import { parseRegistration } from "./identity";
 
 export class MemberInputError extends Error { constructor(readonly status: 400 | 409 = 400) { super("Invalid member operation"); } }
@@ -17,40 +19,43 @@ export async function registerMember(request: Request) {
   if (!await consumeMailRequest(input.emailKey, request)) return accepted();
   const hash = await hashPassword(input.password);
   try {
-    await getPrisma().$transaction(async (tx) => {
+    const deliveryId = await getPrisma().$transaction(async (tx) => {
       await setTransactionSchema(tx);
-      if (await tx.member.findUnique({ where: { emailKey: input.emailKey }, select: { id: true } })) return;
+      if (await tx.member.findUnique({ where: { emailKey: input.emailKey }, select: { id: true } })) return null;
       const member = await tx.member.create({ data: { email: input.email, emailKey: input.emailKey, lastName: input.lastName, firstName: input.firstName, lastNameKey: input.lastNameKey, firstNameKey: input.firstNameKey, phoneNumber: input.phoneNumber, postalCode: input.postalCode, ageBand: input.ageBand, passwordHash: hash, status: "PENDING_EMAIL" } });
-      await issueMemberMail(tx, member, "MEMBERSHIP_CONFIRM");
+      return issueMemberMail(tx, member, "MEMBERSHIP_CONFIRM");
     });
+    if (deliveryId) dispatchMailAfterResponse(deliveryId);
   } catch (error) {
     if (!(error && typeof error === "object" && "code" in error && error.code === "P2002")) throw error;
   }
   return accepted();
 }
 
-export async function requestMemberLink(request: Request, purpose: "MEMBERSHIP_CONFIRM" | "PASSWORD_RESET") {
+export async function requestMemberLink(request: Request, purpose: "MEMBERSHIP_CONFIRM" | "RESTORE_CONFIRM" | "PASSWORD_RESET") {
   checkMutationOrigin(request);
   const body = await readJsonBody(request);
   const key = emailKey(body && typeof body === "object" && "email" in body ? body.email : null);
   if (!key) throw new MemberInputError();
   if (!await consumeMailRequest(key, request)) return accepted();
-  await getPrisma().$transaction(async (tx) => {
+  const deliveryId = await getPrisma().$transaction(async (tx) => {
     await setTransactionSchema(tx);
     const existing = await tx.member.findUnique({ where: { emailKey: key }, select: { id: true } });
-    if (!existing) return;
+    if (!existing) return null;
     await tx.$queryRaw`SELECT id FROM "Member" WHERE id = ${existing.id}::uuid FOR UPDATE`;
     const member = await tx.member.findUniqueOrThrow({ where: { id: existing.id } });
-    if (member.isDeleted || (purpose === "MEMBERSHIP_CONFIRM" ? member.status !== "PENDING_EMAIL" : member.status !== "ACTIVE" || !member.emailVerifiedAt)) return;
+    const eligible = purpose === "MEMBERSHIP_CONFIRM" ? member.status === "PENDING_EMAIL" && !member.isDeleted : purpose === "RESTORE_CONFIRM" ? member.status === "RESTORE_PENDING" && member.isDeleted && !!member.firstActivatedAt : member.status === "ACTIVE" && !member.isDeleted && !!member.emailVerifiedAt;
+    if (!eligible) return null;
     const now = new Date();
     await tx.authToken.updateMany({ where: { memberId: member.id, purpose, usedAt: null, revokedAt: null }, data: { revokedAt: now } });
     await tx.emailDelivery.updateMany({ where: { token: { memberId: member.id, purpose, revokedAt: { not: null } }, status: { in: ["PENDING", "RETRY_WAIT"] } }, data: { status: "CANCELLED", encryptedPayload: null, payloadKeyId: null, payloadExpiresAt: null, closedAt: now, nextAttemptAt: null } });
-    await issueMemberMail(tx, member, purpose);
+    return issueMemberMail(tx, member, purpose);
   });
+  if (deliveryId) dispatchMailAfterResponse(deliveryId);
   return accepted();
 }
 
-export async function consumeMemberLink(request: Request, purpose: "MEMBERSHIP_CONFIRM" | "PASSWORD_RESET") {
+export async function consumeMemberLink(request: Request, purpose: "MEMBERSHIP_CONFIRM" | "RESTORE_CONFIRM" | "PASSWORD_RESET") {
   checkMutationOrigin(request);
   const body = await readJsonBody(request);
   if (!body || typeof body !== "object" || !("token" in body) || !("password" in body) || !validRawToken(body.token) || !validPassword(body.password)) throw new MemberInputError();
@@ -66,12 +71,17 @@ export async function consumeMemberLink(request: Request, purpose: "MEMBERSHIP_C
     const token = await tx.authToken.findUniqueOrThrow({ where: { id: found.id } });
     const member = await tx.member.findUniqueOrThrow({ where: { id: found.memberId } });
     const [{ now }] = await tx.$queryRaw<{now: Date}[]>`SELECT clock_timestamp() AS now`;
-    if (token.purpose !== purpose || token.usedAt || token.revokedAt || token.expiresAt <= now || token.emailKey !== member.emailKey || token.authVersion !== member.authVersion || member.isDeleted || (purpose === "MEMBERSHIP_CONFIRM" ? member.status !== "PENDING_EMAIL" : member.status !== "ACTIVE" || !member.emailVerifiedAt)) return false;
+    const eligible = purpose === "MEMBERSHIP_CONFIRM" ? member.status === "PENDING_EMAIL" && !member.isDeleted : purpose === "RESTORE_CONFIRM" ? member.status === "RESTORE_PENDING" && member.isDeleted && !!member.firstActivatedAt && token.restoreGeneration === member.restoreGeneration : member.status === "ACTIVE" && !member.isDeleted && !!member.emailVerifiedAt;
+    if (token.purpose !== purpose || token.usedAt || token.revokedAt || token.expiresAt <= now || token.emailKey !== member.emailKey || token.authVersion !== member.authVersion || !eligible) return false;
     const consumed = await tx.authToken.updateMany({ where: { id: token.id, usedAt: null, revokedAt: null, expiresAt: { gt: now } }, data: { usedAt: now } });
     if (consumed.count !== 1) return false;
     let reviewMatches: {id: string}[] = [];
     if (purpose === "MEMBERSHIP_CONFIRM") reviewMatches = await tx.member.findMany({ where: { id: { not: member.id }, lastNameKey: member.lastNameKey, firstNameKey: member.firstNameKey, isDeleted: true, status: { in: ["WITHDRAWN", "RESTORE_PENDING"] } }, select: { id: true } });
-    await tx.member.update({ where: { id: member.id }, data: { passwordHash: hash, authVersion: { increment: 1 }, ...(purpose === "MEMBERSHIP_CONFIRM" ? { emailVerifiedAt: now, status: reviewMatches.length ? "PENDING_REVIEW" : "ACTIVE", ...(reviewMatches.length ? {} : { firstActivatedAt: now }) } : {}) } });
+    await tx.member.update({ where: { id: member.id }, data: { passwordHash: hash, authVersion: { increment: 1 }, ...(purpose === "MEMBERSHIP_CONFIRM" ? { emailVerifiedAt: now, status: reviewMatches.length ? "PENDING_REVIEW" : "ACTIVE", ...(reviewMatches.length ? {} : { firstActivatedAt: now }) } : purpose === "RESTORE_CONFIRM" ? { status: "ACTIVE", isDeleted: false, emailVerifiedAt: now, version: { increment: 1 } } : {}) } });
+    if (purpose === "RESTORE_CONFIRM") {
+      const audit = await tx.auditLog.create({ data: { requestKey: randomUUID(), actorType: "SYSTEM", action: "MEMBER_RESTORE_COMPLETED", targetType: "Member", targetId: member.id, changes: { restoreGeneration: member.restoreGeneration } } });
+      await tx.memberLifecycleEvent.create({ data: { memberId: member.id, kind: "RESTORE_COMPLETED", restoreGeneration: member.restoreGeneration, auditId: audit.id } });
+    }
     if (reviewMatches.length) await tx.memberReview.create({ data: { memberId: member.id, matches: { create: reviewMatches.map((match) => ({ matchedMemberId: match.id })) } } });
     await tx.authToken.updateMany({ where: { memberId: member.id, id: { not: token.id }, usedAt: null, revokedAt: null }, data: { revokedAt: now } });
     await tx.appSession.updateMany({ where: { memberId: member.id, revokedAt: null }, data: { revokedAt: now } });

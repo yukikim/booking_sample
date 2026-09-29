@@ -22,7 +22,8 @@
     "test:db": "node --conditions=react-server --import tsx scripts/verify-database.ts",
     "test:auth": "node --conditions=react-server --import tsx scripts/verify-auth.ts",
     "test:member": "node --conditions=react-server --import tsx scripts/verify-member.ts",
-    "mail:send": "node --conditions=react-server --import tsx scripts/send-member-mail.ts"
+    "mail:send": "node --conditions=react-server --import tsx scripts/send-member-mail.ts",
+    "mail:check-domain": "node --import tsx scripts/check-mail-domain.ts"
   },
   "dependencies": {
     "@next/env": "16.3.5",

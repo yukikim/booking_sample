@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   typescript: { tsconfigPath: process.env.AUTH_TEST_TSCONFIG ?? "tsconfig.json" },
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   async headers() {
-    return ["/confirm", "/reset-password"].map((source) => ({ source, headers: [{ key: "Referrer-Policy", value: "no-referrer" }, { key: "Cache-Control", value: "no-store" }] }));
+    return ["/confirm", "/restore", "/reset-password"].map((source) => ({ source, headers: [{ key: "Referrer-Policy", value: "no-referrer" }, { key: "Cache-Control", value: "no-store" }] }));
   },
 };
 
