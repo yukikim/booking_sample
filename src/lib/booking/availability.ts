@@ -34,7 +34,7 @@ export async function evaluateAvailability(tx: Prisma.TransactionClient, input: 
   const closesAt = business?.closesAt.getUTCHours();
   const opensAt = business?.opensAt?.getUTCHours();
   const allowed = Boolean(business?.isOpen && opensAt !== undefined && closesAt !== undefined && (flags.ignoreBookingWindow || previous && bookingWindow(input.date, previous.closesAt.getUTCHours(), now.getTime())));
-  const result: { totals: typeof totals; times: Assignment[] } = { totals, times: [] };
+  const result: { totals: typeof totals; times: Assignment[]; outsideWindow: boolean } = { totals, times: [], outsideWindow: !flags.ignoreBookingWindow && previous !== null && !bookingWindow(input.date, previous.closesAt.getUTCHours(), now.getTime()) };
   if (!allowed || opensAt === undefined || closesAt === undefined) return result;
   const rest = await Promise.all(therapists.map(person => getEffectiveTherapistBreak(tx, person.id, input.date)));
   const toResource = (resource: { id: string; createdAt: Date }, index: number): Resource => ({ id: resource.id, createdAt: resource.createdAt.getTime(), breakStart: rest[index]?.startsAt ? tokyoInstant(input.date, rest[index].startsAt.getUTCHours()) : null, breakEnd: rest[index]?.endsAt ? tokyoInstant(input.date, rest[index].endsAt.getUTCHours()) : null });

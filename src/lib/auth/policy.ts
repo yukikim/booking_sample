@@ -32,7 +32,7 @@ export function claimsFrom(value: unknown): SessionClaims | null {
 export function safeRedirect(url: string, baseUrl: string): string {
   try {
     const target = new URL(url, baseUrl);
-    if (target.origin === new URL(baseUrl).origin && ["/manage", "/admin/login", "/staff/login", "/login", "/account"].includes(target.pathname)) return `${target.origin}${target.pathname}`;
+    if (target.origin === new URL(baseUrl).origin && ["/manage", "/admin/login", "/staff/login", "/login", "/account", "/book"].includes(target.pathname)) return `${target.origin}${target.pathname}`;
   } catch { /* Use the fixed destination. */ }
   return `${baseUrl}/manage`;
 }

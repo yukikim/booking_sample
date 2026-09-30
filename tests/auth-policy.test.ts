@@ -22,5 +22,6 @@ test("パスワードは15〜128コードポイント、空白も保持する", 
 test("外部・protocol-relative・未知の戻り先を許可しない", () => {
   for (const url of ["https://evil.test/manage", "//evil.test/manage", "/unknown", "/\\evil.test"]) assert.equal(safeRedirect(url, "https://booking.test"), "https://booking.test/manage");
   assert.equal(safeRedirect("/staff/login?token=secret", "https://booking.test"), "https://booking.test/staff/login");
+  assert.equal(safeRedirect("/book?next=https://evil.test", "https://booking.test"), "https://booking.test/book");
   assert.equal(claimsFrom({ role: "MEMBER" }), null);
 });

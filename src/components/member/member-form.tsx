@@ -53,6 +53,6 @@ export function MemberForm({ mode }: { mode: Mode }) {
       <button disabled={pending || (["confirm", "restore", "reset"].includes(mode) && !token)} className="rounded bg-blue-700 p-3 text-white disabled:opacity-50">{pending ? "処理中…" : settings[mode].button}</button>
       <p role="status" aria-live="polite">{message}</p>
     </form>
-    <nav className="flex flex-wrap gap-4 text-blue-700 underline"><Link href="/login">ログイン</Link><Link href="/register/resend">確認メール再送</Link><Link href="/restore/resend">復旧確認メール再送</Link><Link href="/forgot-password">パスワード再設定</Link></nav>
+    <nav className="flex flex-wrap gap-4 text-blue-700 underline"><Link href="/login?next=%2Fbook">ログインして予約へ</Link><Link href="/register/resend">確認メール再送</Link><Link href="/restore/resend">復旧確認メール再送</Link><Link href="/forgot-password">パスワード再設定</Link></nav>
   </main>;
 }

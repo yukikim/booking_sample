@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     if ([...url.searchParams.keys()].some(key => !["date", "treatmentId", "optionId"].includes(key))) throw new Error("Invalid query.");
     const input = parseAvailabilityRequest({ date, treatmentId, optionIds });
     const result = await findAvailability(input);
-    return Response.json({ totals: result.totals, times: result.times.map(time => ({ startsAt: time.startsAt, treatmentEndsAt: time.treatmentEndsAt, occupiesUntil: time.occupiesUntil })) }, { headers: { "Cache-Control": "no-store" } });
+    return Response.json({ totals: result.totals, outsideWindow: result.outsideWindow, times: result.times.map(time => ({ startsAt: time.startsAt, treatmentEndsAt: time.treatmentEndsAt, occupiesUntil: time.occupiesUntil })) }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const status = error instanceof Error && (/Invalid|Use a valid|Inactive|exceeds/.test(error.message)) ? 400 : 503;
     return Response.json({ error: status === 400 ? "InvalidInput" : "TemporarilyUnavailable" }, { status, headers: { "Cache-Control": "no-store" } });

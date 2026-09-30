@@ -9,9 +9,8 @@ import { resolveSession } from "@/lib/auth/session";
 import { checkMutationOrigin, StoreInputError } from "@/lib/auth/store-mutation";
 import { StoreAccessError } from "@/lib/auth/permissions";
 import { getPrisma, setTransactionSchema } from "@/lib/prisma";
-import { getEffectiveBusinessDay } from "@/lib/schedules/effective";
 import { parseBusinessDate } from "@/lib/schedules/calendar";
-import { tokyoInstant } from "./availability-core";
+import { cancellationDeadline } from "./deadline";
 import { parseAvailabilityRequest, revalidateAtSave, type AvailabilityRequest } from "./availability";
 import { lockBookingState } from "./lock";
 
@@ -121,16 +120,6 @@ async function replay(tx: Prisma.TransactionClient, actor: Actor, action: string
   return { reservationId: reservation.id, version: changes.resultVersion as number, status: changes.resultStatus as string, replayed: true };
 }
 function auditActor(actor: Actor) { return { actorType: actor.role, ...(actor.role === "MEMBER" ? { actorMemberId: actor.id } : actor.role === "STAFF" ? { actorStaffId: actor.id } : { actorAdminId: actor.id }) } as const; }
-async function cancellationDeadline(tx: Prisma.TransactionClient, date: string) {
-  let day = parseBusinessDate(date);
-  for (let i = 0; i < 366; i++) {
-    day = new Date(day.getTime() - 86_400_000);
-    const text = day.toISOString().slice(0, 10);
-    const setting = await getEffectiveBusinessDay(tx, text);
-    if (setting?.isOpen) return tokyoInstant(text, setting.closesAt.getUTCHours());
-  }
-  return null;
-}
 function checkQuote(input: Selection, calculated: { totalDurationMinutes: number; totalPriceYen: number }) {
   if (input.quote.totalDurationMinutes !== calculated.totalDurationMinutes || input.quote.totalPriceYen !== calculated.totalPriceYen) throw new BookingError(409, "SelectionChanged");
 }

@@ -96,6 +96,32 @@ async function main() {
     assert.equal(first.status, 201, JSON.stringify(first.result));
     const firstId = first.result.reservationId as string;
     assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 1);
+    async function read(path: string, session = memberCookie) {
+      const response = await fetch(`${origin}${path}`, { headers: { cookie: session }, redirect: "manual" });
+      return { status: response.status, result: await response.json() as Record<string, unknown> };
+    }
+    assert.equal((await read("/api/reservations", "")).status, 401);
+    assert.equal((await read(`/api/reservations/${firstId}`, "")).status, 401);
+    assert.equal((await read("/api/reservations?memberId=" + member.id)).status, 400);
+    const ownList = await read("/api/reservations");
+    assert.equal(ownList.status, 200);
+    assert((ownList.result.reservations as { id: string }[]).some(row => row.id === firstId));
+    assert(!(await read("/api/reservations", otherCookie).then(row => row.result.reservations as { id: string }[])).some(row => row.id === firstId));
+    assert.equal((await read(`/api/reservations/${firstId}`, otherCookie)).status, 404);
+    assert.equal((await read(`/api/reservations/${randomUUID()}`)).status, 404);
+    const ownDetail = await read(`/api/reservations/${firstId}`);
+    assert.equal(ownDetail.status, 200);
+    assert.equal((ownDetail.result.reservation as { canCancel: boolean }).canCancel, true);
+    assert.equal((ownDetail.result.reservation as { memberFirstNameSnapshot: string }).memberFirstNameSnapshot, "花子");
+    const ownPage = await fetch(`${origin}/account/reservations/${firstId}`, { headers: { cookie: memberCookie }, redirect: "manual" });
+    assert.equal(ownPage.status, 200);
+    assert((await ownPage.text()).includes("予約詳細"));
+    const foreignPage = await fetch(`${origin}/account/reservations/${firstId}`, { headers: { cookie: otherCookie }, redirect: "manual" });
+    assert.equal(foreignPage.status, 404);
+    assert(!(await foreignPage.text()).includes("booking@example.test"));
+    const anonymousPage = await fetch(`${origin}/account/reservations/${firstId}`, { redirect: "manual" });
+    assert([302, 303, 307, 308].includes(anonymousPage.status));
+    assert.equal(new URL(anonymousPage.headers.get("location")!, origin).pathname, "/login");
     assert.equal((await send("POST", "/api/reservations", firstBody)).result.replayed, true);
     assert.equal((await send("POST", "/api/reservations", { ...firstBody, startsAt: iso(date, 10) })).status, 409);
     const duplicateBody = create(14);
@@ -115,6 +141,8 @@ async function main() {
     const cancelled = await send("DELETE", `/api/reservations/${firstId}`, cancelBody);
     assert.equal(cancelled.status, 200, JSON.stringify(cancelled.result));
     assert.equal((await send("DELETE", `/api/reservations/${firstId}`, cancelBody)).result.replayed, true);
+    assert.equal((await send("DELETE", `/api/reservations/${firstId}`, { requestKey: randomUUID(), expectedVersion: 2 })).status, 409);
+    assert.equal((await read(`/api/reservations/${firstId}`).then(row => row.result.reservation as { canCancel: boolean })).canCancel, false);
     assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 0);
     const history = await db.reservation.findUniqueOrThrow({ where: { id: firstId } });
     assert.equal(history.status, "CANCELLED"); assert.equal(history.memberFirstNameSnapshot, "花子"); assert.equal(history.treatmentPriceYenSnapshot, 6000);
@@ -193,6 +221,7 @@ async function main() {
     const pastId = randomUUID();
     await db.reservation.create({ data: { id: pastId, memberId: member.id, treatmentId: seedIds.treatments[0], roomId: seedIds.rooms[0], therapistId: seedIds.therapists[0], memberLastNameSnapshot: member.lastName, memberFirstNameSnapshot: member.firstName, memberEmailSnapshot: member.email, memberPhoneNumberSnapshot: member.phoneNumber, treatmentNameSnapshot: "ボディケア", treatmentDurationMinutesSnapshot: 60, treatmentPriceYenSnapshot: 6000, roomNameSnapshot: "施術ルーム1", therapistNameSnapshot: "施術者1", businessDate: parseBusinessDate(pastDate), startsAt: new Date(iso(pastDate, 9)), treatmentEndsAt: new Date(iso(pastDate, 10)), occupiesUntil: new Date(iso(pastDate, 10)), totalDurationMinutes: 60, totalPriceYen: 6000, slotCount: 1 } });
     await db.reservationSlot.create({ data: { reservationId: pastId, roomId: seedIds.rooms[0], therapistId: seedIds.therapists[0], slotStartsAt: new Date(iso(pastDate, 9)) } });
+    assert.equal((await read(`/api/reservations/${pastId}`).then(row => row.result.reservation as { canCancel: boolean })).canCancel, false);
     assert.equal((await send("DELETE", `/api/reservations/${pastId}`, { requestKey: randomUUID(), expectedVersion: 1 })).status, 409);
     assert.equal((await send("DELETE", `/api/reservations/${pastId}`, { requestKey: randomUUID(), expectedVersion: 1, storeException: true }, adminCookie)).status, 400);
     assert.equal((await send("DELETE", `/api/reservations/${pastId}`, { requestKey: randomUUID(), expectedVersion: 1, storeException: true, exceptionReason: "店舗都合の中止" }, adminCookie)).status, 200);
