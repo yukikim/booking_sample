@@ -17,7 +17,9 @@ export function parseAvailabilityRequest(value: unknown): AvailabilityRequest {
   return { date: row.date, treatmentId: row.treatmentId, optionIds: row.optionIds as string[] };
 }
 
-export async function evaluateAvailability(tx: Prisma.TransactionClient, input: AvailabilityRequest, now: Date, flags: { excludeReservationId?: string; ignoreBookingWindow?: boolean } = {}) {
+export type AvailabilityFlags = { excludeReservationId?: string; ignoreBookingWindow?: boolean; roomId?: string; therapistId?: string };
+
+export async function evaluateAvailability(tx: Prisma.TransactionClient, input: AvailabilityRequest, now: Date, flags: AvailabilityFlags = {}) {
   const date = parseBusinessDate(input.date);
   const previousDate = new Date(date.getTime() - 86_400_000).toISOString().slice(0, 10);
   const [business, previous, treatment, options, rooms, therapists, reservations, overruns] = await Promise.all([
@@ -38,25 +40,25 @@ export async function evaluateAvailability(tx: Prisma.TransactionClient, input: 
   if (!allowed || opensAt === undefined || closesAt === undefined) return result;
   const rest = await Promise.all(therapists.map(person => getEffectiveTherapistBreak(tx, person.id, input.date)));
   const toResource = (resource: { id: string; createdAt: Date }, index: number): Resource => ({ id: resource.id, createdAt: resource.createdAt.getTime(), breakStart: rest[index]?.startsAt ? tokyoInstant(input.date, rest[index].startsAt.getUTCHours()) : null, breakEnd: rest[index]?.endsAt ? tokyoInstant(input.date, rest[index].endsAt.getUTCHours()) : null });
-  const people = therapists.map(toResource).filter((person, index) => rest[index]?.startsAt && rest[index]?.endsAt && rest[index].startsAt! >= business!.opensAt! && rest[index].endsAt! <= business!.closesAt);
-  const roomResources: Resource[] = rooms.map(room => ({ id: room.id, createdAt: room.createdAt.getTime(), breakStart: null, breakEnd: null }));
+  const people = therapists.map(toResource).filter((person, index) => rest[index]?.startsAt && rest[index]?.endsAt && rest[index].startsAt! >= business!.opensAt! && rest[index].endsAt! <= business!.closesAt && (!flags.therapistId || person.id === flags.therapistId));
+  const roomResources: Resource[] = rooms.filter(room => !flags.roomId || room.id === flags.roomId).map(room => ({ id: room.id, createdAt: room.createdAt.getTime(), breakStart: null, breakEnd: null }));
   const occupied: Occupancy[] = [...reservations, ...overruns].map(row => ({ roomId: row.roomId, therapistId: row.therapistId, startsAt: row.startsAt.getTime(), occupiesUntil: row.occupiesUntil.getTime(), status: row.status }));
   for (let hour = opensAt; hour < closesAt; hour++) {
     const assignment = assignAt(input.date, hour, totals, opensAt, closesAt, roomResources, people, occupied, now.getTime());
-    if (assignment) result.times.push(assignment);
+    if (assignment && Date.parse(assignment.startsAt) > now.getTime()) result.times.push(assignment);
   }
   return result;
 }
 
-export async function findAvailability(input: AvailabilityRequest, now = new Date()) {
+export async function findAvailability(input: AvailabilityRequest, now = new Date(), flags: AvailabilityFlags = {}) {
   return getPrisma().$transaction(async tx => {
     await setTransactionSchema(tx);
-    return evaluateAvailability(tx, input, now);
+    return evaluateAvailability(tx, input, now, flags);
   }, { isolationLevel: "RepeatableRead" });
 }
 
 /** Call immediately before inserting reservation and slots in the same transaction. */
-export async function revalidateAtSave(tx: Prisma.TransactionClient, input: AvailabilityRequest, startsAt: string, now = new Date(), options: { excludeReservationId?: string; ignoreBookingWindow?: boolean } = {}) {
+export async function revalidateAtSave(tx: Prisma.TransactionClient, input: AvailabilityRequest, startsAt: string, now = new Date(), options: AvailabilityFlags = {}) {
   const result = await evaluateAvailability(tx, input, now, options);
   return { totals: result.totals, assignment: result.times.find(time => time.startsAt === startsAt) ?? null };
 }

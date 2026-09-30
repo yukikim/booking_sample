@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatTokyo, reservationStatus } from "@/lib/booking/display";
-import { StoreAccessError } from "@/lib/auth/permissions";
+import { getStoreCapabilities, StoreAccessError } from "@/lib/auth/permissions";
 import {
   listStoreReservations,
   parseReservationFilters,
@@ -37,8 +37,9 @@ export default async function Page({
     );
   }
   let data;
+  let access;
   try {
-    data = await listStoreReservations(filters);
+    [data, access] = await Promise.all([listStoreReservations(filters), getStoreCapabilities()]);
   } catch (error) {
     if (error instanceof StoreAccessError && error.status === 401)
       redirect("/staff/login");
@@ -92,6 +93,7 @@ export default async function Page({
         ← 店舗画面
       </Link>
       <h1 className="text-2xl font-bold">予約一覧・カレンダー</h1>
+      {(access.principal.role === "ADMIN" || access.permissions.includes("RESERVATION_CREATE")) && <Link className="inline-block rounded border p-2 underline" href="/manage/reservations/new">会員の予約を登録</Link>}
       <form
         className="flex flex-wrap items-end gap-3 rounded border p-4"
         action="/manage/reservations"

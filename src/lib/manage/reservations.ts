@@ -44,7 +44,7 @@ export async function getStoreReservation(id: string) {
   await requireStoreAction("STORE_VIEW");
   if (!uuid.test(id)) return null;
   return getPrisma().reservation.findUnique({ where: { id }, select: {
-    id: true, memberId: true, status: true, businessDate: true, startsAt: true, treatmentEndsAt: true, occupiesUntil: true,
+    id: true, version: true, memberId: true, treatmentId: true, roomId: true, therapistId: true, status: true, businessDate: true, startsAt: true, treatmentEndsAt: true, occupiesUntil: true,
     actualStartedAt: true, actualCompletedAt: true, cancelledAt: true, cancellationKind: true, cancellationReason: true,
     memberLastNameSnapshot: true, memberFirstNameSnapshot: true, memberEmailSnapshot: true, memberPhoneNumberSnapshot: true,
     treatmentNameSnapshot: true, treatmentDurationMinutesSnapshot: true, treatmentPriceYenSnapshot: true,

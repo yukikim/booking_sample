@@ -16,7 +16,7 @@ import { lockBookingState } from "./lock";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Actor = { role: SessionClaims["role"]; id: string; claims?: SessionClaims };
-type Selection = AvailabilityRequest & { startsAt: string; notes: string | null; quote: { totalDurationMinutes: number; totalPriceYen: number }; memberId?: string };
+type Selection = AvailabilityRequest & { startsAt: string; notes: string | null; quote: { totalDurationMinutes: number; totalPriceYen: number }; memberId?: string; roomId?: string; therapistId?: string };
 type Command = { requestKey: string; storeException: boolean; exceptionReason: string | null };
 
 export class BookingError extends Error {
@@ -38,7 +38,7 @@ function command(row: Record<string, unknown>): Command {
   if ((storeException && (!exceptionReason || [...exceptionReason].length > 1000)) || (!storeException && row.exceptionReason !== undefined)) return invalid();
   return { requestKey, storeException, exceptionReason };
 }
-function selection(row: Record<string, unknown>, allowMemberId: boolean): Selection {
+function selection(row: Record<string, unknown>, allowMemberId: boolean, allowAssignment = false): Selection {
   let base: AvailabilityRequest;
   try { base = parseAvailabilityRequest({ date: row.date, treatmentId: row.treatmentId, optionIds: row.optionIds }); }
   catch { return invalid(); }
@@ -48,16 +48,17 @@ function selection(row: Record<string, unknown>, allowMemberId: boolean): Select
   const quote = object(row.quote, ["totalDurationMinutes", "totalPriceYen"]);
   if (!Number.isSafeInteger(quote.totalDurationMinutes) || (quote.totalDurationMinutes as number) < 1 || (quote.totalDurationMinutes as number) > 1380 || !Number.isSafeInteger(quote.totalPriceYen) || (quote.totalPriceYen as number) < 0 || (quote.totalPriceYen as number) > 1_000_000) return invalid();
   if (row.memberId !== undefined && (!allowMemberId || typeof row.memberId !== "string" || !uuid.test(row.memberId))) return invalid();
-  return { ...base, startsAt: row.startsAt, notes, quote: { totalDurationMinutes: quote.totalDurationMinutes as number, totalPriceYen: quote.totalPriceYen as number }, ...(row.memberId ? { memberId: row.memberId as string } : {}) };
+  if ((row.roomId !== undefined || row.therapistId !== undefined) && (!allowAssignment || typeof row.roomId !== "string" || !uuid.test(row.roomId) || typeof row.therapistId !== "string" || !uuid.test(row.therapistId))) return invalid();
+  return { ...base, startsAt: row.startsAt, notes, quote: { totalDurationMinutes: quote.totalDurationMinutes as number, totalPriceYen: quote.totalPriceYen as number }, ...(row.memberId ? { memberId: row.memberId as string } : {}), ...(row.roomId ? { roomId: row.roomId as string, therapistId: row.therapistId as string } : {}) };
 }
 export function parseCreate(value: unknown) {
   const row = object(value, ["requestKey", "memberId", "date", "startsAt", "treatmentId", "optionIds", "quote", "notes"]);
   return { ...command(row), ...selection(row, true) };
 }
 export function parseChange(value: unknown) {
-  const row = object(value, ["requestKey", "expectedVersion", "date", "startsAt", "treatmentId", "optionIds", "quote", "notes", "storeException", "exceptionReason"]);
+  const row = object(value, ["requestKey", "expectedVersion", "date", "startsAt", "treatmentId", "optionIds", "quote", "notes", "roomId", "therapistId", "storeException", "exceptionReason"]);
   if (!Number.isSafeInteger(row.expectedVersion) || (row.expectedVersion as number) < 1) return invalid();
-  return { ...command(row), ...selection(row, false), expectedVersion: row.expectedVersion as number };
+  return { ...command(row), ...selection(row, false, true), expectedVersion: row.expectedVersion as number };
 }
 export function parseCancel(value: unknown) {
   const row = object(value, ["requestKey", "expectedVersion", "reason", "storeException", "exceptionReason"]);
@@ -127,7 +128,7 @@ async function validateSelection(tx: Prisma.TransactionClient, input: Selection,
   if (Date.parse(input.startsAt) <= now.getTime()) throw new BookingError(409, "Unavailable");
   await lockCatalog(tx, input);
   let evaluated;
-  try { evaluated = await revalidateAtSave(tx, input, input.startsAt, now, { excludeReservationId, ignoreBookingWindow: exception }); }
+    try { evaluated = await revalidateAtSave(tx, input, input.startsAt, now, { excludeReservationId, ignoreBookingWindow: exception, roomId: input.roomId, therapistId: input.therapistId }); }
   catch (error) { if (error instanceof Error && (/Invalid|Inactive|exceeds|Use a valid/.test(error.message))) throw new BookingError(409, "SelectionChanged"); throw error; }
   checkQuote(input, evaluated.totals);
   if (!evaluated.assignment) throw new BookingError(409, "Unavailable");
@@ -192,6 +193,7 @@ export async function changeReservation(request: Request, id: string, value: unk
   return getPrisma().$transaction(async tx => {
     await setTransactionSchema(tx);
     const actor = await authorize(tx, request, "RESERVATION_UPDATE", input.storeException);
+    if (actor.role === "MEMBER" && input.roomId) throw new BookingError(403, "Forbidden");
     await lockBookingState(tx);
     if (actor.role !== "MEMBER") {
       const repeated = await replay(tx, actor, "RESERVATION_CHANGED", input.requestKey, hash);
