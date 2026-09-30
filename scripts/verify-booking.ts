@@ -87,6 +87,38 @@ async function main() {
     const availability = await fetch(`${origin}/api/availability?date=${date}&treatmentId=${seedIds.treatments[0]}`);
     assert.equal(availability.status, 200);
     assert((await availability.json() as { times: { startsAt: string }[] }).times.some(time => time.startsAt === iso(date, 9)));
+    const calendarResponse = await fetch(`${origin}/api/availability/calendar?treatmentId=${seedIds.treatments[0]}`);
+    assert.equal(calendarResponse.status, 200);
+    assert.equal(calendarResponse.headers.get("cache-control"), "no-store");
+    const bookingCalendar = await calendarResponse.json() as { today: string; endDate: string; days: { date: string; availableCount: number; outsideWindow: boolean }[] };
+    assert.equal(bookingCalendar.today, tokyoBusinessDate(new Date()));
+    assert.equal(bookingCalendar.days.length, 30);
+    assert(bookingCalendar.days.every(day => day.date > bookingCalendar.today && day.date <= bookingCalendar.endDate));
+    assert(bookingCalendar.days.find(day => day.date === date)!.availableCount > 0);
+    const closedDay = bookingCalendar.days.find(day => parseBusinessDate(day.date).getUTCDay() === 0)!;
+    assert.equal(closedDay.availableCount, 0);
+    assert.equal((await fetch(`${origin}/api/availability/calendar?treatmentId=invalid`)).status, 400);
+    assert.equal((await fetch(`${origin}/api/availability/calendar?treatmentId=${seedIds.treatments[0]}&date=${date}`)).status, 400);
+    const withOption = await fetch(`${origin}/api/availability/calendar?treatmentId=${seedIds.treatments[0]}&optionId=${seedIds.options[0]}`);
+    assert.equal(withOption.status, 200);
+    const optionCalendar = await withOption.json() as typeof bookingCalendar;
+    const optionDaily = await fetch(`${origin}/api/availability?date=${date}&treatmentId=${seedIds.treatments[0]}&optionId=${seedIds.options[0]}`).then(response => response.json()) as { times: unknown[] };
+    assert.equal(optionCalendar.days.find(day => day.date === date)!.availableCount, optionDaily.times.length);
+    // Fill every available time on a separate test day through the real booking API.
+    const fullDate = dayAfter(20);
+    const fullDay = await fetch(`${origin}/api/availability?date=${fullDate}&treatmentId=${seedIds.treatments[0]}`).then(response => response.json()) as { times: { startsAt: string }[] };
+    assert(fullDay.times.length > 0);
+    const fullIds: string[] = [];
+    for (const slot of fullDay.times) {
+      const booked = await send("POST", "/api/reservations", { ...create(9), date: fullDate, startsAt: slot.startsAt });
+      assert.equal(booked.status, 201);
+      fullIds.push(booked.result.reservationId as string);
+    }
+    const fullCalendar = await fetch(`${origin}/api/availability/calendar?treatmentId=${seedIds.treatments[0]}`).then(response => response.json()) as typeof bookingCalendar;
+    assert.equal(fullCalendar.days.find(day => day.date === fullDate)!.availableCount, 0);
+    for (const id of fullIds) assert.equal((await send("DELETE", `/api/reservations/${id}`, { requestKey: randomUUID(), expectedVersion: 1 })).status, 200);
+    const reopenedCalendar = await fetch(`${origin}/api/availability/calendar?treatmentId=${seedIds.treatments[0]}`).then(response => response.json()) as typeof bookingCalendar;
+    assert.equal(reopenedCalendar.days.find(day => day.date === fullDate)!.availableCount, fullDay.times.length);
     const unauthenticated = await send("POST", "/api/reservations", create(9), "");
     assert.equal(unauthenticated.status, 401, JSON.stringify({ result: unauthenticated.result, input: create(9) }));
     assert.equal((await send("POST", "/api/reservations", { ...create(9), memberId: other.id })).status, 400);

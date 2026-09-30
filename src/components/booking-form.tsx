@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BookingDatePicker } from "@/components/booking-date-picker";
 import {
   useCallback,
   useEffect,
@@ -40,7 +41,7 @@ const time = (value: string) =>
     hour12: false,
   }).format(new Date(value));
 
-export function BookingForm() {
+export function BookingForm({ initialToday }: { initialToday: string }) {
   const [catalog, setCatalog] = useState<{
     treatments: Item[];
     options: Item[];
@@ -49,6 +50,7 @@ export function BookingForm() {
   const [treatmentId, setTreatmentId] = useState("");
   const [optionIds, setOptionIds] = useState<string[]>([]);
   const [date, setDate] = useState("");
+  const [calendarRevision, setCalendarRevision] = useState(0);
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
@@ -142,6 +144,7 @@ export function BookingForm() {
     searchVersion.current++;
     setAvailability(null);
     setSlot(null);
+    setSearching(false);
     setSearchError("");
     setConfirming(false);
     setMember(null);
@@ -169,7 +172,10 @@ export function BookingForm() {
       if (version === searchVersion.current)
         setSearchError("空き時刻を取得できませんでした。再検索してください。");
     } finally {
-      if (version === searchVersion.current) setSearching(false);
+      if (version === searchVersion.current) {
+        setSearching(false);
+        setCalendarRevision(value => value + 1);
+      }
     }
   }
   async function prepare() {
@@ -291,7 +297,7 @@ export function BookingForm() {
       </main>
     );
   return (
-    <main className="mx-auto max-w-2xl space-y-6 p-6">
+    <main className="mx-auto max-w-4xl space-y-6 p-6">
       <h1 className="text-2xl font-bold">Web予約</h1>
       <p>
         メニューと空き時刻はどなたでも確認できます。予約の確定には会員ログインが必要です。
@@ -370,63 +376,28 @@ export function BookingForm() {
             )}
           </section>
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold">2. 日付・空き時刻</h2>
-            <label className="block">
-              予約日
-              <input
-                className="mt-1 w-full rounded border p-3"
-                type="date"
-                value={date}
-                onChange={(event) => {
-                  resetSelection();
-                  setDate(event.target.value);
-                }}
-              />
-            </label>
-            <Button
-              type="button"
-              disabled={!date || !validTotal || searching}
-              onClick={() => void search()}
-            >
-              {searching ? "取得中…" : "空き時刻を検索"}
-            </Button>
+            <h2 id="booking-calendar-heading" tabIndex={-1} className="text-xl font-semibold">2. 日付・空き時刻</h2>
+            <BookingDatePicker
+              initialToday={initialToday}
+              treatmentId={treatmentId}
+              optionIds={optionIds}
+              enabled={validTotal && !searching}
+              date={date}
+              slot={slot}
+              refreshKey={calendarRevision}
+              onSelect={(selectedDate, selectedSlot, selectedAvailability) => {
+                resetSelection();
+                setDate(selectedDate);
+                setAvailability(selectedAvailability);
+                setSlot(selectedSlot);
+              }}
+            />
             {searchError && <p role="alert">{searchError}</p>}
-            {availability?.outsideWindow && (
-              <p role="status">
-                この日は予約受付期間外です。予約は30日前から前日の営業終了時刻まで受け付けます。
-              </p>
-            )}
-            {availability &&
-              !availability.outsideWindow &&
-              availability.times.length === 0 && (
-                <p role="status">この日の空き時刻はありません。</p>
-              )}
-            {availability && availability.times.length > 0 && (
-              <fieldset className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <legend className="mb-2">開始時刻を選択</legend>
-                {availability.times.map((item) => (
-                  <label key={item.startsAt} className="rounded border p-3">
-                    <input
-                      type="radio"
-                      name="slot"
-                      checked={slot?.startsAt === item.startsAt}
-                      onChange={() => {
-                        setSlot(item);
-                        setConfirming(false);
-                        setMessage("");
-                        requestKey.current = null;
-                      }}
-                    />{" "}
-                    {time(item.startsAt)}
-                  </label>
-                ))}
-              </fieldset>
-            )}
           </section>
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold">3. 予約内容</h2>
+            <h2 className="text-xl font-semibold">3. 備考</h2>
             <label className="block">
-              備考（任意・1,000文字以内）
+              ご要望など（任意・1,000文字以内）
               <textarea
                 className="mt-1 w-full rounded border p-3"
                 rows={3}
