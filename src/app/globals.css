@@ -1,19 +1,66 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f8fb;
+  --foreground: #20364b;
+  --card: #ffffff;
+  --primary: #1769aa;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf3fb;
+  --secondary-foreground: #185a8c;
+  --muted: #eef3f7;
+  --muted-foreground: #5d7183;
+  --accent: #e8f5f1;
+  --accent-foreground: #246b60;
+  --border: #d6e2ec;
+  --ring: #1769aa;
+  --destructive: #b42334;
+  --radius: 0.75rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * { border-color: var(--border); }
+  body { @apply bg-background font-sans text-foreground; }
+  ::selection { @apply bg-secondary text-secondary-foreground; }
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    @apply outline-2 outline-offset-4 outline-ring;
+  }
+  :where(button, select, summary) { cursor: pointer; }
+  :where(button):disabled { cursor: not-allowed; }
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
+    @apply min-h-11 min-w-0 rounded-lg border bg-card px-3 py-2 text-base;
+    max-width: 100%;
+  }
+  :where(input[type="checkbox"], input[type="radio"]) {
+    @apply size-4 shrink-0 accent-primary;
+  }
+  :where(input, select, textarea):disabled { @apply bg-muted opacity-70; }
+  :where(button:not([data-slot="button"])) {
+    @apply min-h-11 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50;
+  }
+  :where(h1, h2, h3) { @apply tracking-tight; }
+  :where(p) { line-height: 1.8; overflow-wrap: anywhere; }
+  :where(a) { text-underline-offset: 4px; }
+  :where(th, td) { @apply px-3 py-3; }
+  :where(th) { @apply bg-secondary font-semibold; }
+  :where([role="alert"]) { @apply rounded-lg border border-destructive/20 bg-red-50 p-3 text-destructive; }
+}
+
+@layer components {
+  /* Existing pages keep their individual max-width and layout utilities. */
+  .site-content > main {
+    width: 100%;
+    margin-block: 1.5rem;
+    @apply rounded-2xl border bg-card shadow-soft;
+  }
+  .site-content > main:not(.home-page) { padding: 1.25rem; }
+  @media (min-width: 640px) {
+    .site-content > main { margin-block: 2.5rem; }
+    .site-content > main:not(.home-page) { padding: 2rem; }
+  }
 }

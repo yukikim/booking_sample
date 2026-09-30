@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   useCallback,
   useEffect,
@@ -382,14 +383,13 @@ export function BookingForm() {
                 }}
               />
             </label>
-            <button
+            <Button
               type="button"
               disabled={!date || !validTotal || searching}
-              className="rounded bg-blue-700 p-3 text-white disabled:opacity-50"
               onClick={() => void search()}
             >
               {searching ? "取得中…" : "空き時刻を検索"}
-            </button>
+            </Button>
             {searchError && <p role="alert">{searchError}</p>}
             {availability?.outsideWindow && (
               <p role="status">
@@ -439,16 +439,15 @@ export function BookingForm() {
               />
             </label>
             {!confirming && (
-              <button
+              <Button
                 type="button"
                 disabled={!slot || memberState === "loading"}
-                className="rounded bg-blue-700 p-3 text-white disabled:opacity-50"
                 onClick={() => void prepare()}
               >
                 {memberState === "loading"
                   ? "会員情報を確認中…"
                   : "予約内容を確認"}
-              </button>
+              </Button>
             )}
             {memberState === "login" && (
               <p role="alert">
@@ -501,12 +500,9 @@ export function BookingForm() {
                   {yen(availability.totals.totalPriceYen)}
                 </p>
                 <p>備考：{notes || "なし"}</p>
-                <button
-                  disabled={submitting}
-                  className="rounded bg-blue-700 p-3 text-white disabled:opacity-50"
-                >
+                <Button disabled={submitting}>
                   {submitting ? "送信中…" : "この内容で予約する"}
-                </button>
+                </Button>
               </form>
             )}
             {message && <p role="alert">{message}</p>}

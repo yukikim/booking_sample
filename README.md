@@ -18,7 +18,7 @@ Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼー
 | --- | --- |
 | フレームワーク | Next.js（App Router） |
 | 言語 | TypeScript |
-| スタイリング | Tailwind CSS |
+| スタイリング | Tailwind CSS v4（theme.extend）＋shadcn/ui |
 | データベース | PostgreSQL |
 | ORM | Prisma |
 | 認証 | NextAuth 5.0.0-beta.32（管理者・スタッフ認証実装済み） |
@@ -44,6 +44,17 @@ Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼー
 Next.jsはホスト側で動かし、PostgreSQLだけをコンテナで動かします。DB・認証画面のローカル開発にVercel・Neon・Resendのアカウントは不要です。実際のメール送信にはResendの設定が必要です。会員・予約・認証主体・運用情報・適用日付き設定の計30モデルはローカルDBへ適用し、開発用初期データ・DB制約を検証済みです。管理者・スタッフ・会員認証、送信待ち登録、配送ワーカー、保護された定期実行入口を実装済みです。実Resend配信と本番定期実行は未検証です。予約画面と店舗管理画面は実装済みです。本番公開とブラウザ全フロー検証は未完了です。設定と手順は[Epic 3詳細設計](docs/detailed_design_ep3.md)を参照してください。
 
 Prisma CLIの推移依存には、監査指摘に対応した版限定の`overrides`があります。更新時の扱いは[Epic 2詳細設計第7章](docs/detailed_design_ep2.md#7-dependency-auditの失敗への対応)を参照してください。
+
+### 基本UIデザイン（2026-09-30実装）
+
+- ブルーを基調とし、白いカード・淡いブルーの背景・控えめなグリーンで健康的でスマートな印象を作る。
+- モバイルファースト。ヘッダーのグローバルメニューはスマートフォンでは開閉式、PC（lg以上）では横並び。全画面に共通ヘッダー・フッターを表示する。
+- `tailwind.config.ts`の`theme.extend`で既定テーマに色・角丸・影・フォントを追加。Tailwind v4の`@config`で読み込み、配色は`src/app/globals.css`のCSS変数で管理する。
+- shadcn/uiのButton・Cardを`src/components/ui/`に配置。トップページ、予約・会員手続き・ログインの主要アクションに採用。追加コンポーネントの設定は`components.json`に管理する。
+- キーボードフォーカス、本文スキップ、現在ページ表示、モバイルメニューのEscape閉じ、44px以上の主要操作領域に対応する。
+- 画面ごとの既存の最大幅を維持し、フォーム画面は中央配置、PCでは余白を広く取る。既存の予約処理・認証・DBスキーマは変更しない。
+
+設計と検証範囲は[基本UI詳細設計](docs/ui_design.md)を参照してください。
 
 ## 3. 利用者
 

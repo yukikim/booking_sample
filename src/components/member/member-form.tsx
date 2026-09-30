@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 type Mode =
   | "register"
@@ -200,15 +201,14 @@ export function MemberForm({ mode }: { mode: Mode }) {
             </span>
           </label>
         )}
-        <button
+        <Button
           disabled={
             pending ||
             (["confirm", "restore", "reset"].includes(mode) && !token)
           }
-          className="rounded bg-blue-700 p-3 text-white disabled:opacity-50"
         >
           {pending ? "処理中…" : settings[mode].button}
-        </button>
+        </Button>
         <p role="status" aria-live="polite">
           {message}
         </p>

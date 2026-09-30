@@ -1,4 +1,6 @@
 "use client";
+
+import { Button } from "@/components/ui/button";
 import { useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -69,12 +71,9 @@ export function LoginForm({ role }: { role: "admin" | "staff" | "member" }) {
           className="rounded border p-2"
         />
       </label>
-      <button
-        disabled={pending}
-        className="rounded bg-blue-700 p-3 text-white disabled:opacity-50"
-      >
+      <Button disabled={pending}>
         {pending ? "確認中…" : "ログイン"}
-      </button>
+      </Button>
       <p role="status" aria-live="polite">
         {message}
       </p>
