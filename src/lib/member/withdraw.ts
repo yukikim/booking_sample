@@ -10,11 +10,12 @@ import { resolveSession } from "@/lib/auth/session";
 import { checkMutationOrigin, readJsonBody, requireStoreMutation, StoreInputError } from "@/lib/auth/store-mutation";
 import { lockBookingState } from "@/lib/booking/lock";
 import { getPrisma, setTransactionSchema } from "@/lib/prisma";
+import { withdrawalReviewToken } from "./withdraw-review";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type WithdrawalKind = "VOLUNTARY_WITHDRAWAL" | "FORCED_WITHDRAWAL";
 type Actor = { role: "MEMBER" | "STAFF" | "ADMIN"; id: string };
-type Input = { requestKey: string; expectedVersion: number; reason: string | null; operation: "self" | "force" | "delete" };
+type Input = { requestKey: string; expectedVersion: number; reason: string | null; operation: "self" | "force" | "delete"; reviewToken?: string };
 
 export class WithdrawalError extends Error {
   constructor(readonly status: 400 | 401 | 403 | 404 | 409, readonly code: string) { super(code); }
@@ -23,16 +24,17 @@ function invalid(): never { throw new WithdrawalError(400, "InvalidInput"); }
 function parse(value: unknown, operation: Input["operation"]): Input {
   if (!value || typeof value !== "object" || Array.isArray(value)) return invalid();
   const row = value as Record<string, unknown>;
-  const allowed = operation === "self" ? ["requestKey", "expectedVersion", "reason"] : ["requestKey", "expectedVersion", "reason", "operation"];
+  const allowed = operation === "self" ? ["requestKey", "expectedVersion", "reason", "reviewToken"] : ["requestKey", "expectedVersion", "reason", "operation"];
   if (Object.keys(row).some(key => !allowed.includes(key)) || typeof row.requestKey !== "string" || !uuid.test(row.requestKey) || !Number.isSafeInteger(row.expectedVersion) || (row.expectedVersion as number) < 1) return invalid();
   if (operation !== "self" && row.operation !== operation) return invalid();
   const reason = typeof row.reason === "string" ? row.reason.trim() : null;
+  if (operation === "self" && row.reviewToken !== undefined && (typeof row.reviewToken !== "string" || !/^[0-9a-f]{64}$/.test(row.reviewToken))) return invalid();
   if (
     (row.reason !== undefined && row.reason !== null && typeof row.reason !== "string") ||
     (reason !== null && [...reason].length > 1000) ||
     (operation === "self" && !reason)
   ) return invalid();
-  return { requestKey: row.requestKey, expectedVersion: row.expectedVersion as number, reason, operation };
+  return { requestKey: row.requestKey, expectedVersion: row.expectedVersion as number, reason, operation, ...(operation === "self" && row.reviewToken ? { reviewToken: row.reviewToken as string } : {}) };
 }
 function hash(memberId: string, input: Input) { return createHash("sha256").update(JSON.stringify({ memberId, ...input })).digest("hex"); }
 async function memberClaims(request: Request, tx: Prisma.TransactionClient): Promise<SessionClaims> {
@@ -85,6 +87,7 @@ async function performWithdrawal(tx: Prisma.TransactionClient, memberId: string,
   // reservation is still unstarted and must be cancelled regardless of cutoff.
   await tx.$queryRaw`SELECT id FROM "Reservation" WHERE "memberId" = ${memberId}::uuid AND status = 'CONFIRMED' ORDER BY id FOR UPDATE`;
   const reservations = await tx.reservation.findMany({ where: { memberId, status: "CONFIRMED" }, orderBy: { id: "asc" }, select: { id: true, version: true } });
+  if (input.reviewToken && input.reviewToken !== withdrawalReviewToken(memberId, member.version, reservations)) throw new WithdrawalError(409, "ReservationSetChanged");
   const lifecycleAudit = await tx.auditLog.create({ data: { requestKey: input.requestKey, ...auditActor(actor), action, targetType: "Member", targetId: memberId, changes: { requestHash: hash(memberId, input), resultVersion: member.version + 1, cancelledCount: reservations.length, kind } } });
   const next = await tx.member.update({ where: { id: memberId }, data: { status: "WITHDRAWN", isDeleted: true, authVersion: { increment: 1 }, version: { increment: 1 }, ...(member.status === "RESTORE_PENDING" ? { restoreGeneration: { increment: 1 } } : {}) } });
   await tx.memberLifecycleEvent.create({ data: { memberId, kind, reason: input.reason, restoreGeneration: next.restoreGeneration, createdAt: now, auditId: lifecycleAudit.id } });

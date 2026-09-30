@@ -83,7 +83,11 @@ async function main() {
     const staffCookie = await cookie("STAFF", staff.id);
     async function send(path: string, body: object, session = memberCookie) {
       const response = await fetch(`${origin}${path}`, { method: "POST", headers: { origin, cookie: session, "content-type": "application/json" }, body: JSON.stringify(body) });
-      return { status: response.status, result: await response.json() as Record<string, unknown> };
+      return { status: response.status, result: await response.json() as Record<string, unknown>, setCookie: response.headers.get("set-cookie") };
+    }
+    async function preview(session = memberCookie) {
+      const response = await fetch(`${origin}/api/member/withdraw/preview`, { headers: { cookie: session } });
+      return { status: response.status, result: await response.json() as { preview?: { expectedVersion: number; reviewToken: string; confirmed: { id: string }[] } } };
     }
     const date = dayAfter(7);
     const booking = (hour: number, targetDate = date, options: string[] = []) => ({ requestKey: randomUUID(), date: targetDate, startsAt: iso(targetDate, hour), treatmentId: seedIds.treatments[0], optionIds: options, quote: { totalDurationMinutes: options.length ? 70 : 60, totalPriceYen: options.length ? 7000 : 6000 } });
@@ -97,6 +101,16 @@ async function main() {
     const previouslyCancelled = await send("/api/reservations", booking(14));
     assert.equal(previouslyCancelled.status, 201);
     const cancelledId = previouslyCancelled.result.reservationId as string;
+    assert.equal((await preview("")).status, 401);
+    const withdrawalPage = await fetch(`${origin}/account/withdraw`, { headers: { cookie: memberCookie }, redirect: "manual" });
+    assert.equal(withdrawalPage.status, 200);
+    assert((await withdrawalPage.text()).includes("退会手続き"));
+    const anonymousPage = await fetch(`${origin}/account/withdraw`, { redirect: "manual" });
+    assert([302, 303, 307, 308].includes(anonymousPage.status));
+    assert.equal(new URL(anonymousPage.headers.get("location")!, origin).pathname, "/login");
+    const stalePreview = await preview();
+    assert.equal(stalePreview.status, 200);
+    assert(stalePreview.result.preview!.confirmed.some(row => row.id === cancelledId));
     const cancelledResponse = await fetch(`${origin}/api/reservations/${cancelledId}`, { method: "DELETE", headers: { origin, cookie: memberCookie, "content-type": "application/json" }, body: JSON.stringify({ requestKey: randomUUID(), expectedVersion: 1 }) });
     assert.equal(cancelledResponse.status, 200);
     const pastDate = new Date(parseBusinessDate(tokyoBusinessDate(new Date())).getTime() - 86_400_000).toISOString().slice(0, 10);
@@ -110,11 +124,23 @@ async function main() {
     const ongoingId = await historical("IN_PROGRESS", 10);
     const completedId = await historical("COMPLETED", 11);
     const testToken = await db.authToken.create({ data: { digest: createHash("sha256").update(randomUUID()).digest("hex"), purpose: "PASSWORD_RESET", memberId: member.id, emailKey: member.emailKey, authVersion: 1, expiresAt: new Date(Date.now() + 60 * 60_000) } });
+    assert.equal((await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reviewToken: stalePreview.result.preview!.reviewToken, reason: "古い確認" })).status, 409);
+    assert.equal((await db.member.findUniqueOrThrow({ where: { id: member.id } })).status, "ACTIVE");
+    const currentPreview = await preview();
+    assert.equal(currentPreview.status, 200);
+    assert.equal(currentPreview.result.preview!.expectedVersion, 1);
+    assert.equal(currentPreview.result.preview!.confirmed.length, 2);
     assert.equal((await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reason: " " })).status, 400);
     assert.equal((await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reason: "退会希望" }, "")).status, 401);
-    const withdrawal = await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reason: "退会希望" });
+    assert.equal((await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reason: "退会希望" }, staffCookie)).status, 403);
+    assert.equal((await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reason: "退会希望", memberId: forced.id })).status, 400);
+    const withdrawal = await send("/api/member/withdraw", { requestKey: randomUUID(), expectedVersion: 1, reviewToken: currentPreview.result.preview!.reviewToken, reason: "退会希望" });
     assert.equal(withdrawal.status, 200, JSON.stringify(withdrawal.result));
+    assert(withdrawal.setCookie?.includes("authjs.session-token=; Max-Age=0"));
     assert.equal(withdrawal.result.cancelledCount, 2);
+    assert.equal((await preview()).status, 401);
+    const withdrawnPage = await fetch(`${origin}/account/withdraw`, { headers: { cookie: memberCookie }, redirect: "manual" });
+    assert([302, 303, 307, 308].includes(withdrawnPage.status));
     const inactive = await db.member.findUniqueOrThrow({ where: { id: member.id } });
     assert.equal(inactive.status, "WITHDRAWN"); assert.equal(inactive.isDeleted, true); assert.equal(inactive.version, 2);
     assert.equal((await db.memberLifecycleEvent.findFirstOrThrow({ where: { memberId: member.id, kind: "VOLUNTARY_WITHDRAWAL" } })).reason, "退会希望");

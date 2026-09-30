@@ -18,6 +18,6 @@ export default async function Page() {
   return <main className="mx-auto max-w-2xl space-y-6 p-6"><h1 className="text-2xl font-bold">マイページ</h1><Link className="text-blue-700 underline" href="/book">新しく予約する</Link>
     <section className="space-y-3"><h2 className="text-xl font-semibold">予約一覧</h2>{reservations.length === 0 && <p>予約はありません。</p>}
       <ul className="space-y-3">{reservations.map(reservation => <li key={reservation.id} className="rounded border p-4"><p className="font-semibold">{formatTokyo(reservation.startsAt)}　{reservation.treatmentNameSnapshot}</p><p>{reservationStatus(reservation.status)}／{reservation.totalDurationMinutes}分／{reservation.totalPriceYen.toLocaleString("ja-JP")}円（税込）</p><Link className="text-blue-700 underline" href={`/account/reservations/${reservation.id}`}>詳細を見る</Link></li>)}</ul>
-    </section><LogoutButton target="/login" />
+    </section><section className="space-y-2 border-t pt-5"><h2 className="text-lg font-semibold">会員手続き</h2><Link className="text-blue-700 underline" href="/account/withdraw">退会を希望する場合</Link></section><LogoutButton target="/login" />
   </main>;
 }
