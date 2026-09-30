@@ -34,6 +34,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!.env.hosted.example
 
 # vercel
 .vercel
@@ -43,3 +44,8 @@ yarn-error.log*
 next-env.d.ts
 
 /prisma/src/generated/prisma
+
+# Database archives must not be committed.
+*.dump
+*.backup
+/backups/

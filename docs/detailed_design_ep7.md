@@ -72,3 +72,60 @@ HTTP統合検証で非会員の予約作成・一覧・詳細を401で拒否。�
 標準Turbopackビルドは環境制限で未解決。Webpackの成功からTurbopackやVercelでの成功は推定しない。初回DB接続はsandboxの制限で失敗し、ローカル接続が可能な実行で再検証して成功した。
 
 未解決事項：全フローのブラウザE2E、認証後の全画面の表示/操作、実メール受信、本番Cron、本番ログ保存、デプロイ後の動作確認。Task 7.1.3と7.1.4のローカル確認・結果記録は完了。Task 7.1.1と7.1.2は上記の残作業があるため未完了のまま維持する。Story 7.1の完了条件と初期リリース判定はまだ満たさない。
+
+## 6. Story 7.2：環境分離・デプロイ・運用（Task 7.2.1〜7.2.4）
+
+2026-09-30実施。ユーザー回答「未設定。まずリポジトリ内の設定・運用手順を整備する」に従い、Vercel/Neonの作成や本番変更は行わない。手順の全文は[運用手順](operations.md)に記載する。
+
+### 6.1 Task 7.2.1：環境分離と接続設定
+
+開発は既存Docker、検証・本番は別Vercelプロジェクトと別Neon endpointを使う方針。`.env.hosted.example`を追加し、APP_ENV、pooler/direct接続、固定endpoint hostname、HTTPS AUTH_URL、独立した認証/メール/監視秘密値を定義する。
+
+`env:check`はURLのTLS/public schema、endpoint/database一致、pooler/direct区分、固定host一致、秘密値の最低長・使い回し、メール暗号化鍵、管理者パスワード、Previewでのproduction指定、テスト用フラグ混入を検査する。値を出力せず、変数名と失敗理由だけを返す。--file指定時はそのファイルだけを検査し、ローカル.envやshellの値と混ぜない。
+
+VercelのbuildCommandを `npm run build:deploy` に設定する。環境検査→Prisma Client生成→ビルドの順で、migration/seedを実行しない。手元の通常build/checkは従来どおり実行できる。
+
+結果：リポジトリ内の設定と検査を整備。単一設定ファイルの整合性検査であり、異なる環境間のDB分離を証明しない。外部Vercel/Neonでの登録・接続確認は未実施、Task全体は未完了。
+
+### 6.2 Task 7.2.2：migrationとrollback
+
+migration実行者を1人に定め、検証済みcommitとSQLをバックアップ後に本番へ適用し、その後アプリ公開する。ビルド/Preview/起動時migrationを禁止する。追加変更を先に適用する互換性維持を原則とし、破壊的変更は変更窓と別リリースで扱う。
+
+`db:deployment`は明示的な.envファイル・照合済みexpected-host・status/deploy/bootstrapの指定を要求する。bootstrapは固定管理者行だけを追加し、開発用seedを本番へ流さない。これは実行対象の指定を助けるガードで、担当者による対象照合を代替しない。
+
+アプリrollbackとDB復旧を分離する。旧コード互換なら旧Vercelデプロイへ戻す。migration失敗は実スキーマと履歴を照合し、検証した修正のみ適用。データ破損/非互換では隔離DBへ復元し、退会・権限・予約状態を突合してから切り替える。既存本番をreset/restoreで上書きしない。
+
+結果：実行タイミングと失敗時の手順を決定・記載し、Task 7.2.2を完了。外部DBへのmigrationやVercelのrollback実行は未実施。
+
+### 6.3 Task 7.2.3：監視・バックアップ・復旧
+
+- `/api/ops/health`：32文字以上の独立したOPS_SECRETで認証。正常200、期限超過キュー（5分）、24時間以内のFAILED、UNKNOWN、リース切れSENDINGまたはDB障害で503。no-store、宛先/ID/本文/トークンを含まない集計のみ。送信・DB変更はしない。
+- `instrumentation.ts`：Next.js同梱guideを参照し、捕捉サーバーエラーのeventとroute種別のみを記録。error本文・headers・具体的なpath/queryを出さない。捕捉済みAPIエラーはステータスと監視で確認。基盤が自動出力するログの機密除去と90日保持は外部設定・実ログ確認が必要。
+- `db:backup`：設定検査後のDIRECT_URLでcustom formatのpg_dumpを実行。秘密情報をargvへ出さず、新規0600ファイルへ保存する。35日保持・日次/リリース前取得・暗号化保管の方針を運用手順へ記載。外部保管とschedulerは未設定。
+- 復元時隔離処理：全AppSession/AuthTokenを失効し、復元されたPENDING/RETRY_WAIT/SENDINGをUNKNOWNにしてpayloadを消去する。STARTED試行もUNKNOWNにする。バックアップ以降の実送信を再送しない。予約・枠・会員・権限は変更しない。
+- `test:recovery`：ローカル接続ガード後、使い捨て2DBへmigration/fixtureを用意し、実pg_dump/pg_restoreを実行。復旧処理の再実行、migration履歴、予約/枠、退会状態、スタッフ権限、セッション/トークン失効、キュー監視、復元後の一意制約を検証。既存publicを保持し、テストDBとdumpを削除する。
+
+即時送信と既存1/5/30分の回復再試行は維持する。恒久/UNKNOWN/期限切れは停止。Cronの毎分設定はプラン条件を確認する。PreviewではVercel Cronが実行されないため、別途入口の確認が必要。
+
+結果：ローカルの復旧演習と監視入口のHTTP検証は成功。外部検証環境の復旧、通知先・ログ保存・暗号化保管・35日保持・日次scheduler・実Resend/Cronは未実施。Task全体は未完了。
+
+### 6.4 Task 7.2.4：公開後確認とREADME
+
+`smoke:deployment`を追加。明示的な設定ファイルのAUTH_URLへ読み取り専用でトップ/予約/ログイン画面、非会員の予約情報拒否、保護された監視APIを確認する。予約・メール・スタッフ作成は実行しない。認証後の全フローはブラウザで別途確認する。初期公開時には7.1.1/7.1.2、実メール、Cron、監視通知、バックアップ復元の結果も記録する。
+
+結果：READMEと運用手順、実行用スクリプトを整備。デプロイ先未設定のため、外部smoke・実予約/管理フローは未実施。Task全体は未完了。
+
+### 6.5 検証記録
+
+| 対象 | 結果 |
+| --- | --- |
+| `npm run check` | 成功：Prisma validate/generate、lint、型チェック、単体41件 |
+| 環境検査の単体テスト | staging/production、別DBロール、Preview、本番host混入、TLS不足、pooler誤り、秘密値/テストフラグと機密非出力を検証 |
+| エラーログの単体テスト | 例外/URL/headersの機密値を記録しないことを検証 |
+| `npm run test:e2e:http` | 成功：既存4系統。ops認証拒否・異常503・no-store・機密非露出・DBテーブル欠落時の固定503も確認 |
+| `npm run test:recovery` | 成功：実dump/restoreと隔離処理、テストDB削除。既存DB保持 |
+| `npm run build -- --webpack` | 成功：監視routeとinstrumentationを含む本番ビルド |
+| hosted env:check / build:deploy / db:deployment / db:backup / smoke:deployment | 実際の外部設定なしのため未実施。検査ロジックとローカル復旧共通処理を検証 |
+| CI | HTTP統合4系統を追加。GitHub上での実行は未確認 |
+
+Task 7.2.2は完了、7.2.1/7.2.3/7.2.4はリポジトリ内準備まで。Story 7.2と本番リリースは未完了。

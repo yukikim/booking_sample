@@ -27,7 +27,13 @@
     "test:e2e:http": "npm run test:auth && npm run test:member && npm run test:booking && npm run test:withdrawal",
     "check:release": "npm run check && npm run test:db && npm run test:e2e:http && npm run build",
     "mail:send": "node --conditions=react-server --import tsx scripts/send-member-mail.ts",
-    "mail:check-domain": "node --import tsx scripts/check-mail-domain.ts"
+    "mail:check-domain": "node --import tsx scripts/check-mail-domain.ts",
+    "env:check": "node --import tsx scripts/check-deployment-env.ts",
+    "build:deploy": "npm run env:check && npm run db:generate && npm run build",
+    "db:backup": "node --import tsx scripts/backup-database.ts",
+    "test:recovery": "node --conditions=react-server --import tsx scripts/verify-recovery.ts",
+    "smoke:deployment": "node --import tsx scripts/smoke-deployment.ts",
+    "db:deployment": "node --import tsx scripts/deploy-database.ts"
   },
   "dependencies": {
     "@next/env": "16.3.5",

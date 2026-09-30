@@ -36,6 +36,7 @@ async function main() {
     process.env.RESEND_FROM = "mail@example.test";
     process.env.RESEND_API_KEY = "re_test_local_only";
     process.env.MAIL_TEST_DISABLE_IMMEDIATE = "1";
+    process.env.OPS_SECRET = randomBytes(32).toString("hex");
     process.env.CRON_SECRET = randomBytes(24).toString("base64url");
     process.env.ADMIN_EMAIL = "admin@example.test";
     process.env.ADMIN_PASSWORD = randomBytes(24).toString("base64url");
@@ -213,7 +214,24 @@ async function main() {
     assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: staleMail.id } })).status, "UNKNOWN");
     assert.equal((await fetch(`${origin}/api/cron/mail`)).status, 401);
     assert.equal((await fetch(`${origin}/api/cron/mail`, { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } })).status, 200);
-    process.stdout.write("Member registration, review, auth boundaries, expiry, reset and logout passed.\n");
+    assert.equal((await fetch(`${origin}/api/ops/health`)).status, 401);
+    assert.equal((await fetch(`${origin}/api/ops/health`, { headers: { authorization: `Bearer wrong-secret` } })).status, 401);
+    const ops = await fetch(`${origin}/api/ops/health`, { headers: { authorization: `Bearer ${process.env.OPS_SECRET}` } });
+    assert.equal(ops.headers.get("cache-control"), "no-store");
+    assert.equal(ops.status, 503); // Existing UNKNOWN mail fixtures require attention.
+    const opsBody = await ops.json();
+    assert.equal(opsBody.status, "attention");
+    assert(opsBody.mail.unknown > 0);
+    assert(!JSON.stringify(opsBody).includes("@"));
+    assert(!JSON.stringify(opsBody).includes(process.env.OPS_SECRET!));
+    await pg.query(`ALTER TABLE "${schema}"."EmailDelivery" RENAME TO "UnavailableDelivery"`);
+    try {
+      const unavailableOps = await fetch(`${origin}/api/ops/health`, { headers: { authorization: `Bearer ${process.env.OPS_SECRET}` } });
+      assert.equal(unavailableOps.status, 503);
+      assert.deepEqual(await unavailableOps.json(), { error: "TemporarilyUnavailable" });
+    } finally { await pg.query(`ALTER TABLE "${schema}"."UnavailableDelivery" RENAME TO "EmailDelivery"`); }
+
+    process.stdout.write("Member registration, review, auth boundaries, expiry, reset, logout and protected operations health passed.\n");
   } finally {
     if (server) { server.kill("SIGTERM"); await once(server,"exit").catch(()=>{}); }
     await db?.$disconnect();
