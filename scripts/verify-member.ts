@@ -106,7 +106,7 @@ async function main() {
     assert.equal(session.user.id, member.id);
     assert.equal((await fetch(`${origin}/api/manage/staff`, { headers: { cookie: memberCookie } })).status, 403);
     assert.equal((await fetch(`${origin}/api/manage/staff/${member.id}/permissions`, { method: "POST", headers: { cookie: memberCookie, origin, "content-type": "application/json" }, body: JSON.stringify({ permission: "ROOM_CREATE", enabled: true }) })).status, 403);
-    assert.match(await (await fetch(`${origin}/account`, { headers: { cookie: memberCookie } })).text(), /会員ページ/);
+    assert.match(await (await fetch(`${origin}/account`, { headers: { cookie: memberCookie } })).text(), /マイページ/);
     assert.equal((await fetch(`${origin}/manage`, { headers: { cookie: memberCookie }, redirect: "manual" })).status, 200);
     assert.match(await (await fetch(`${origin}/manage`, { headers: { cookie: memberCookie } })).text(), /権限がありません/);
     const jwt = await getToken({ req: new Request(origin, { headers: { cookie: memberCookie } }), secret: process.env.AUTH_SECRET, secureCookie: false });
@@ -222,4 +222,9 @@ async function main() {
     await pg.end();
   }
 }
-main().catch((error) => { process.stderr.write(`${error instanceof Error ? error.stack : String(error)}\n`); process.exitCode=1; });
+main().catch((error: unknown) => {
+  // Assertion messages can contain response bodies, tokens and member snapshots.
+  if (error instanceof Error) process.stderr.write(`${error.name}\n${error.stack?.split("\n").filter(line => line.trim().startsWith("at ")).join("\n") ?? ""}\n`);
+  process.stderr.write("Integration failed; inspect assertions locally without logging response bodies.\n");
+  process.exitCode = 1;
+});

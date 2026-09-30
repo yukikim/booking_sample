@@ -24,6 +24,8 @@
     "test:member": "node --conditions=react-server --import tsx scripts/verify-member.ts",
     "test:booking": "node --conditions=react-server --import tsx scripts/verify-booking.ts",
     "test:withdrawal": "node --conditions=react-server --import tsx scripts/verify-withdrawal.ts",
+    "test:e2e:http": "npm run test:auth && npm run test:member && npm run test:booking && npm run test:withdrawal",
+    "check:release": "npm run check && npm run test:db && npm run test:e2e:http && npm run build",
     "mail:send": "node --conditions=react-server --import tsx scripts/send-member-mail.ts",
     "mail:check-domain": "node --import tsx scripts/check-mail-domain.ts"
   },

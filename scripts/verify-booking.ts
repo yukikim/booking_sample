@@ -440,4 +440,9 @@ async function main() {
     await pg.end();
   }
 }
-main().catch(error => { process.stderr.write(`${error instanceof Error ? error.stack : String(error)}\n`); process.exitCode = 1; });
+main().catch((error: unknown) => {
+  // Assertion messages can contain response bodies, tokens and member snapshots.
+  if (error instanceof Error) process.stderr.write(`${error.name}\n${error.stack?.split("\n").filter(line => line.trim().startsWith("at ")).join("\n") ?? ""}\n`);
+  process.stderr.write("Integration failed; inspect assertions locally without logging response bodies.\n");
+  process.exitCode = 1;
+});
