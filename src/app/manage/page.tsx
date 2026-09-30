@@ -25,9 +25,10 @@ export default async function Page() {
     <Link href="/manage/catalog" className="block underline">施術メニュー・オプション</Link>
     <Link href="/manage/resources" className="block underline">部屋・施術者</Link>
     <Link href="/manage/schedules" className="block underline">営業日・営業時間・休憩</Link>
+    <Link href="/manage/reservations" className="block underline">予約一覧・カレンダー</Link>
     <Link href="/manage/adjustments" className="block underline">要調整・確認待ちの予約：{adjustmentCount}件</Link>
     {(access.principal.role === "ADMIN" || access.permissions.includes("MEMBER_RESTORE")) && <Link href="/manage/members/restore" className="block underline">退会済み会員の復旧</Link>}
-    <p>予約やその他の店舗設定機能は、今後の開発で追加します。</p>
+    <p>予約の登録・変更・取消などの操作は、今後の開発で追加します。</p>
     <LogoutButton />
   </main>;
 }

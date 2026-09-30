@@ -96,6 +96,40 @@ async function main() {
     assert.equal(first.status, 201, JSON.stringify(first.result));
     const firstId = first.result.reservationId as string;
     assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 1);
+    const firstAssignment = await db.reservation.findUniqueOrThrow({ where: { id: firstId } });
+    async function storePage(path: string, session: string) {
+      const response = await fetch(`${origin}${path}`, { headers: { cookie: session }, redirect: "manual" });
+      return { status: response.status, html: await response.text(), location: response.headers.get("location") };
+    }
+    const storePath = `/manage/reservations?date=${date}`;
+    const storeList = await storePage(storePath, staffCookie);
+    assert.equal(storeList.status, 200);
+    assert(storeList.html.includes(firstId));
+    assert(storeList.html.includes("予約一覧・カレンダー"));
+    const filtered = await storePage(`${storePath}&roomId=${firstAssignment.roomId}&therapistId=${firstAssignment.therapistId}&status=CONFIRMED`, adminCookie);
+    assert.equal(filtered.status, 200);
+    assert(filtered.html.includes(firstId));
+    const otherDate = new Date(parseBusinessDate(date).getTime() + 86_400_000).toISOString().slice(0, 10);
+    assert(!(await storePage(`/manage/reservations?date=${otherDate}`, staffCookie)).html.includes(firstId));
+    assert(!(await storePage(`${storePath}&status=COMPLETED`, staffCookie)).html.includes(firstId));
+    const noMatch = await storePage(`${storePath}&roomId=${seedIds.rooms[1]}`, staffCookie);
+    assert.equal(noMatch.status, 200);
+    assert(!noMatch.html.includes(firstId));
+    const calendar = await storePage(`${storePath}&view=calendar`, staffCookie);
+    assert.equal(calendar.status, 200);
+    assert(calendar.html.includes("占有時間"));
+    assert(calendar.html.includes(firstId));
+    const storeDetail = await storePage(`/manage/reservations/${firstId}`, staffCookie);
+    assert.equal(storeDetail.status, 200);
+    assert(storeDetail.html.includes("booking@example.test"));
+    assert(storeDetail.html.includes("6,000円"));
+    const memberStorePage = await storePage(`/manage/reservations/${firstId}`, memberCookie);
+    assert(!memberStorePage.html.includes("booking@example.test"));
+    const anonymousStorePage = await storePage(`/manage/reservations/${firstId}`, "");
+    assert([302, 303, 307, 308].includes(anonymousStorePage.status));
+    assert.equal(new URL(anonymousStorePage.location!, origin).pathname, "/staff/login");
+    const invalidStoreDetail = await storePage(`/manage/reservations/${randomUUID()}`, staffCookie);
+    assert.equal(invalidStoreDetail.status, 404);
     async function read(path: string, session = memberCookie) {
       const response = await fetch(`${origin}${path}`, { headers: { cookie: session }, redirect: "manual" });
       return { status: response.status, result: await response.json() as Record<string, unknown> };
@@ -146,6 +180,10 @@ async function main() {
     assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 0);
     const history = await db.reservation.findUniqueOrThrow({ where: { id: firstId } });
     assert.equal(history.status, "CANCELLED"); assert.equal(history.memberFirstNameSnapshot, "花子"); assert.equal(history.treatmentPriceYenSnapshot, 6000);
+    const cancelledList = await storePage(`${storePath}&status=CANCELLED`, staffCookie);
+    assert(cancelledList.html.includes(firstId));
+    const cancelledCalendar = await storePage(`${storePath}&status=CANCELLED&view=calendar`, staffCookie);
+    assert(cancelledCalendar.html.includes("表示する占有枠はありません"));
     const simultaneous = await Promise.all([send("POST", "/api/reservations", create(15)), send("POST", "/api/reservations", create(15))]);
     assert.deepEqual(simultaneous.map(row => row.status).sort(), [201, 409], JSON.stringify(simultaneous));
     assert.equal(await db.reservation.count({ where: { businessDate: parseBusinessDate(date), startsAt: new Date(iso(date, 15)), status: "CONFIRMED" } }), 1);
