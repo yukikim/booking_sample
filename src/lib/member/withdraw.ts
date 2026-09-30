@@ -24,17 +24,17 @@ function invalid(): never { throw new WithdrawalError(400, "InvalidInput"); }
 function parse(value: unknown, operation: Input["operation"]): Input {
   if (!value || typeof value !== "object" || Array.isArray(value)) return invalid();
   const row = value as Record<string, unknown>;
-  const allowed = operation === "self" ? ["requestKey", "expectedVersion", "reason", "reviewToken"] : ["requestKey", "expectedVersion", "reason", "operation"];
+  const allowed = operation === "self" ? ["requestKey", "expectedVersion", "reason", "reviewToken"] : ["requestKey", "expectedVersion", "reason", "operation", "reviewToken"];
   if (Object.keys(row).some(key => !allowed.includes(key)) || typeof row.requestKey !== "string" || !uuid.test(row.requestKey) || !Number.isSafeInteger(row.expectedVersion) || (row.expectedVersion as number) < 1) return invalid();
   if (operation !== "self" && row.operation !== operation) return invalid();
   const reason = typeof row.reason === "string" ? row.reason.trim() : null;
-  if (operation === "self" && row.reviewToken !== undefined && (typeof row.reviewToken !== "string" || !/^[0-9a-f]{64}$/.test(row.reviewToken))) return invalid();
+  if (row.reviewToken !== undefined && (typeof row.reviewToken !== "string" || !/^[0-9a-f]{64}$/.test(row.reviewToken))) return invalid();
   if (
     (row.reason !== undefined && row.reason !== null && typeof row.reason !== "string") ||
     (reason !== null && [...reason].length > 1000) ||
     (operation === "self" && !reason)
   ) return invalid();
-  return { requestKey: row.requestKey, expectedVersion: row.expectedVersion as number, reason, operation, ...(operation === "self" && row.reviewToken ? { reviewToken: row.reviewToken as string } : {}) };
+  return { requestKey: row.requestKey, expectedVersion: row.expectedVersion as number, reason, operation, ...(row.reviewToken ? { reviewToken: row.reviewToken as string } : {}) };
 }
 function hash(memberId: string, input: Input) { return createHash("sha256").update(JSON.stringify({ memberId, ...input })).digest("hex"); }
 async function memberClaims(request: Request, tx: Prisma.TransactionClient): Promise<SessionClaims> {

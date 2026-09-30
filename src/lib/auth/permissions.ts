@@ -4,7 +4,7 @@ import { getStoreSession, AuthUnavailable } from "@/auth";
 import { StaffPermissionKey } from "@/generated/prisma/enums";
 import { getPrisma } from "@/lib/prisma";
 
-export type StoreAction = StaffPermissionKey | "STORE_VIEW" | "STAFF_PERMISSION_MANAGE";
+export type StoreAction = StaffPermissionKey | "STORE_VIEW" | "STAFF_PERMISSION_MANAGE" | "MEMBER_REVIEW";
 export type StorePrincipal = { id: string; role: "ADMIN" | "STAFF"; expires: string };
 
 const permissionKeys = new Set<string>(Object.values(StaffPermissionKey));
@@ -16,7 +16,7 @@ export class StoreAccessError extends Error {
 }
 
 function validAction(action: string): action is StoreAction {
-  return action === "STORE_VIEW" || action === "STAFF_PERMISSION_MANAGE" || permissionKeys.has(action);
+  return action === "STORE_VIEW" || action === "STAFF_PERMISSION_MANAGE" || action === "MEMBER_REVIEW" || permissionKeys.has(action);
 }
 
 /** Call at each server entry point. The UI and JWT never supply effective permissions. */
@@ -38,7 +38,7 @@ export async function requireStoreAction(action: StoreAction): Promise<StorePrin
     expires: session.expires,
   };
   if (action === "STORE_VIEW" || principal.role === "ADMIN") return principal;
-  if (action === "STAFF_PERMISSION_MANAGE") throw new StoreAccessError(403);
+  if (action === "STAFF_PERMISSION_MANAGE" || action === "MEMBER_REVIEW") throw new StoreAccessError(403);
 
   try {
     const grant = await getPrisma().staffPermission.findUnique({

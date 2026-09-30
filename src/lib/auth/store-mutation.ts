@@ -36,7 +36,7 @@ export async function requireStoreMutation(tx: Prisma.TransactionClient, request
   else await tx.$queryRaw`SELECT id FROM "StaffAccount" WHERE id = ${claims.principalId}::uuid FOR UPDATE`;
   if (!await resolveSession(claims, new Date(), tx)) throw new StoreAccessError(401);
   if (claims.role === "ADMIN") return claims;
-  if (action === "STAFF_PERMISSION_MANAGE") throw new StoreAccessError(403);
+  if (action === "STAFF_PERMISSION_MANAGE" || action === "MEMBER_REVIEW") throw new StoreAccessError(403);
   if (action === "STORE_VIEW") return claims;
   const grant = await tx.staffPermission.findUnique({ where: { staffId_permission: { staffId: claims.principalId, permission: action } }, select: { staffId: true } });
   if (!grant) throw new StoreAccessError(403);
