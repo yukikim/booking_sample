@@ -11,6 +11,7 @@ type Props = {
   canStart: boolean;
   canComplete: boolean;
   canException: boolean;
+  initialException?: boolean;
 };
 
 export function ManageReservationActions({
@@ -21,10 +22,11 @@ export function ManageReservationActions({
   canStart,
   canComplete,
   canException,
+  initialException = false,
 }: Props) {
   const [action, setAction] = useState<Action | null>(null);
   const [reason, setReason] = useState("");
-  const [storeException, setStoreException] = useState(false);
+  const [storeException, setStoreException] = useState(initialException && canException);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [done, setDone] = useState(false);

@@ -48,9 +48,11 @@ export type EditReservation = {
 export function ManageReservationForm({
   edit,
   canException,
+  initialException = false,
 }: {
   edit?: EditReservation;
   canException: boolean;
+  initialException?: boolean;
 }) {
   const [catalog, setCatalog] = useState<{
     treatments: Item[];
@@ -72,7 +74,7 @@ export function ManageReservationForm({
   const [assignment, setAssignment] = useState(false);
   const [roomId, setRoomId] = useState(edit?.roomId ?? "");
   const [therapistId, setTherapistId] = useState(edit?.therapistId ?? "");
-  const [storeException, setStoreException] = useState(false);
+  const [storeException, setStoreException] = useState(initialException && canException);
   const [exceptionReason, setExceptionReason] = useState("");
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [slot, setSlot] = useState<Slot | null>(null);

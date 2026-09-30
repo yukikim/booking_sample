@@ -13,6 +13,7 @@ import { parseBusinessDate } from "@/lib/schedules/calendar";
 import { cancellationDeadline } from "./deadline";
 import { parseAvailabilityRequest, revalidateAtSave, type AvailabilityRequest } from "./availability";
 import { lockBookingState } from "./lock";
+import { resolveNoticesAfterReservation } from "@/lib/manage/adjustment-response";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Actor = { role: SessionClaims["role"]; id: string; claims?: SessionClaims };
@@ -223,6 +224,7 @@ export async function changeReservation(request: Request, id: string, value: unk
     if (updated.count !== 1) throw new BookingError(409, "VersionConflict");
     await writeDetails(tx, id, input, data);
     await tx.auditLog.create({ data: { requestKey: input.requestKey, ...auditActor(actor), action: "RESERVATION_CHANGED", targetType: "Reservation", targetId: id, changes: { requestHash: hash, beforeVersion: input.expectedVersion, resultVersion: input.expectedVersion + 1, resultStatus: "CONFIRMED", storeException: input.storeException, exceptionReason: input.exceptionReason } } });
+    await resolveNoticesAfterReservation(tx, id, actor, "changed");
     return { reservationId: id, version: input.expectedVersion + 1, status: "CONFIRMED" as const, replayed: false };
   }, { timeout: 20_000 });
 }
@@ -261,6 +263,7 @@ export async function cancelReservation(request: Request, id: string, value: unk
     const updated = await tx.reservation.updateMany({ where: { id, status: "CONFIRMED", version: input.expectedVersion }, data: { status: "CANCELLED", version: { increment: 1 }, cancelledAt: now, cancellationKind: input.storeException ? "STORE_EXCEPTION" : "NORMAL", cancellationReason: input.storeException ? input.exceptionReason : input.reason, cancellationAuditId: audit.id } });
     if (updated.count !== 1) throw new BookingError(409, "VersionConflict");
     await tx.reservationSlot.deleteMany({ where: { reservationId: id } });
+    await resolveNoticesAfterReservation(tx, id, actor, "cancelled");
     return { reservationId: id, version: input.expectedVersion + 1, status: "CANCELLED" as const, replayed: false };
   }, { timeout: 20_000 });
 }

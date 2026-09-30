@@ -36,6 +36,7 @@ async function main() {
     process.env.AUTH_SECRET = randomBytes(32).toString("hex");
     process.env.AUTH_RATE_LIMIT_SECRET = randomBytes(32).toString("hex");
     process.env.MAIL_PAYLOAD_KEY = randomBytes(32).toString("base64");
+    process.env.MAIL_TEST_DISABLE_IMMEDIATE = "1";
     process.env.RESEND_FROM = "mail@example.test";
     process.env.ADMIN_EMAIL = "admin@example.test";
     process.env.ADMIN_PASSWORD = randomBytes(24).toString("base64url");

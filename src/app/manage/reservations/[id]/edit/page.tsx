@@ -9,8 +9,10 @@ export const dynamic = "force-dynamic";
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ storeException?: string }>;
 }) {
   let access;
   let reservation;
@@ -81,6 +83,7 @@ export default async function Page({
           access.principal.role === "ADMIN" ||
           access.permissions.includes("RESERVATION_EXCEPTION")
         }
+        initialException={(await searchParams).storeException === "true"}
       />
     </main>
   );

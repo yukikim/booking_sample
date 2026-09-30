@@ -49,6 +49,7 @@ export default async function Page() {
     dateStyle: "medium",
     timeStyle: "short",
   });
+  const soon = (await getPrisma().$queryRaw<{ now: Date }[]>`SELECT clock_timestamp() AS now`)[0].now.getTime() + 48 * 60 * 60_000;
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-8">
       <h1 className="text-2xl font-bold">要調整の予約</h1>
@@ -60,7 +61,7 @@ export default async function Page() {
       ) : (
         <ul className="space-y-3">
           {notices.map((notice) => (
-            <li key={notice.id} className="rounded border p-4">
+            <li key={notice.id} className={`rounded border p-4 ${notice.reservation.startsAt.getTime() <= soon && notice.responseStatus !== "IMPACT_RESOLVED_PENDING_REVIEW" ? "border-red-600 bg-red-50" : ""}`}>
               <p className="font-bold">
                 {dateTime.format(notice.reservation.startsAt)}　予約{" "}
                 {notice.reservation.id.slice(0, 8)}
@@ -79,6 +80,9 @@ export default async function Page() {
                 変更：{notice.changeAudit.action}／予約状態：
                 {notice.reservation.status}
               </p>
+              {notice.reservation.startsAt.getTime() <= soon && notice.responseStatus !== "IMPACT_RESOLVED_PENDING_REVIEW" && <p className="font-semibold text-red-800">来店日時が迫っています。店舗で対応を確認してください。</p>}
+              <p>配信状態：{notice.deliveries[0]?.status ?? "未依頼"}／顧客対応状態：{notice.responseStatus}</p>
+              <Link className="block underline" href={`/manage/adjustments/${notice.id}`}>候補と対応の詳細</Link>
               {notice.deliveries.length ? (
                 <p>メール送信状態：{notice.deliveries[0].status}</p>
               ) : notice.responseStatus !== "IMPACT_RESOLVED_PENDING_REVIEW" &&
