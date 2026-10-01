@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { StaffPermissionKey } from "@/generated/prisma/enums";
+import { emailKey, validPassword } from "@/lib/auth/policy";
 
 const labels: Record<StaffPermissionKey, string> = {
   RESERVATION_CREATE: "予約作成",
@@ -33,17 +34,53 @@ const labels: Record<StaffPermissionKey, string> = {
   NOTICE_UPDATE_RESPONSE: "通知の対応状況更新",
 };
 
+type StaffField = "displayName" | "email" | "password";
+type StaffFieldErrors = Partial<Record<StaffField, string>>;
+
+function validateStaffField(field: StaffField, value: string): string {
+  if (field === "displayName") {
+    if (!value.trim()) return "表示名を入力してください。";
+    if (value.trim().length > 100) return "表示名は100文字以内で入力してください。";
+  } else if (field === "email") {
+    if (!value.trim()) return "メールアドレスを入力してください。";
+    if (!emailKey(value)) return "有効なメールアドレスを入力してください（254文字以内）。";
+  } else {
+    if (!value) return "初期パスワードを入力してください。";
+    if (!validPassword(value)) return "初期パスワードは15〜128文字で入力してください。";
+  }
+  return "";
+}
+
 export function StaffCreateForm({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<StaffFieldErrors>({});
+  function validateField(field: StaffField, value: string) {
+    setFieldErrors((current) => ({
+      ...current,
+      [field]: validateStaffField(field, value),
+    }));
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
-    setBusy(true);
     setError("");
     const form = event.currentTarget;
     const data = new FormData(form);
+    const errors: StaffFieldErrors = {};
+    for (const field of ["displayName", "email", "password"] as const) {
+      const message = validateStaffField(field, String(data.get(field) ?? ""));
+      if (message) errors[field] = message;
+    }
+    setFieldErrors(errors);
+    const firstInvalidField = Object.keys(errors)[0];
+    if (firstInvalidField) {
+      const input = form.elements.namedItem(firstInvalidField);
+      if (input instanceof HTMLInputElement) input.focus();
+      return;
+    }
+    setBusy(true);
     try {
       const response = await fetch("/api/manage/staff", {
         method: "POST",
@@ -55,7 +92,9 @@ export function StaffCreateForm({ isAdmin }: { isAdmin: boolean }) {
         }),
       });
       if (response.status === 409) {
-        setError("このメールアドレスは登録済みです。");
+        setFieldErrors({ email: "このメールアドレスは登録済みです。" });
+        const input = form.elements.namedItem("email");
+        if (input instanceof HTMLInputElement) input.focus();
         return;
       }
       if (!response.ok) {
@@ -78,38 +117,98 @@ export function StaffCreateForm({ isAdmin }: { isAdmin: boolean }) {
     }
   }
   return (
-    <form onSubmit={submit} className="space-y-4 rounded border p-5">
+    <form noValidate onSubmit={submit} className="space-y-4 rounded border p-5">
       <h2 className="text-xl font-semibold">スタッフを作成</h2>
       <label className="block">
         表示名
         <input
           name="displayName"
+          readOnly={busy}
+          aria-invalid={!!fieldErrors.displayName}
+          aria-describedby={
+            fieldErrors.displayName ? "staff-displayName-error" : undefined
+          }
+          onBlur={(event) => validateField("displayName", event.currentTarget.value)}
+          onChange={(event) => {
+            if (fieldErrors.displayName) {
+              validateField("displayName", event.currentTarget.value);
+            }
+          }}
           required
           maxLength={100}
           className="mt-1 block w-full rounded border p-2"
         />
+        {fieldErrors.displayName && (
+          <span
+            id="staff-displayName-error"
+            role="alert"
+            className="mt-1 block text-sm text-red-700"
+          >
+            {fieldErrors.displayName}
+          </span>
+        )}
       </label>
       <label className="block">
         メールアドレス
         <input
           name="email"
+          readOnly={busy}
+          aria-invalid={!!fieldErrors.email}
+          aria-describedby={
+            fieldErrors.email ? "staff-email-error" : undefined
+          }
+          onBlur={(event) => validateField("email", event.currentTarget.value)}
+          onChange={(event) => {
+            if (fieldErrors.email) {
+              validateField("email", event.currentTarget.value);
+            }
+          }}
           type="email"
           required
           maxLength={254}
           autoComplete="off"
           className="mt-1 block w-full rounded border p-2"
         />
+        {fieldErrors.email && (
+          <span
+            id="staff-email-error"
+            role="alert"
+            className="mt-1 block text-sm text-red-700"
+          >
+            {fieldErrors.email}
+          </span>
+        )}
       </label>
       <label className="block">
         初期パスワード（15〜128文字）
         <input
           name="password"
+          readOnly={busy}
+          aria-invalid={!!fieldErrors.password}
+          aria-describedby={
+            fieldErrors.password ? "staff-password-error" : undefined
+          }
+          onBlur={(event) => validateField("password", event.currentTarget.value)}
+          onChange={(event) => {
+            if (fieldErrors.password) {
+              validateField("password", event.currentTarget.value);
+            }
+          }}
           type="password"
           required
           maxLength={256}
           autoComplete="new-password"
           className="mt-1 block w-full rounded border p-2"
         />
+        {fieldErrors.password && (
+          <span
+            id="staff-password-error"
+            role="alert"
+            className="mt-1 block text-sm text-red-700"
+          >
+            {fieldErrors.password}
+          </span>
+        )}
       </label>
       <p className="text-sm">
         作成時の権限は閲覧のみです。権限の付与は管理者が行います。
@@ -189,7 +288,7 @@ export function StaffPermissionForm({
             <input
               type="checkbox"
               checked={granted.has(permission)}
-              disabled={busy}
+              readOnly={busy}
               onChange={(event) =>
                 toggle(permission, event.currentTarget.checked)
               }
