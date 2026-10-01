@@ -7,6 +7,7 @@ import { getSession } from "next-auth/react";
 import type { Session } from "next-auth";
 import { ArrowUpRight, Menu, Waves, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/auth/login-form";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
@@ -26,15 +27,21 @@ export function SiteHeader() {
     };
   }, [pathname]);
   const role = sessionState?.pathname === pathname ? sessionState.session?.user.role : undefined;
+  const canLogout = role === "MEMBER" || role === "ADMIN";
   const links = [
     { href: "/", label: "ホーム" },
     { href: "/book", label: "メニュー・Web予約" },
     ...(role === "MEMBER" ? [{ href: "/account", label: "マイページ" }] : []),
     ...(role === "ADMIN" ? [{ href: "/manage", label: "管理ページ" }] : []),
-    { href: "/login", label: "ログイン" },
+    ...(!canLogout ? [{ href: "/login", label: "ログイン" }] : []),
   ];
   const [openFor, setOpenFor] = useState<string | null>(null);
   const open = openFor === pathname;
+  const onLogout = () => {
+    setSessionState({ pathname, session: null });
+    setOpenFor(null);
+  };
+  const logoutTarget = role === "ADMIN" ? "/admin/login" : "/login";
   const active = (href: string) => href === "/" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
@@ -51,6 +58,7 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="グローバルメニュー" className="hidden items-center gap-1 lg:flex">
           {links.map(({ href, label }) => <Link key={href} href={href} aria-current={active(href) ? "page" : undefined} className={cn("rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary", active(href) && "bg-secondary text-primary")}>{label}</Link>)}
+          {canLogout && <LogoutButton target={logoutTarget} onSuccess={onLogout} className="rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary disabled:opacity-50" />}
           <Button asChild className="ml-3"><Link href="/register?next=%2Fbook">会員登録<ArrowUpRight aria-hidden="true" /></Link></Button>
         </nav>
         <Button id="menu-toggle" variant="outline" size="icon" className="lg:hidden" aria-label={open ? "メニューを閉じる" : "メニューを開く"} aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpenFor(open ? null : pathname)}>
@@ -60,6 +68,7 @@ export function SiteHeader() {
       <nav id="mobile-menu" aria-label="モバイルグローバルメニュー" hidden={!open} className="border-t px-4 py-4 lg:hidden">
         <div className="mx-auto grid max-w-6xl gap-1">
           {links.map(({ href, label }) => <Link key={href} href={href} aria-current={active(href) ? "page" : undefined} onClick={() => setOpenFor(null)} className={cn("rounded-lg px-4 py-3 text-sm font-medium hover:bg-secondary", active(href) && "bg-secondary text-primary")}>{label}</Link>)}
+          {canLogout && <LogoutButton target={logoutTarget} onSuccess={onLogout} className="w-full rounded-lg px-4 py-3 text-left text-sm font-medium hover:bg-secondary disabled:opacity-50" />}
           <Button asChild className="mt-2"><Link href="/register?next=%2Fbook" onClick={() => setOpenFor(null)}>会員登録<ArrowUpRight aria-hidden="true" /></Link></Button>
         </div>
       </nav>

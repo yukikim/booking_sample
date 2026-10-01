@@ -80,7 +80,7 @@ export function LoginForm({ role }: { role: "admin" | "staff" | "member" }) {
     </form>
   );
 }
-export function LogoutButton({ target = "/staff/login" }: { target?: string }) {
+export function LogoutButton({ target = "/staff/login", className = "rounded border p-3", onSuccess }: { target?: string; className?: string; onSuccess?: () => void }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -101,6 +101,7 @@ export function LogoutButton({ target = "/staff/login" }: { target?: string }) {
         body: new URLSearchParams({ csrfToken, callbackUrl: target }),
       });
       if (!response.ok) throw new Error();
+      onSuccess?.();
       router.replace(target);
       router.refresh();
     } catch {
@@ -114,7 +115,7 @@ export function LogoutButton({ target = "/staff/login" }: { target?: string }) {
       <button
         onClick={logout}
         disabled={pending}
-        className="rounded border p-3"
+        className={className}
       >
         {pending ? "処理中…" : "ログアウト"}
       </button>
