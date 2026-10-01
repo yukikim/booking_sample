@@ -27,12 +27,12 @@ export function SiteHeader() {
     };
   }, [pathname]);
   const role = sessionState?.pathname === pathname ? sessionState.session?.user.role : undefined;
-  const canLogout = role === "MEMBER" || role === "ADMIN";
+  const canLogout = role === "MEMBER" || role === "ADMIN" || role === "STAFF";
   const links = [
     { href: "/", label: "ホーム" },
     { href: "/book", label: "メニュー・Web予約" },
     ...(role === "MEMBER" ? [{ href: "/account", label: "マイページ" }] : []),
-    ...(role === "ADMIN" ? [{ href: "/manage", label: "管理ページ" }] : []),
+    ...(role === "ADMIN" || role === "STAFF" ? [{ href: "/manage", label: "管理ページ" }] : []),
     ...(!canLogout ? [{ href: "/login", label: "ログイン" }] : []),
   ];
   const [openFor, setOpenFor] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export function SiteHeader() {
     setSessionState({ pathname, session: null });
     setOpenFor(null);
   };
-  const logoutTarget = role === "ADMIN" ? "/admin/login" : "/login";
+  const logoutTarget = role === "ADMIN" ? "/admin/login" : role === "STAFF" ? "/staff/login" : "/login";
   const active = (href: string) => href === "/" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
