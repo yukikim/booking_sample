@@ -33,7 +33,9 @@
     "db:backup": "node --import tsx scripts/backup-database.ts",
     "test:recovery": "node --conditions=react-server --import tsx scripts/verify-recovery.ts",
     "smoke:deployment": "node --import tsx scripts/smoke-deployment.ts",
-    "db:deployment": "node --import tsx scripts/deploy-database.ts"
+    "db:deployment": "node --import tsx scripts/deploy-database.ts",
+    "db:backup:local": "node --import tsx scripts/backup-local-database.ts",
+    "db:import:production": "node --import tsx scripts/import-production-database.ts"
   },
   "dependencies": {
     "@next/env": "16.3.5",

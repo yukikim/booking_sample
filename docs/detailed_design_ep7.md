@@ -129,3 +129,11 @@ migration実行者を1人に定め、検証済みcommitとSQLをバックアッ�
 | CI | HTTP統合4系統を追加。GitHub上での実行は未確認 |
 
 Task 7.2.2は完了、7.2.1/7.2.3/7.2.4はリポジトリ内準備まで。Story 7.2と本番リリースは未完了。
+
+### 2026-10-01：ローカルバックアップと本番初期投入
+
+- `db:backup:local`：既存の開発env読込みとCompose接続ガードを共有。publicをcustom formatで新規0600ファイルに保存し、失敗時は作成ファイルを削除。
+- `db:import:production`：production設定・expected-host/database・確認フラグ・custom archiveを検査し、空のpublicだけに復元。既存オブジェクトを削除/上書きしない。アプリ/Cron/migrationを切り離した新DBへ実行する。
+- pg_restoreは単一トランザクション。その後共有quarantine処理でセッション/トークン失効・未確定メール隔離。隔離失敗時は復元済みDBをオフラインに保ち、手動隔離または新DBで再実施する。
+- 全量投入であり差分同期ではない。テストデータ・認証情報・移行履歴・権限・退会/取消の照合と切替は運用手順第4章に記載。本番実行・外部復旧確認は未実施のためTask 7.2.3の未完了状態を維持。
+- 検証：型チェック・対象ESLint・CLI拒否テスト2件、ローカルbackup実行（0600/custom形式確認、検証dump削除）、使い捨てDBでのtest:recovery成功。本番投入スクリプトの実Neon接続は未確認。

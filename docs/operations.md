@@ -112,6 +112,33 @@ COMMIT;
 
 `npm run test:recovery` はローカルCompose接続ガードを通し、使い捨てDBを2つ作って実際のdump/restoreと隔離処理を検証し、テストDBとアーカイブを削除する。既存booking_sampleをリセットしない。定期的に、外部保管したバックアップについても同じ復元・照合を行う。
 
+### ローカルDBのバックアップと本番への初期投入（2026-10-01追加）
+
+```sh
+npm run db:up
+# 親ディレクトリは先に作成。出力は存在しないファイルを指定する。
+npm run db:backup:local -- --output /secure/location/local.dump
+```
+
+ローカルはNext.js開発時の優先順（process.env → .env.development.local → .env.local → .env.development → .env）で読み込む。DATABASE_URLとDIRECT_URLは同一のlocalhost/127.0.0.1:5432/booking_sample、publicスキーマのみ許可。`.env.production` は不要。ホスト側にpg_dump/pg_restoreが必要で、Docker内の実行へは自動切替しない。publicの構造・データ・Prisma migration履歴をcustom format/0600で保存し、既存ファイルを上書きしない。
+
+本番への投入は**空の新しいNeon DB/ブランチへの全量復元**。データの差分同期・マージではない。既存publicオブジェクトがあれば拒否し、--cleanや既存DB削除は実行しない。すでに運用中の本番には、旧DBを保持して新ブランチへ復元・検証後、接続を切り替える。現在の本番の退会・取消・新規予約はローカルdumpに含まれないため、置換を通常の更新手段にしない。
+
+1. ローカルのテスト会員・予約・スタッフ・seed設定をレビューし、本番へ移すデータを確定する。dumpは信頼できる自分のバックアップだけを使う（復元にはSQL実行が含まれる）。
+2. アプリ・Cron・migrationから切り離した空の本番Neon DB/ブランチを準備する。既存本番があればdb:backupで別途保全する。
+3. `.env.hosted.example` を元に復元先の `.env.production` を設定。全deployment設定検査に加えAPP_ENV=productionを要求する。HOSTとDATABASEはNeon画面で直接接続先と照合する。
+4. 以下を実行する。環境ファイル名は任意だが、接続先の明示と確認フラグは必須。
+
+```sh
+npm run db:import:production -- --file .env.production --input /secure/location/local.dump --expected-host HOST --expected-database DATABASE --confirm-empty-production-import
+```
+
+5. 復元は単一トランザクションで行い、その後別トランザクションで全AppSession/AuthTokenを失効、未確定EmailDelivery/AttemptをUNKNOWNへ隔離する。復元後の隔離に失敗した場合、復元データは残る。失敗時は接続を切り替えず、隔離SQLを実行・検証するか新しい空DBでやり直す。自動削除・自動再試行は行わない。
+6. 同一コード版のmigration履歴・制約・会員/予約/退会/権限・営業時間を照合し、必要なmigrationを明示適用する。旧ロールのACLは復元しないのでアプリロールの権限を再付与する。ローカルのスタッフ/会員パスワードハッシュも移るため、本番用認証情報を確認・変更し、管理者Versionと環境側の認証/メール暗号化鍵も確認する。UNKNOWNメールを自動再送しない。
+7. メールを停止したまま新DBで検証してから本番アプリの接続先を切り替え、公開後確認を実施して受付/ワーカーを再開する。
+
+本番スクリプト自体は本番DBへ接続するため、ローカルの検証演習では実行しない。`test:recovery` は使い捨てDBで共有dump/restore・隔離処理を検証する。本番への実投入は別途実施・記録する。
+
 ## 5. デプロイ後の確認と公開判定
 
 ```sh
