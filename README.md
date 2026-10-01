@@ -502,7 +502,7 @@ GitHub Actionsはpush・pull request・手動実行で起動します。`checks`
 
 ### デプロイ方針・後続作業
 
-開発用Docker DBと、検証・本番のVercel/Neon環境を分離します。接続・migration・監視・バックアップ・復旧・公開後確認の手順は[運用手順](docs/operations.md)と[Epic 7詳細設計第6章](docs/detailed_design_ep7.md#6-story-72環境分離デプロイ運用task-721724)を参照してください。外部環境は未設定です。ローカルバックアップは `npm run db:backup:local -- --output ./backups/local.dump`、空の本番DBへの初期投入は `db:import:production` を使います。接続先指定・確認フラグ・投入後の隔離と確認手順は[運用手順第4章](docs/operations.md#4-バックアップと復元)を参照してください。
+開発用Docker DBと、検証・本番のVercel/Neon環境を分離します。デプロイはGitHub ActionsのCI/CDを前提とし、CI成功・検証環境確認・本番バックアップ・migration・Vercel公開の順に進めます。現在の `.github/workflows/ci.yml` はCIのみで、CD workflow・GitHub Environments・Vercel Git自動デプロイ停止は未設定です。接続・migration・監視・バックアップ・復旧・公開後確認の手順は[運用手順](docs/operations.md)と[Epic 7詳細設計第6章](docs/detailed_design_ep7.md#6-story-72環境分離デプロイ運用task-721724)を参照してください。外部環境は未設定です。ローカルバックアップは `npm run db:backup:local -- --output ./backups/local.dump`、空の本番DBへの初期投入は `db:import:production` を使います。接続先指定・確認フラグ・投入後の隔離と確認手順は[運用手順第4章](docs/operations.md#4-バックアップと復元)を参照してください。
 
 初期リリースには入会・復旧確認、パスワード再設定、店舗都合の変更案内メールの配信基盤を含めます。管理者認証情報・認証用秘密鍵は`.env.example`の項目をローカル環境へ設定します（[Epic 3のハンズオン](docs/detailed_design_ep3.md#6-ハンズオン手順)）。実値はリポジトリ・ブラウザ・ログへ出力しません。実際の配信には`RESEND_API_KEY`と、送信に使えるドメインの`RESEND_FROM`を設定します。
 

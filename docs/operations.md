@@ -1,6 +1,6 @@
 # デプロイ・監視・バックアップ・復旧手順
 
-対象：Vercel / Neon / Resend。2026-09-30時点で外部環境は未作成。以下は設定と実施手順であり、本番実施済みの記録ではない。リリース責任者が接続先・変更内容・バックアップ・確認結果をリリース記録へ残す。
+対象：GitHub Actions（CI/CD）/ Vercel / Neon / Resend。2026-10-01更新。外部環境の確認記録は未登録。以下は設定と実施手順であり、本番実施済みの記録ではない。リリース責任者が接続先・変更内容・バックアップ・確認結果をリリース記録へ残す。
 
 ## 1. 環境の分離
 
@@ -14,7 +14,7 @@
 
 1. Neonで検証と本番のDBを別々に作成する。各環境のアプリ用・migration用のロールを分ける。
 2. アプリの `DATABASE_URL` はpooler、`DIRECT_URL` は同一endpoint/databaseの直接接続にする。TLSを必須にする。`DEPLOYMENT_DB_HOST` に選んだ直接接続のhostnameを固定する。
-3. `.env.hosted.example` を `.env.staging` と `.env.production` にコピーし、それぞれ別の秘密値を入力する。既存の開発用.envは変更しない。
+3. 手元で確認する場合は `.env.hosted.example` を `.env.staging` と `.env.production` にコピーし、それぞれ別の秘密値を入力する。GitHub ActionsではEnvironment secretsからrunner上に一時設定ファイルを生成する（第2章）。既存の開発用.envは変更しない。
 4. 検証は `APP_ENV=staging`、本番は `APP_ENV=production`。`AUTH_URL` は実際に開く固定HTTPS origin。管理者パスワードは15〜128文字。秘密情報をGit・チャット・チケットへ貼らない。
 5. AUTH_SECRET・AUTH_RATE_LIMIT_SECRET・CRON_SECRET・OPS_SECRETは各々32文字以上の独立したランダム値。MAIL_PAYLOAD_KEYは独立した32バイトのBase64値。鍵の生成例：`openssl rand -hex 32` / `openssl rand -base64 32`。値は秘密管理へ保存する。
 6. VercelにNext.jsプロジェクトとして登録し、Nodeはpackage.jsonのenginesと整合する22系、Build Commandはvercel.jsonの `npm run build:deploy` を使用する。Production/Previewの環境変数を区別し、Previewは検証DBだけへ接続する。固定検証URLを使うため、検証専用プロジェクトのProduction環境はAPP_ENV=stagingとしてよい。本番プロジェクトのPreviewもstagingにする。
@@ -30,31 +30,107 @@ Resendは送信可能な確認済みドメインをRESEND_FROMへ設定する。
 
 ## 2. リリースとmigration
 
-migrationはビルド時・アプリ起動時・Preview生成時には適用しない。`build:deploy` は環境検証・Client生成・ビルドのみ。migration実行者を1人に決め、同時実行せず、同一コミットのSQLを検証→本番の順で適用する。
+### 2.1 GitHub CI/CDの責務と実装状況
 
-1. `npm run check`、`npm run test:db`、`npm run test:e2e:http`、`npm run test:recovery`、本番ビルドを成功させる。7.1.1/7.1.2の未完了項目も初期公開までに完了する。
-2. migration SQLをレビューする。既存コードと互換性を保つ追加を先に適用し、削除/必須化等は別リリースに分ける。予約への影響と長時間ロックを確認する。
-3. 検証DBでバックアップ取得、migration適用、動作確認を行う。
-4. 本番DBの接続先・バックアップの取得時刻・対象コミット・旧デプロイURLを記録する。書込みと互換性を保てない変更は受付を止め、変更窓を設ける。
-5. 本番migrationを適用してから、そのスキーマと互換性のあるアプリを公開する。自動公開がmigrationより先に走らないよう、Vercelの公開操作をリリース責任者が管理する。
-6. 初回のみ、固定IDの管理者行をbootstrapする。これは既存管理者を上書きせず、サンプル予約・会員・営業設定を追加しない。
+GitHub Actionsが検査・migration・Vercelへの公開を順番に実行する前提とする。リリース責任者は対象commitと変更内容を確認し、通常の本番migration実行はCDに一本化する。ビルド時・アプリ起動時・Preview生成時にはmigrationを適用しない。`build:deploy` は環境検証・Client生成・ビルドのみ。
+
+**現在の `.github/workflows/ci.yml` はCIのみ。CD workflow、本番Environment、Vercel連携、バックアップ保管先はこの更新では実装・設定していない。** CIはpush・pull request・手動実行で起動し、checks（静的検査・隔離DB/HTTP検証・ビルド）とdependency-auditを実行する。`test:recovery` は現在のCIには含まれていないため、リリースの追加検証として実行する。以下はCD実装時に満たす運用要件。
+
+| 段階 | 実行内容 | 次へ進む条件 |
+| --- | --- | --- |
+| CI | checks / dependency-audit / 復旧演習 | リリース対象SHAで全チェック成功 |
+| 検証CD | 検証DBバックアップ → migration → 検証アプリ公開 → smoke / ブラウザ確認 | 同一SHA・SQLで検証成功、結果を記録 |
+| 本番準備 | 本番設定・接続先照合、公開前ビルド、必要なリリース承認 | 本番Environmentの保護条件を満たす |
+| 本番CD | バックアップの保管確認 → migration → 状態・権限確認 → 本番公開 → smoke | 各処理が成功。失敗した段階で後続を止める |
+
+CDの設定要件：
+
+1. デプロイ対象を保護されたリリースブランチ/タグに限定する。ブランチ名は運用で確定する。PRのCIに本番secretsを渡さない。CI・検証・本番のcheckoutとビルドは同じcommit SHAに固定し、途中でブランチ先頭を取り直さない。別workflowでCI完了を受ける場合も、その実行の成功・信頼できるブランチ・対象SHAを照合する。
+2. GitHub Environmentsに `staging` / `production` を作り、各環境のsecretsと許可ブランチを分離する。必要な本番承認はRequired reviewersで設定する。利用可否はGitHubプランとリポジトリの公開範囲による。利用できなければ権限を制限した手動起動などで公開を制御する。
+3. 本番CD全体（バックアップ〜公開後確認）を固定の `concurrency.group`（例：`booking-production-release`）で直列化し、`cancel-in-progress: false` を設定する。現在のCIの `cancel-in-progress: true` をCDへ引き継がない。すべての本番リリース入口で同じgroupを使い、手元からの並行migrationも禁止する。実行中のmigrationを手動cancelした場合は、再実行前に履歴と実スキーマを確認する。
+4. VercelのGit連携によるpush時の自動デプロイを無効にし、GitHub Actionsからのみ公開する。例えば `vercel.json` の既存設定へ `"git": { "deploymentEnabled": false }` を追加する。**現在のvercel.jsonには未設定**。CDを有効にする前に設定し、既存のbuildCommand/cronsを保持する。
+5. GitHubのEnvironment secretsにVercelの `VERCEL_TOKEN` と、環境別の `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`、DB・認証・メール・監視の設定を登録する。Vercel側にも実行時環境変数を登録する。GitHubへの登録だけではVercelアプリへ反映されない。migrationの `DIRECT_URL` はDDL用、`DATABASE_URL` はアプリ用ロールを使う。
+6. DBコマンドはprocess.envだけではなく `--file` の内容を読む。runnerの一時ディレクトリへ `.env.hosted.example` と同じキーを持つ設定ファイルをsecretsから作成し、0600にする。dotenvとして引用・改行を正しく扱い、シェル文字列への直接展開、`set -x`、内容の出力を避ける。バックアップと設定ファイルを通常のActions artifact/cacheへ入れず、終了時（失敗時も）に一時ファイルを削除する。
+7. Vercel CLIは検証した版を固定する。`vercel pull --environment=production` → `vercel build --prod` で公開前にビルドし、migrationと後述の確認成功後に `vercel deploy --prebuilt --prod` で公開する。認証とproject指定は環境ごとに行う。検証専用Vercelプロジェクトも固定URLを使うためProductionへ公開するが、`APP_ENV=staging` と検証DBを使用する。Preview用はpreviewの設定・検証DBを使い、本番DBに接続しない。
+8. バックアップ用にサーバーに対応するpg_dump/pg_restoreをrunnerへ用意し、暗号化と35日保持の外部保管を実装する。暗号化済みアーカイブの保管完了と復元可能性を確認してからmigrationへ進む。run URL・SHA・migration名・保管ID・旧/新デプロイURL・確認結果をリリース記録へ残す。
+
+順序の根拠：[VercelのGitHub Actions連携](https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel)、[Git自動デプロイの停止](https://vercel.com/docs/project-configuration/git-configuration)、[GitHubのEnvironment・concurrency](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/control-deployments)。
+
+### 2.2 本番migrationの実施手順
+
+migrationは**GitへコミットしたSQLを本番DBへ適用する処理**。ローカルのデータを本番へ同期する処理ではない。通常の更新では第4章の全量importを使わず、既存本番データを保持して未適用SQLだけを適用する。
+
+以下はCDに組み込む手順。CD実装前に担当者が実行する場合も、同じ対象SHAと順序を使い、本番自動公開と他のmigration実行を止める。コマンド例の `HOST` はNeon画面で照合した本番の直接接続hostname、`.env.production` は本番設定ファイルに置き換える。runnerでは一時ファイルの絶対パスを使う。パスワードをコマンド引数に入れない。
+
+**1. リリース内容を準備・検証する**
+
+- `prisma/schema.prisma` と `prisma/migrations/<migration名>/migration.sql` を同じcommitへ含める。適用済みSQLを後から編集しない。本番でmigrationを生成しない。
+- SQLのDROP、TRUNCATE、型変更、NOT NULL、一意制約追加、既存行の更新、ロック時間をレビューする。旧アプリが動いたまま新スキーマを使えるか確認する。追加 → アプリ切替/必要なデータ補完 → 別リリースで削除・必須化の順を基本とする。
+- `npm ci`、CI全チェック、`npm run test:recovery`、検証DBで同じSQLの適用、検証アプリの動作確認を成功させる。公開前に本番設定でVercelビルドを完了する。旧コードと互換性がない場合は、受付・管理操作・Cronなど書込み経路を止める変更窓を決め、再開条件を記録する。
+
+**2. 接続先と現在の履歴を確認する**
+
+Neonの本番プロジェクト/ブランチ・endpoint・database名・migrationロールを照合する。`APP_ENV=production`、pooler/directのDB一致、`DEPLOYMENT_DB_HOST=HOST` を確認する。スクリプトはstagingも受け付けるため、ファイル名だけで本番と判断しない。expected-hostのガードもdatabase名や環境を独立に証明するものではない。
 
 ```sh
-# HOSTにはNeon画面で照合した直接接続hostnameを入力する。パスワードは引数に入れない。
-npm run db:deployment -- --file .env.staging --expected-host HOST --action status
-npm run db:deployment -- --file .env.staging --expected-host HOST --action deploy
-npm run db:deployment -- --file .env.staging --expected-host HOST --action bootstrap
-# 本番は.env.productionと本番HOSTを照合して同じ順で実施する。
+npm run env:check -- --file .env.production
+npm run db:deployment -- --file .env.production --expected-host HOST --action status
 ```
 
-migration用ロールはDDL権限を持ち、アプリ用ロールは必要なpublicスキーマのUSAGEとSELECT/INSERT/UPDATE/DELETE、必要なsequence USAGE/SELECTだけを付与する。migration後に新規テーブルの権限も付与する。アプリ用ロールへDB作成・ロール管理権限を渡さない。復元時はACLを再適用する。
+**statusの終了コードに注意**：Prisma 7は未適用migrationや初回の履歴テーブル未作成でも終了コード1を返す。現在のラッパーはCLI出力を抑制し、これらと接続障害/失敗履歴を同じ汎用エラーで返す。失敗を `|| true` や `continue-on-error` で無視してdeployへ進めない。CD実装時は事前状態を判別する検査を用意する。それまでは権限を持つ担当者が保護されたDBコンソール等で `_prisma_migrations` と対象SQLを照合し、「予定どおりの未適用だけ」または「初回の空DB」と確認した場合だけ進む。失敗履歴・履歴の分岐・接続不良なら停止する。[Prisma 7 statusの終了コード](https://www.prisma.io/docs/cli/v7/migrate/status)
 
-失敗時：
+初回以外の履歴確認例（DBコンソールで実行。`logs` は機密情報を含み得るため公開ログへ出さない）：
 
-- ビルド失敗：旧アプリを継続使用し、再公開しない。
-- migration失敗：公開を止め、`_prisma_migrations`と実スキーマを照合する。SQLを修正・検証し、必要な場合だけPrisma migrate resolveで状態を整える。成功扱いへ変更して再実行を強行しない。
-- 新アプリで障害：追加migrationが旧コード互換ならVercelで旧デプロイへ戻す。アプリのrollbackはDBを戻さない。
-- 非互換・データ破損：受付とCronを停止し、下記の隔離復元・照合を行う。古いバックアップを稼働中DBへ上書きしない。
+```sql
+SELECT migration_name, started_at, finished_at, rolled_back_at
+FROM "public"."_prisma_migrations"
+ORDER BY started_at;
+```
+
+`finished_at IS NULL AND rolled_back_at IS NULL` の履歴は原因調査が必要。初回に履歴テーブルがない場合は、publicに既存アプリテーブルがないことを確認する。既存テーブルがあるのに履歴がない場合は初期migrationを強行せず、別途baseline計画を作る。第4章の全量import済みDBでは移された履歴を確認し、未適用分だけを扱う。
+
+**3. 直前バックアップを取得・保管する**
+
+```sh
+npm run db:backup -- --file .env.production --output /secure/location/release-new.dump
+```
+
+保存先は実在する書込み可能なディレクトリと新規ファイル名に置き換える。取得成功だけで進めず、暗号化・外部保管完了・取得時刻・対象DB・復元検証結果を記録する。バックアップ失敗/保管失敗は公開中止。稼働中の取得後にも予約等は更新されるため、復元時のデータ損失範囲を把握する。書込み停止が必要な変更では、停止後に最終バックアップを取得する。
+
+**4. 未適用migrationを一度だけ適用する**
+
+```sh
+npm run db:deployment -- --file .env.production --expected-host HOST --action deploy
+```
+
+内部で `prisma migrate deploy --config prisma7.config.ts` を実行し、指定ファイルの `DIRECT_URL` へ接続する。未適用のmigrationを順に適用し、履歴へ記録する。Client生成・seed・ローカルデータ転送はしない。すでに適用済みならそのSQLを再適用しない。`db:migrate` はローカル専用なので本番で使わない。本番では `migrate dev` / `migrate reset` / `db push` / 開発用seedも使わない。
+
+現在のラッパーはPrisma子プロセスのtimeoutが120秒。長時間DDLは検証時に実行時間とロックを測定し、必要な実行方法を別途準備する。timeoutや接続断でも「何も適用されなかった」と判断せず、履歴と実スキーマを確認してから復旧する。`migrate deploy` はスキーマの手動変更（drift）を網羅的に検出しないため、成功だけで制約・権限の正しさを保証しない。[Prisma 7 deployの仕様](https://www.prisma.io/docs/cli/v7/migrate/deploy)
+
+**5. 状態・権限・初回設定を確認する**
+
+```sh
+npm run db:deployment -- --file .env.production --expected-host HOST --action status
+# 初回だけ。既存管理者を上書きせず固定IDの管理者行を追加する。
+npm run db:deployment -- --file .env.production --expected-host HOST --action bootstrap
+```
+
+適用後のstatusは終了コード0を必須とし、履歴・追加テーブル/列・CHECK/FK/一意制約を照合する。bootstrapはサンプル会員/予約/営業設定を作らず、管理者の認証情報は環境変数で設定する。
+
+migrationロールはDDL権限を持ち、アプリロールには必要なpublicスキーマのUSAGEとSELECT/INSERT/UPDATE/DELETE、必要なsequence USAGE/SELECTだけを付与する。新規テーブルの権限もmigration後・公開前に確認する。アプリロールへDB作成・ロール管理権限を渡さない。復元時はACLを再適用する。
+
+**6. 同じSHAのアプリを公開・確認する**
+
+migrationと状態/権限確認成功後に、準備済みの同じSHAのVercelビルドを公開する。固定本番URLで `npm run smoke:deployment -- --file .env.production` と第5章の確認を行い、結果を記録する。受付・ワーカーを止めていた場合は、整合性・メール状態を確認してから再開する。CI/CD成功と実メール/Cron/ブラウザ確認を分けて記録する。
+
+### 2.3 失敗時の対応
+
+- CI/ビルド/バックアップ失敗：後続migration・公開を止め、旧アプリを継続使用する。
+- migration失敗/timeout：公開を止め、`_prisma_migrations` と実スキーマ・部分適用されたSQLを照合する。migration全体が自動的にrollbackされたと仮定しない。失敗状態を無視して再実行しない。
+- 失敗migrationの復旧：部分適用を安全に取り消したか、再適用可能な状態を検証した場合は `migrate resolve --rolled-back <migration名>` で再適用を許可する。残りのSQLを手動で完了させ、期待するスキーマ/データと一致した場合は `migrate resolve --applied <migration名>` で履歴を合わせる。**resolveはSQL実行・データ復元を行わず、履歴だけを更新する。** このリポジトリのラッパーはresolveを受け付けないため、接続先を照合した別の復旧作業として実施し、通常CDへ組み込まない。[Prisma 7の復旧手順](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/patching-and-hotfixing)
+- migration成功後の公開失敗：追加migrationが旧コード互換なら旧アプリを継続使用し、DBを戻さず同じSHAの公開を再試行する。再実行時も履歴と現状を確認する。
+- 新アプリで障害：旧コード互換ならVercelで旧デプロイへ戻す。アプリrollbackはDBを戻さない。
+- 非互換・データ破損：受付・管理書込み・Cronを停止し、第4章の隔離復元・照合を行う。古いバックアップを稼働中DBへ上書きしない。
 
 ## 3. 監視とメール復旧
 

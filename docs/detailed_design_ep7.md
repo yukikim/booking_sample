@@ -89,9 +89,11 @@ VercelのbuildCommandを `npm run build:deploy` に設定する。環境検査�
 
 ### 6.2 Task 7.2.2：migrationとrollback
 
-migration実行者を1人に定め、検証済みcommitとSQLをバックアップ後に本番へ適用し、その後アプリ公開する。ビルド/Preview/起動時migrationを禁止する。追加変更を先に適用する互換性維持を原則とし、破壊的変更は変更窓と別リリースで扱う。
+2026-10-01追記：デプロイはGitHub ActionsのCI/CDを前提とする。通常の本番migrationはCDへ一本化し、リリース責任者が対象SHA・変更・確認結果を管理する。CI成功→同一SHAの検証CD→本番ビルド→バックアップ保管→本番migration→状態/権限確認→Vercel公開→smokeの順とする。production Environmentと固定concurrency group（cancel-in-progress: false）を使い、VercelのGit自動デプロイを停止する。現在のworkflowはCIのみで、CDと外部設定は未実装。具体的な設定要件と本番migrationの6段階の手順は[運用手順第2章](operations.md#2-リリースとmigration)を参照。
 
-`db:deployment`は明示的な.envファイル・照合済みexpected-host・status/deploy/bootstrapの指定を要求する。bootstrapは固定管理者行だけを追加し、開発用seedを本番へ流さない。これは実行対象の指定を助けるガードで、担当者による対象照合を代替しない。
+検証済みcommitとSQLをバックアップ後に本番へ適用し、その後アプリ公開する。ビルド/Preview/起動時migrationを禁止する。追加変更を先に適用する互換性維持を原則とし、破壊的変更は変更窓と別リリースで扱う。
+
+`db:deployment`は明示的な.envファイル・照合済みexpected-host・status/deploy/bootstrapの指定を要求する。bootstrapは固定管理者行だけを追加し、開発用seedを本番へ流さない。これは実行対象の指定を助けるガードで、担当者による対象照合を代替しない。Prisma 7のstatusは未適用migrationでも終了コード1を返し、現在のラッパーは出力を抑制するため障害と区別できない。CD実装時に事前状態の判別を用意し、汎用エラーを無視してdeployへ進めない。子プロセスtimeoutは120秒で、timeout後も部分適用を確認する。
 
 アプリrollbackとDB復旧を分離する。旧コード互換なら旧Vercelデプロイへ戻す。migration失敗は実スキーマと履歴を照合し、検証した修正のみ適用。データ破損/非互換では隔離DBへ復元し、退会・権限・予約状態を突合してから切り替える。既存本番をreset/restoreで上書きしない。
 
