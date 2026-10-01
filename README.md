@@ -34,7 +34,7 @@ Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼー
 | --- | --- |
 | Node.js | `.nvmrc`の22.23.1を開発・CIの基準とする。`engines`は22.23.1以上・23未満 |
 | npm | 10.9.8で再現確認。依存は`npm ci`でlockfileから導入 |
-| Next.js / React | 16.3.5 / 19.2.8 |
+| Next.js / React | 16.3.8 / 19.2.8 |
 | TypeScript / Tailwind CSS | lockfileで5.9.3 / 4.3.3 |
 | Prisma CLI・Client・pgアダプター | lockfileで7.10.0。CLI設定は`prisma7.config.ts` |
 | ローカルDB | Docker Composeの`postgres:17-alpine`。ホスト側の`127.0.0.1:5432`へ公開 |

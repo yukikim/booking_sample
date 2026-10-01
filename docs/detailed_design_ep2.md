@@ -318,6 +318,20 @@ MySQL2はアプリのPostgreSQL接続では使わないが、CLIの依存とし�
 
 Prisma更新時は上流の依存修正状況を調べ、修正済みならoverrideを除去してlockfileを再生成する。npm ci・監査・check・DB疎通・buildを再確認する。監査を通す目的でPrismaのmajorを自動変更しない。現時点の0件は将来の脆弱性不存在を保証しないため、既存のCI監査を継続する。
 
+### 7.5 2026-10-01：Next.jsとfast-uriの監査指摘への対応
+
+GitHub Actionsの`dependency-audit`で、Next.jsのcriticalとfast-uriのmoderateが報告された。`--audit-level=high`の終了コード1はcriticalによるもの。監査基準とワークフローは維持した。
+
+- `next`・`@next/env`・`eslint-config-next`を16.3.5から16.3.8へ固定更新。[Next.jsのアドバイザリ](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j)では16.3.6が修正版の下限。npmが提示した同一minorの16.3.8を採用した。
+- `prisma → @prisma/dev → @prisma/streams-local → ajv → fast-uri`の間接依存を3.1.7から3.1.8へ更新。[fast-uriのアドバイザリ](https://github.com/advisories/GHSA-hrr3-gc8f-f4qj)に記載された3系の修正版で、既存の依存範囲内でlockfileを更新できるためoverrideは追加していない。
+- `package.json`・`package-lock.json`とREADMEの現行バージョン表を同期した。`npm audit fix --force`による一括更新は行っていない。
+
+更新したlockfileから`npm ci`成功。`npm run audit:dependencies`は終了コード0、脆弱性0件。`npm run check`はPrisma検証・生成、lint、型チェック、46テストが成功した。DBの変更・migrationは行っていない。
+
+`npm run build`はsandbox内でGoogle Fonts取得が失敗し、通信を許可した再実行ではTurbopackのポート作成が`Operation not permitted`で停止した。`npm run build -- --webpack`は通信を許可した環境で成功。既定TurbopackによるGitHub上のビルド成功は別途確認する。
+
+GitHub側の修正後の実行は未確認。この差分をcommit・pushした後の新しい実行で確認する。修正前のcommitに対する失敗ジョブの再実行では、更新したlockfileは使われない。
+
 ## 8. Task 2.1.4：READMEへのセットアップ・起動・検証手順の統合
 
 ### 8.1 目的・完了条件
