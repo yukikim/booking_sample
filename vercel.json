@@ -6,5 +6,6 @@
       "schedule": "* * * * *"
     }
   ],
+  "git": { "deploymentEnabled": false},
   "buildCommand": "npm run build:deploy"
 }
