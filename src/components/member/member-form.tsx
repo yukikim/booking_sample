@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 type Mode =
@@ -50,6 +51,7 @@ const settings = {
 };
 
 export function MemberForm({ mode }: { mode: Mode }) {
+  const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const tokenRead = useRef(false);
   const [message, setMessage] = useState("");
@@ -79,6 +81,10 @@ export function MemberForm({ mode }: { mode: Mode }) {
         }),
       });
       const result = await response.json();
+      if (response.ok && mode === "confirm") {
+        router.replace("/login");
+        return;
+      }
       setMessage(
         response.ok
           ? ["confirm", "restore", "reset"].includes(mode)
