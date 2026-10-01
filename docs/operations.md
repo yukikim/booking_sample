@@ -85,6 +85,8 @@ migration用ロールはDDL権限を持ち、アプリ用ロールは必要なpu
 npm run db:backup -- --file .env.production --output /secure/location/new-backup.dump
 ```
 
+`/secure/location` は保存先の例であり、自動作成されない。実在する書込み可能なディレクトリを指定する。
+
 生成ファイルは0600。認証情報はCLI引数へ渡さない。アーカイブ自体には個人情報が入るので、取得直後に暗号化・保管し、平文ファイルを管理する。ツール出力をチャットへ貼らない。
 
 復元手順：
@@ -116,8 +118,9 @@ COMMIT;
 
 ```sh
 npm run db:up
-# 親ディレクトリは先に作成。出力は存在しないファイルを指定する。
-npm run db:backup:local -- --output /secure/location/local.dump
+# 保存先を作成。出力は存在しないファイルを指定する。
+mkdir -p ./backups
+npm run db:backup:local -- --output ./backups/local.dump
 ```
 
 ローカルはNext.js開発時の優先順（process.env → .env.development.local → .env.local → .env.development → .env）で読み込む。DATABASE_URLとDIRECT_URLは同一のlocalhost/127.0.0.1:5432/booking_sample、publicスキーマのみ許可。`.env.production` は不要。ホスト側にpg_dump/pg_restoreが必要で、Docker内の実行へは自動切替しない。publicの構造・データ・Prisma migration履歴をcustom format/0600で保存し、既存ファイルを上書きしない。
@@ -130,7 +133,7 @@ npm run db:backup:local -- --output /secure/location/local.dump
 4. 以下を実行する。環境ファイル名は任意だが、接続先の明示と確認フラグは必須。
 
 ```sh
-npm run db:import:production -- --file .env.production --input /secure/location/local.dump --expected-host HOST --expected-database DATABASE --confirm-empty-production-import
+npm run db:import:production -- --file .env.production --input ./backups/local.dump --expected-host HOST --expected-database DATABASE --confirm-empty-production-import
 ```
 
 5. 復元は単一トランザクションで行い、その後別トランザクションで全AppSession/AuthTokenを失効、未確定EmailDelivery/AttemptをUNKNOWNへ隔離する。復元後の隔離に失敗した場合、復元データは残る。失敗時は接続を切り替えず、隔離SQLを実行・検証するか新しい空DBでやり直す。自動削除・自動再試行は行わない。
