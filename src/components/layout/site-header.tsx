@@ -2,20 +2,37 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getSession } from "next-auth/react";
+import type { Session } from "next-auth";
 import { ArrowUpRight, Menu, Waves, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "/", label: "ホーム" },
-  { href: "/book", label: "メニュー・Web予約" },
-  { href: "/account", label: "マイページ" },
-  { href: "/login", label: "ログイン" },
-];
-
 export function SiteHeader() {
   const pathname = usePathname();
+  const [sessionState, setSessionState] = useState<{ pathname: string; session: Session | null } | null>(null);
+  useEffect(() => {
+    let current = true;
+    const refreshSession = async () => {
+      const session = await getSession({ broadcast: false }).catch(() => null);
+      if (current) setSessionState({ pathname, session });
+    };
+    void refreshSession();
+    window.addEventListener("focus", refreshSession);
+    return () => {
+      current = false;
+      window.removeEventListener("focus", refreshSession);
+    };
+  }, [pathname]);
+  const role = sessionState?.pathname === pathname ? sessionState.session?.user.role : undefined;
+  const links = [
+    { href: "/", label: "ホーム" },
+    { href: "/book", label: "メニュー・Web予約" },
+    ...(role === "MEMBER" ? [{ href: "/account", label: "マイページ" }] : []),
+    ...(role === "ADMIN" ? [{ href: "/manage", label: "管理ページ" }] : []),
+    { href: "/login", label: "ログイン" },
+  ];
   const [openFor, setOpenFor] = useState<string | null>(null);
   const open = openFor === pathname;
   const active = (href: string) => href === "/" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
