@@ -77,6 +77,10 @@ HTTP統合検証で非会員の予約作成・一覧・詳細を401で拒否。�
 
 2026-09-30実施。ユーザー回答「未設定。まずリポジトリ内の設定・運用手順を整備する」に従い、Vercel/Neonの作成や本番変更は行わない。手順の全文は[運用手順](operations.md)に記載する。
 
+2026-10-02追記：今回の公開範囲は、環境分離を行わないVercelの動作サンプルへ変更。Vercel 1プロジェクト・Neon DB 1つ・repository secretsで構成する。`ci-deploy.yml`から`ci.yml`を再利用し、静的・DB・HTTP検証・ビルドと依存監査の成功後、mainのpushだけを公開する。migrationは手動準備、公開ジョブではstatusのみを検査する。CLIは62.1.0固定、CLI配下の脆弱性は各親パッケージの版を限定したoverrideで修正（undiciは5系から6.29.0へ変更）。公開後smokeと環境ファイル削除を追加。CronはHobby対応の日次へ変更し、操作直後のdispatchは維持する。詳細は[サンプル公開手順](operations.md#0-今回のサンプル公開単一環境)を参照。以下の環境分離・自動migration・バックアップは将来の実運用設計として残し、Story全体の完了状態は変更しない。GitHub/Vercelでの実行は未確認。
+
+2026-10-02ローカル確認：workflowのYAML・埋込みBash構文・CI依存関係・CLI/lockfile整合性、`npm run check`（Prisma検証・生成、lint、型検査、46テスト）、`npm run audit:dependencies`（脆弱性0件）、CLIのversion/build help、`git diff --check`が成功。実Vercelビルド・公開、外部DBのstatus・smoke、GitHub runner上の実行は未確認。
+
 ### 6.1 Task 7.2.1：環境分離と接続設定
 
 開発は既存Docker、検証・本番は別Vercelプロジェクトと別Neon endpointを使う方針。`.env.hosted.example`を追加し、APP_ENV、pooler/direct接続、固定endpoint hostname、HTTPS AUTH_URL、独立した認証/メール/監視秘密値を定義する。
@@ -89,7 +93,7 @@ VercelのbuildCommandを `npm run build:deploy` に設定する。環境検査�
 
 ### 6.2 Task 7.2.2：migrationとrollback
 
-2026-10-01追記：デプロイはGitHub ActionsのCI/CDを前提とする。通常の本番migrationはCDへ一本化し、リリース責任者が対象SHA・変更・確認結果を管理する。CI成功→同一SHAの検証CD→本番ビルド→バックアップ保管→本番migration→状態/権限確認→Vercel公開→smokeの順とする。production Environmentと固定concurrency group（cancel-in-progress: false）を使い、VercelのGit自動デプロイを停止する。現在のworkflowはCIのみで、CDと外部設定は未実装。具体的な設定要件と本番migrationの6段階の手順は[運用手順第2章](operations.md#2-リリースとmigration)を参照。
+2026-10-01追記：デプロイはGitHub ActionsのCI/CDを前提とする。通常の本番migrationはCDへ一本化し、リリース責任者が対象SHA・変更・確認結果を管理する。CI成功→同一SHAの検証CD→本番ビルド→バックアップ保管→本番migration→状態/権限確認→Vercel公開→smokeの順とする。production Environmentと固定concurrency group（cancel-in-progress: false）を使い、VercelのGit自動デプロイを停止する。2026-10-01時点のworkflowはCIのみ。2026-10-02に単一環境サンプルCDを追加したが、ここに記載する実運用CDと外部設定は未実装。具体的な設定要件と本番migrationの6段階の手順は[運用手順第2章](operations.md#2-リリースとmigration)を参照。
 
 検証済みcommitとSQLをバックアップ後に本番へ適用し、その後アプリ公開する。ビルド/Preview/起動時migrationを禁止する。追加変更を先に適用する互換性維持を原則とし、破壊的変更は変更窓と別リリースで扱う。
 
@@ -107,7 +111,7 @@ VercelのbuildCommandを `npm run build:deploy` に設定する。環境検査�
 - 復元時隔離処理：全AppSession/AuthTokenを失効し、復元されたPENDING/RETRY_WAIT/SENDINGをUNKNOWNにしてpayloadを消去する。STARTED試行もUNKNOWNにする。バックアップ以降の実送信を再送しない。予約・枠・会員・権限は変更しない。
 - `test:recovery`：ローカル接続ガード後、使い捨て2DBへmigration/fixtureを用意し、実pg_dump/pg_restoreを実行。復旧処理の再実行、migration履歴、予約/枠、退会状態、スタッフ権限、セッション/トークン失効、キュー監視、復元後の一意制約を検証。既存publicを保持し、テストDBとdumpを削除する。
 
-即時送信と既存1/5/30分の回復再試行は維持する。恒久/UNKNOWN/期限切れは停止。Cronの毎分設定はプラン条件を確認する。PreviewではVercel Cronが実行されないため、別途入口の確認が必要。
+即時送信と既存1/5/30分の回復再試行は維持する。恒久/UNKNOWN/期限切れは停止。サンプル公開は日次Cronとし、毎分へ変更する場合はプラン条件を確認する。PreviewではVercel Cronが実行されないため、別途入口の確認が必要。
 
 結果：ローカルの復旧演習と監視入口のHTTP検証は成功。外部検証環境の復旧、通知先・ログ保存・暗号化保管・35日保持・日次scheduler・実Resend/Cronは未実施。Task全体は未完了。
 

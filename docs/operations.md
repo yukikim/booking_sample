@@ -1,6 +1,41 @@
 # デプロイ・監視・バックアップ・復旧手順
 
-対象：GitHub Actions（CI/CD）/ Vercel / Neon / Resend。2026-10-01更新。外部環境の確認記録は未登録。以下は設定と実施手順であり、本番実施済みの記録ではない。リリース責任者が接続先・変更内容・バックアップ・確認結果をリリース記録へ残す。
+対象：GitHub Actions（CI/CD）/ Vercel / Neon / Resend。2026-10-02更新。外部環境の確認記録は未登録。以下は設定と実施手順であり、本番実施済みの記録ではない。リリース責任者が接続先・変更内容・バックアップ・確認結果をリリース記録へ残す。
+
+## 0. 今回のサンプル公開（単一環境）
+
+今回の公開範囲は、GitHubリポジトリのコードをVercelで動かすサンプル。検証用・本番用の環境分離は行わず、Vercel 1プロジェクトとサンプル用Neon DB 1つを使う。GitHub Environmentsは作成不要。以下の第1〜5章の環境分離・承認・自動migration・バックアップ運用は、将来実運用へ移行する場合の設計であり、今回の公開要件ではない。
+
+### 公開前の設定
+
+1. Vercelにプロジェクトを登録し、Next.js / Node 22系を選択する。Productionの環境変数に `.env.hosted.example` の全項目を登録する。単一の公開環境なので `APP_ENV=production`、`AUTH_URL` は固定公開URL（例：`https://PROJECT.vercel.app`）とする。DBはNeonのpooler/directを使い、`DEPLOYMENT_DB_HOST` はdirect hostnameと一致させる。管理者・認証・メール・監視の秘密値も必要。Productionという名称はVercelの公開先区分を表す。
+2. GitHubのSettings → Secrets and variables → Actions → Repository secretsに `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID` を登録する。アプリ用設定はVercel側へ登録し、CIには渡さない。
+3. サンプルDBにmigrationと固定管理者行を準備する。`.env.hosted.example`をリポジトリに含めない `.env.sample` へコピーし、Vercelと同じ設定を入力する。HOSTはNeon画面で照合したdirect hostnameに置き換える。
+
+```sh
+npm ci
+npm run env:check -- --file .env.sample
+npm run db:deployment -- --file .env.sample --expected-host HOST --action deploy
+npm run db:deployment -- --file .env.sample --expected-host HOST --action bootstrap
+npm run db:deployment -- --file .env.sample --expected-host HOST --action status
+```
+
+DB操作は公開対象の確認後に担当者が実行する。既存DBのresetや全量上書きは不要。部屋・施術者・メニュー・営業時間・休憩は公開後に管理画面で設定する。ローカル専用 `db:seed` をNeonへ実行しない。
+
+### workflowの動作
+
+- `.github/workflows/ci-deploy.yml` はpush・PR・手動実行で、再利用workflow `ci.yml` のchecks / dependency-auditを呼び出す。専用PostgreSQLによる型・単体・DB・HTTP検証とビルド、依存監査がすべて成功するまで公開しない。同一checkout SHAを検査・公開する。
+- `main`へのpushだけが公開対象。PR・他ブランチ・手動実行はCIのみ。公開は直列化し、自動キャンセルしない。
+- 公開ジョブはlockfile固定のVercel CLIを使い、Production設定取得 → 環境検査 → migration status → build → prebuilt deploy → 固定AUTH_URLへのsmoke確認を実行する。取得した環境ファイルは終了時に削除する。
+- CLI 62.1.0の依存監査で検出された脆弱性は、Vercel各パッケージの版を限定したoverrideで修正版へ更新する。undiciは5系に修正版がないため、CLI配下のみ6.29.0へ更新する。CLI更新時はoverrideの必要性と互換性を再確認する。ローカルの起動確認は実公開の互換性検証を代替しない。
+- migrationは自動適用しない。未適用・失敗履歴・接続障害などでstatusが失敗すると公開を止める。対象DBを確認して必要なmigrationを手動適用後、失敗した公開ジョブを再実行する。statusは実スキーマのdriftまでは証明しない。
+- `vercel.json` の `git.deploymentEnabled=false` によりGit連携からの自動公開を停止する。公開ジョブのsmoke失敗はworkflow失敗となるが、公開済みアプリを自動rollbackしない。公開URLと監視APIを確認する。Deployment Protectionがある場合はsmokeもアクセス制御の対象になる。
+
+CronはVercel Hobbyで使える日次 `0 0 * * *`（UTC 00:00、日本時間09:00）にする。ユーザー操作直後のメールdispatchは維持するが、失敗メールのCron回復は日次となり、1/5/30分の再試行時刻を過ぎても次の日次起動まで待つ場合がある。毎分回復を試す場合は対応プランで `* * * * *` へ変更する。滞留メールがあれば監視APIは503となり、公開後smokeも失敗する。
+
+初回公開後に管理画面の設定、予約検索・予約、実メール受信を確認する。GitHub/Vercel/Neonの実行結果は別途記録する。今回のworkflow整備だけでは、実運用向けStory 7.2の環境分離やバックアップ要件を完了扱いにしない。
+
+参考：[GitHub reusable workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)、[Vercel pull](https://vercel.com/docs/cli/pull)、[Cronのプラン条件](https://vercel.com/docs/cron-jobs/usage-and-pricing)。
 
 ## 1. 環境の分離
 
@@ -34,7 +69,7 @@ Resendは送信可能な確認済みドメインをRESEND_FROMへ設定する。
 
 GitHub Actionsが検査・migration・Vercelへの公開を順番に実行する前提とする。リリース責任者は対象commitと変更内容を確認し、通常の本番migration実行はCDに一本化する。ビルド時・アプリ起動時・Preview生成時にはmigrationを適用しない。`build:deploy` は環境検証・Client生成・ビルドのみ。
 
-**現在の `.github/workflows/ci.yml` はCIのみ。CD workflow、本番Environment、Vercel連携、バックアップ保管先はこの更新では実装・設定していない。** CIはpush・pull request・手動実行で起動し、checks（静的検査・隔離DB/HTTP検証・ビルド）とdependency-auditを実行する。`test:recovery` は現在のCIには含まれていないため、リリースの追加検証として実行する。以下はCD実装時に満たす運用要件。
+**現在は第0章の単一環境サンプルCDを実装。環境分離・自動migration・バックアップ保管を伴う実運用CDは未実装。** `ci-deploy.yml` がpush・pull request・手動実行で起動し、再利用workflow `ci.yml` のchecks（静的検査・隔離DB/HTTP検証・ビルド）とdependency-auditを実行する。`test:recovery` は現在のCIには含まれていないため、リリースの追加検証として実行する。以下はCD実装時に満たす運用要件。
 
 | 段階 | 実行内容 | 次へ進む条件 |
 | --- | --- | --- |
@@ -47,8 +82,8 @@ CDの設定要件：
 
 1. デプロイ対象を保護されたリリースブランチ/タグに限定する。ブランチ名は運用で確定する。PRのCIに本番secretsを渡さない。CI・検証・本番のcheckoutとビルドは同じcommit SHAに固定し、途中でブランチ先頭を取り直さない。別workflowでCI完了を受ける場合も、その実行の成功・信頼できるブランチ・対象SHAを照合する。
 2. GitHub Environmentsに `staging` / `production` を作り、各環境のsecretsと許可ブランチを分離する。必要な本番承認はRequired reviewersで設定する。利用可否はGitHubプランとリポジトリの公開範囲による。利用できなければ権限を制限した手動起動などで公開を制御する。
-3. 本番CD全体（バックアップ〜公開後確認）を固定の `concurrency.group`（例：`booking-production-release`）で直列化し、`cancel-in-progress: false` を設定する。現在のCIの `cancel-in-progress: true` をCDへ引き継がない。すべての本番リリース入口で同じgroupを使い、手元からの並行migrationも禁止する。実行中のmigrationを手動cancelした場合は、再実行前に履歴と実スキーマを確認する。
-4. VercelのGit連携によるpush時の自動デプロイを無効にし、GitHub Actionsからのみ公開する。例えば `vercel.json` の既存設定へ `"git": { "deploymentEnabled": false }` を追加する。**現在のvercel.jsonには未設定**。CDを有効にする前に設定し、既存のbuildCommand/cronsを保持する。
+3. 本番CD全体（バックアップ〜公開後確認）を固定の `concurrency.group`（例：`booking-production-release`）で直列化し、`cancel-in-progress: false` を設定する。CIのみの構成で `cancel-in-progress: true` を使う場合もCDへ引き継がない。すべての本番リリース入口で同じgroupを使い、手元からの並行migrationも禁止する。実行中のmigrationを手動cancelした場合は、再実行前に履歴と実スキーマを確認する。
+4. VercelのGit連携によるpush時の自動デプロイを無効にし、GitHub Actionsからのみ公開する。例えば `vercel.json` の既存設定へ `"git": { "deploymentEnabled": false }` を追加する。**現在のvercel.jsonには設定済み**。既存のbuildCommand/cronsを保持する。
 5. GitHubのEnvironment secretsにVercelの `VERCEL_TOKEN` と、環境別の `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`、DB・認証・メール・監視の設定を登録する。Vercel側にも実行時環境変数を登録する。GitHubへの登録だけではVercelアプリへ反映されない。migrationの `DIRECT_URL` はDDL用、`DATABASE_URL` はアプリ用ロールを使う。
 6. DBコマンドはprocess.envだけではなく `--file` の内容を読む。runnerの一時ディレクトリへ `.env.hosted.example` と同じキーを持つ設定ファイルをsecretsから作成し、0600にする。dotenvとして引用・改行を正しく扱い、シェル文字列への直接展開、`set -x`、内容の出力を避ける。バックアップと設定ファイルを通常のActions artifact/cacheへ入れず、終了時（失敗時も）に一時ファイルを削除する。
 7. Vercel CLIは検証した版を固定する。`vercel pull --environment=production` → `vercel build --prod` で公開前にビルドし、migrationと後述の確認成功後に `vercel deploy --prebuilt --prod` で公開する。認証とproject指定は環境ごとに行う。検証専用Vercelプロジェクトも固定URLを使うためProductionへ公開するが、`APP_ENV=staging` と検証DBを使用する。Preview用はpreviewの設定・検証DBを使い、本番DBに接続しない。
@@ -140,7 +175,7 @@ migrationと状態/権限確認成功後に、準備済みの同じSHAのVercel�
 
 `src/instrumentation.ts` はサーバー捕捉エラーを `SERVER_REQUEST_ERROR` とroute種別のみで記録する。API側が捕捉して返す503はHTTPステータスと監視APIで確認する。VercelのLogsでデプロイ、時刻、ステータスを絞り込む。独自ログは例外本文・リクエストURL・Cookie・Authorizationを出さない。フレームワーク/基盤の自動ログは別経路なので、外部ログ保存先のフィルタと実ログを検証する。技術ログ90日保持には保存先/Drains等の契約・設定が必要で、Vercel標準の保持期間だけでは保証しない。監査ログと技術ログを混同しない。
 
-会員手続きのメールはDB commit後のユーザー操作直後にdispatchし、Cronは回復・再試行用。vercel.jsonは毎分 `/api/cron/mail` を実行する構成。毎分実行可能なプランを用意する（Hobbyは日次制限）。Vercel CronはProductionデプロイだけに適用されるため、Previewは手動/別schedulerで確認する。検証専用プロジェクトのProductionでもテストメールのみに限定する。
+会員手続きのメールはDB commit後のユーザー操作直後にdispatchし、Cronは回復・再試行用。今回のvercel.jsonは第0章のサンプル公開向けに日次 `/api/cron/mail` を実行する構成。実運用で毎分回復する場合は対応プランを用意してscheduleを変更する（Hobbyは日次制限）。Vercel CronはProductionデプロイだけに適用されるため、Previewは手動/別schedulerで確認する。検証専用プロジェクトのProductionでもテストメールのみに限定する。
 
 障害時の処理：
 

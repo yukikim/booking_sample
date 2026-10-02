@@ -68,7 +68,8 @@
     "prisma": "7.10.0",
     "tailwindcss": "^4",
     "tsx": "4.23.13",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "62.1.0"
   },
   "engines": {
     "node": ">=22.23.1 <23"
@@ -79,6 +80,42 @@
     },
     "prisma@7.10.0": {
       "mysql2": "3.24.4"
+    },
+    "vercel@62.1.0": {
+      "smol-toml": "1.9.0",
+      "undici": "6.29.0"
+    },
+    "@vercel/static-config@3.4.4": {
+      "ajv": "8.20.0"
+    },
+    "@vercel/python-analysis@0.14.0": {
+      "js-yaml": "4.3.2",
+      "minimatch": "10.2.6",
+      "smol-toml": "1.9.0"
+    },
+    "@vercel/backends@12.0.0": {
+      "path-to-regexp": "8.4.2",
+      "esbuild@>=0.27.3 <0.28.1": "0.28.2"
+    },
+    "@vercel/express@12.0.0": {
+      "path-to-regexp": "8.4.2"
+    },
+    "@vercel/hono@12.0.0": {
+      "path-to-regexp": "8.4.2"
+    },
+    "@vercel/node@17.0.0": {
+      "path-to-regexp": "6.3.0",
+      "undici": "6.29.0"
+    },
+    "@vercel/remix-builder@17.0.0": {
+      "path-to-regexp": "6.3.0"
+    },
+    "@vercel/container@12.0.0": {
+      "smol-toml": "1.9.0",
+      "tar": "7.5.22"
+    },
+    "@vercel/rust@13.0.0": {
+      "smol-toml": "1.9.0"
     }
   }
 }

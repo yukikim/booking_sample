@@ -1,0 +1,80 @@
+name: CI and Vercel Deploy
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# mainのCIから公開後確認まで直列化し、公開途中の実行を自動キャンセルしない。
+concurrency:
+  group: ci-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    # PRのCIへVercel secretsは渡さない。
+
+  deploy:
+    name: Deploy sample to Vercel
+    needs: ci
+    # PR・main以外・手動実行はCIのみ。
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies (including pinned Vercel CLI)
+        run: npm ci
+
+      - name: Check Vercel secrets
+        run: |
+          for key in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!key}" ]; then
+              echo "::error::$key repository secret is required"
+              exit 1
+            fi
+          done
+
+      - name: Pull Vercel settings
+        run: |
+          umask 077
+          npx --no-install vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          chmod 600 .vercel/.env.production.local
+
+      - name: Check sample database migrations
+        run: |
+          npm run env:check -- --file .vercel/.env.production.local
+          expected_host="$(node --input-type=module -e 'import { readFileSync } from "node:fs"; import { parse } from "dotenv"; process.stdout.write(parse(readFileSync(".vercel/.env.production.local")).DEPLOYMENT_DB_HOST);')"
+          npm run db:deployment -- --file .vercel/.env.production.local --expected-host "$expected_host" --action status
+
+      - name: Build sample
+        run: npx --no-install vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy sample
+        run: npx --no-install vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
+
+      - name: Check published sample
+        run: npm run smoke:deployment -- --file .vercel/.env.production.local
+
+      - name: Remove downloaded environment file
+        if: always()
+        run: rm -f .vercel/.env.production.local
