@@ -210,6 +210,7 @@ model Reservation {
   cancellationAuditId String?                   @unique @db.Uuid
   cancellationAudit   AuditLog?                 @relation(fields: [cancellationAuditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   notices             ReservationChangeNotice[]
+  confirmationDeliveries EmailDelivery[]
 
   // Referenced by the slot FK so every slot uses this reservation's assignment.
   @@unique([id, roomId, therapistId])
@@ -330,6 +331,8 @@ enum EmailKind {
   RESTORE_CONFIRM
   PASSWORD_RESET
   RESERVATION_CHANGE
+  RESERVATION_CONFIRMED_MEMBER
+  RESERVATION_CONFIRMED_ADMIN
 }
 
 enum EmailStatus {
@@ -513,6 +516,8 @@ model EmailDelivery {
   tokenId             String?                  @db.Uuid
   // Preserved after the short-lived AuthToken is deleted.
   tokenReferenceId    String?                  @db.Uuid
+  reservationId       String?                  @db.Uuid
+  reservationVersion  Int?
   noticeId            String?                  @db.Uuid
   // Required for change notices: audit of explicit staff/admin send confirmation.
   confirmationAuditId String?                  @db.Uuid
@@ -534,10 +539,12 @@ model EmailDelivery {
   token               AuthToken?               @relation(fields: [tokenId], references: [id], onDelete: SetNull, onUpdate: Restrict)
   notice              ReservationChangeNotice? @relation(fields: [noticeId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   confirmationAudit   AuditLog?                @relation(fields: [confirmationAuditId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  reservation         Reservation?             @relation(fields: [reservationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   attempts            EmailDeliveryAttempt[]
 
   @@unique([tokenReferenceId, kind])
   @@unique([noticeId, kind])
+  @@unique([reservationId, kind])
   @@index([status, nextAttemptAt])
   @@index([leaseExpiresAt])
   @@index([closedAt])

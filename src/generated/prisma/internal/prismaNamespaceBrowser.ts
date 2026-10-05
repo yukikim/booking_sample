@@ -399,6 +399,8 @@ export const EmailDeliveryScalarFieldEnum = {
   kind: 'kind',
   tokenId: 'tokenId',
   tokenReferenceId: 'tokenReferenceId',
+  reservationId: 'reservationId',
+  reservationVersion: 'reservationVersion',
   noticeId: 'noticeId',
   confirmationAuditId: 'confirmationAuditId',
   status: 'status',

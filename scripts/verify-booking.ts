@@ -131,6 +131,30 @@ async function main() {
     const first = await send("POST", "/api/reservations", firstBody);
     assert.equal(first.status, 201, JSON.stringify(first.result));
     const firstId = first.result.reservationId as string;
+    const { runMailBatch } = await import("../src/lib/mail/worker");
+    const { decryptMailPayload } = await import("../src/lib/member/mail");
+    const confirmations = await db.emailDelivery.findMany({ where: { reservationId: firstId }, orderBy: { kind: "asc" } });
+    assert.equal(confirmations.length, 2);
+    const memberMail = confirmations.find(row => row.kind === "RESERVATION_CONFIRMED_MEMBER")!;
+    const adminMail = confirmations.find(row => row.kind === "RESERVATION_CONFIRMED_ADMIN")!;
+    const memberPayload = decryptMailPayload(memberMail.encryptedPayload!);
+    const adminPayload = decryptMailPayload(adminMail.encryptedPayload!);
+    assert.equal(memberPayload.to, member.email);
+    assert.equal(adminPayload.to, process.env.ADMIN_EMAIL);
+    assert.match(memberPayload.subject, /予約が確定/);
+    assert.match(memberPayload.text, /予約 花子 様/);
+    assert(memberPayload.text.includes(`${date.replaceAll("-", "/")} 09:00`));
+    assert(memberPayload.text.includes(`/account/reservations/${firstId}`));
+    assert(adminPayload.text.includes(`/manage/reservations/${firstId}`));
+    const confirmationKeys: string[] = [];
+    await runMailBatch(async (_payload, key) => { confirmationKeys.push(key); return { kind: "TRANSIENT", code: "RATE_LIMITED" }; }, 1, db, memberMail.id);
+    assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: memberMail.id } })).status, "RETRY_WAIT");
+    await runMailBatch(async payload => { assert.equal(payload.to, process.env.ADMIN_EMAIL); return { kind: "ACCEPTED" }; }, 1, db, adminMail.id);
+    await db.emailDelivery.update({ where: { id: memberMail.id }, data: { nextAttemptAt: new Date() } });
+    await runMailBatch(async (_payload, key) => { confirmationKeys.push(key); return { kind: "ACCEPTED" }; }, 1, db, memberMail.id);
+    assert.deepEqual(confirmationKeys, [memberMail.requestKey, memberMail.requestKey]);
+    assert.equal((await runMailBatch(async () => { assert.fail("Accepted mail must not send again"); }, 1, db, memberMail.id)).attempted, 0);
+    assert.equal(await db.emailDelivery.count({ where: { reservationId: firstId, status: "ACCEPTED", encryptedPayload: null } }), 2);
     assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 1);
     const firstAssignment = await db.reservation.findUniqueOrThrow({ where: { id: firstId } });
     async function storePage(path: string, session: string) {
@@ -193,11 +217,19 @@ async function main() {
     assert([302, 303, 307, 308].includes(anonymousPage.status));
     assert.equal(new URL(anonymousPage.headers.get("location")!, origin).pathname, "/login");
     assert.equal((await send("POST", "/api/reservations", firstBody)).result.replayed, true);
+    assert.equal(await db.emailDelivery.count({ where: { reservationId: firstId } }), 2);
     assert.equal((await send("POST", "/api/reservations", { ...firstBody, startsAt: iso(date, 10) })).status, 409);
     const duplicateBody = create(14);
     const duplicates = await Promise.all([send("POST", "/api/reservations", duplicateBody), send("POST", "/api/reservations", duplicateBody)]);
     assert.deepEqual(duplicates.map(row => row.status), [201, 201]);
     assert.equal(duplicates[0].result.reservationId, duplicates[1].result.reservationId);
+    const duplicateId = duplicates[0].result.reservationId as string;
+    assert.equal(await db.emailDelivery.count({ where: { reservationId: duplicateId } }), 2);
+    await send("DELETE", `/api/reservations/${duplicateId}`, { requestKey: randomUUID(), expectedVersion: 1 });
+    for (const stale of await db.emailDelivery.findMany({ where: { reservationId: duplicateId } })) {
+      assert.equal((await runMailBatch(async () => { assert.fail("Cancelled reservation must not send confirmation"); }, 1, db, stale.id)).attempted, 0);
+      assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: stale.id } })).status, "EXPIRED");
+    }
     assert.deepEqual(duplicates.map(row => row.result.replayed).sort(), [false, true]);
     assert.equal((await send("PATCH", `/api/reservations/${firstId}`, { ...create(10), expectedVersion: 1 }, otherCookie)).status, 403);
     const changeBody = { ...create(10), expectedVersion: 1 };
@@ -226,6 +258,7 @@ async function main() {
     const before = await db.reservation.count();
     const beforeOptions = await db.reservationOption.count();
     const beforeSlots = await db.reservationSlot.count();
+    const beforeDeliveries = await db.emailDelivery.count();
     const secondSlot = iso(date, 17);
     await pg.query(`CREATE FUNCTION "${schema}".reject_second_slot() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."slotStartsAt" = '${secondSlot}'::timestamptz THEN RAISE EXCEPTION 'test rollback'; END IF; RETURN NEW; END $$`);
     await pg.query(`CREATE TRIGGER reject_second_slot BEFORE INSERT ON "${schema}"."ReservationSlot" FOR EACH ROW EXECUTE FUNCTION "${schema}".reject_second_slot()`);
@@ -234,8 +267,19 @@ async function main() {
     assert.equal(await db.reservation.count(), before);
     assert.equal(await db.reservationOption.count(), beforeOptions);
     assert.equal(await db.reservationSlot.count(), beforeSlots);
+    assert.equal(await db.emailDelivery.count(), beforeDeliveries);
     await pg.query(`DROP TRIGGER reject_second_slot ON "${schema}"."ReservationSlot"`);
     await pg.query(`DROP FUNCTION "${schema}".reject_second_slot()`);
+    await pg.query(`CREATE FUNCTION "${schema}".reject_admin_mail() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.kind = 'RESERVATION_CONFIRMED_ADMIN' THEN RAISE EXCEPTION 'test rollback'; END IF; RETURN NEW; END $$`);
+    await pg.query(`CREATE TRIGGER reject_admin_mail BEFORE INSERT ON "${schema}"."EmailDelivery" FOR EACH ROW EXECUTE FUNCTION "${schema}".reject_admin_mail()`);
+    const mailFailureBody = create(16);
+    assert.equal((await send("POST", "/api/reservations", mailFailureBody)).status, 503);
+    assert.equal(await db.reservation.count(), before);
+    assert.equal(await db.reservationSlot.count(), beforeSlots);
+    assert.equal(await db.emailDelivery.count(), beforeDeliveries);
+    assert.equal(await db.auditLog.count({ where: { requestKey: mailFailureBody.requestKey } }), 0);
+    await pg.query(`DROP TRIGGER reject_admin_mail ON "${schema}"."EmailDelivery"`);
+    await pg.query(`DROP FUNCTION "${schema}".reject_admin_mail()`);
     const simultaneousId = simultaneous.find(row => row.status === 201)!.result.reservationId as string;
     const sameReservation = await Promise.all([
       send("PATCH", `/api/reservations/${simultaneousId}`, { ...create(16), expectedVersion: 1 }),
@@ -409,14 +453,14 @@ async function main() {
     assert.equal(sent.status, 200, JSON.stringify(sent.result));
     assert.equal((await send("POST", noticeSendPath, { expectedVersion: 1, confirmed: true }, adminCookie)).status, 200);
     assert.equal(await db.emailDelivery.count({ where: { noticeId: adjustment.id } }), 1);
-    const { runMailBatch } = await import("../src/lib/mail/worker");
     const keys: string[] = [];
-    const firstMail = await runMailBatch(async (payload, key) => { keys.push(key); assert.match(payload.text, /候補時刻/); assert.match(payload.text, /店舗までご連絡/); return { kind: "TRANSIENT", code: "RATE_LIMITED" }; }, 1, db);
+    const noticeDelivery = await db.emailDelivery.findFirstOrThrow({ where: { noticeId: adjustment.id } });
+    const firstMail = await runMailBatch(async (payload, key) => { keys.push(key); assert.match(payload.text, /候補時刻/); assert.match(payload.text, /店舗までご連絡/); return { kind: "TRANSIENT", code: "RATE_LIMITED" }; }, 1, db, noticeDelivery.id);
     assert.equal(firstMail.attempted, 1);
     const delivery = await db.emailDelivery.findFirstOrThrow({ where: { noticeId: adjustment.id } });
     assert.equal(delivery.status, "RETRY_WAIT");
     await db.emailDelivery.update({ where: { id: delivery.id }, data: { nextAttemptAt: new Date() } });
-    const retryMail = await runMailBatch(async (_payload, key) => { keys.push(key); return { kind: "ACCEPTED" }; }, 1, db);
+    const retryMail = await runMailBatch(async (_payload, key) => { keys.push(key); return { kind: "ACCEPTED" }; }, 1, db, delivery.id);
     assert.equal(retryMail.attempted, 1);
     assert.deepEqual(keys, [delivery.requestKey, delivery.requestKey]);
     assert.equal(await db.emailDeliveryAttempt.count({ where: { deliveryId: delivery.id } }), 2);
@@ -449,7 +493,8 @@ async function main() {
     const noCandidateNotice = await db.reservationChangeNotice.create({ data: { reservationId: noCandidateReservation, changeAuditId: noCandidateAudit.id, reservationVersion: 1, reason: "RESOURCE_UNAVAILABLE" } });
     await db.treatment.update({ where: { id: seedIds.treatments[0] }, data: { isActive: false } });
     assert.equal((await send("POST", `/api/manage/adjustments/${noCandidateNotice.id}/send`, { expectedVersion: 1, confirmed: true }, adminCookie)).status, 200);
-    const emptyMail = await runMailBatch(async payload => { assert.match(payload.text, /空き候補がありません/); assert.match(payload.text, /店舗までご連絡/); return { kind: "ACCEPTED" }; }, 1, db);
+    const emptyDelivery = await db.emailDelivery.findFirstOrThrow({ where: { noticeId: noCandidateNotice.id } });
+    const emptyMail = await runMailBatch(async payload => { assert.match(payload.text, /空き候補がありません/); assert.match(payload.text, /店舗までご連絡/); return { kind: "ACCEPTED" }; }, 1, db, emptyDelivery.id);
     assert.equal(emptyMail.attempted, 1);
     await db.treatment.update({ where: { id: seedIds.treatments[0] }, data: { isActive: true } });
     assert.equal((await db.reservationChangeNotice.findUniqueOrThrow({ where: { id: noCandidateNotice.id } })).responseStatus, "UNCONTACTED");

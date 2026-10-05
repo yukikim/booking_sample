@@ -13,6 +13,8 @@ import { parseBusinessDate } from "@/lib/schedules/calendar";
 import { cancellationDeadline } from "./deadline";
 import { parseAvailabilityRequest, revalidateAtSave, type AvailabilityRequest } from "./availability";
 import { lockBookingState } from "./lock";
+import { queueReservationConfirmation } from "@/lib/mail/reservation-confirmation";
+import { dispatchMailAfterResponse } from "@/lib/mail/immediate";
 import { resolveNoticesAfterReservation } from "@/lib/manage/adjustment-response";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -161,7 +163,8 @@ export async function createReservation(request: Request, value: unknown) {
   const input = parseCreate(value);
   checkMutationOrigin(request);
   const hash = digest(input);
-  return getPrisma().$transaction(async tx => {
+  const deliveryIds: string[] = [];
+  const result = await getPrisma().$transaction(async tx => {
     await setTransactionSchema(tx);
     const actor = await authorize(tx, request, "RESERVATION_CREATE", false);
     if (actor.role === "MEMBER" && input.memberId !== undefined || actor.role !== "MEMBER" && !input.memberId) throw new BookingError(400, "InvalidInput");
@@ -179,11 +182,14 @@ export async function createReservation(request: Request, value: unknown) {
     const now = await clock(tx);
     const data = await validateSelection(tx, input, now);
     const id = randomUUID();
-    await tx.reservation.create({ data: { id, ...reservationData(input, member, data) } });
+    const reservation = await tx.reservation.create({ data: { id, ...reservationData(input, member, data) } });
     await writeDetails(tx, id, input, data);
     await tx.auditLog.create({ data: { requestKey: input.requestKey, ...auditActor(actor), action: "RESERVATION_CREATED", targetType: "Reservation", targetId: id, changes: { requestHash: hash, resultVersion: 1, resultStatus: "CONFIRMED" } } });
+    if (actor.role === "MEMBER") deliveryIds.push(...await queueReservationConfirmation(tx, reservation, data.options));
     return { reservationId: id, version: 1, status: "CONFIRMED" as const, replayed: false };
   }, { timeout: 20_000 });
+  for (const deliveryId of deliveryIds) dispatchMailAfterResponse(deliveryId);
+  return result;
 }
 
 export async function changeReservation(request: Request, id: string, value: unknown) {

@@ -27,11 +27,13 @@ export type AggregateEmailDelivery = {
 }
 
 export type EmailDeliveryAvgAggregateOutputType = {
+  reservationVersion: number | null
   attemptCount: number | null
   version: number | null
 }
 
 export type EmailDeliverySumAggregateOutputType = {
+  reservationVersion: number | null
   attemptCount: number | null
   version: number | null
 }
@@ -42,6 +44,8 @@ export type EmailDeliveryMinAggregateOutputType = {
   kind: $Enums.EmailKind | null
   tokenId: string | null
   tokenReferenceId: string | null
+  reservationId: string | null
+  reservationVersion: number | null
   noticeId: string | null
   confirmationAuditId: string | null
   status: $Enums.EmailStatus | null
@@ -66,6 +70,8 @@ export type EmailDeliveryMaxAggregateOutputType = {
   kind: $Enums.EmailKind | null
   tokenId: string | null
   tokenReferenceId: string | null
+  reservationId: string | null
+  reservationVersion: number | null
   noticeId: string | null
   confirmationAuditId: string | null
   status: $Enums.EmailStatus | null
@@ -90,6 +96,8 @@ export type EmailDeliveryCountAggregateOutputType = {
   kind: number
   tokenId: number
   tokenReferenceId: number
+  reservationId: number
+  reservationVersion: number
   noticeId: number
   confirmationAuditId: number
   status: number
@@ -111,11 +119,13 @@ export type EmailDeliveryCountAggregateOutputType = {
 
 
 export type EmailDeliveryAvgAggregateInputType = {
+  reservationVersion?: true
   attemptCount?: true
   version?: true
 }
 
 export type EmailDeliverySumAggregateInputType = {
+  reservationVersion?: true
   attemptCount?: true
   version?: true
 }
@@ -126,6 +136,8 @@ export type EmailDeliveryMinAggregateInputType = {
   kind?: true
   tokenId?: true
   tokenReferenceId?: true
+  reservationId?: true
+  reservationVersion?: true
   noticeId?: true
   confirmationAuditId?: true
   status?: true
@@ -150,6 +162,8 @@ export type EmailDeliveryMaxAggregateInputType = {
   kind?: true
   tokenId?: true
   tokenReferenceId?: true
+  reservationId?: true
+  reservationVersion?: true
   noticeId?: true
   confirmationAuditId?: true
   status?: true
@@ -174,6 +188,8 @@ export type EmailDeliveryCountAggregateInputType = {
   kind?: true
   tokenId?: true
   tokenReferenceId?: true
+  reservationId?: true
+  reservationVersion?: true
   noticeId?: true
   confirmationAuditId?: true
   status?: true
@@ -285,6 +301,8 @@ export type EmailDeliveryGroupByOutputType = {
   kind: $Enums.EmailKind
   tokenId: string | null
   tokenReferenceId: string | null
+  reservationId: string | null
+  reservationVersion: number | null
   noticeId: string | null
   confirmationAuditId: string | null
   status: $Enums.EmailStatus
@@ -332,6 +350,8 @@ export type EmailDeliveryWhereInput = {
   kind?: Prisma.EnumEmailKindFilter<"EmailDelivery"> | $Enums.EmailKind
   tokenId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
   tokenReferenceId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  reservationId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  reservationVersion?: Prisma.IntNullableFilter<"EmailDelivery"> | number | null
   noticeId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
   confirmationAuditId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
   status?: Prisma.EnumEmailStatusFilter<"EmailDelivery"> | $Enums.EmailStatus
@@ -351,6 +371,7 @@ export type EmailDeliveryWhereInput = {
   token?: Prisma.XOR<Prisma.AuthTokenNullableScalarRelationFilter, Prisma.AuthTokenWhereInput> | null
   notice?: Prisma.XOR<Prisma.ReservationChangeNoticeNullableScalarRelationFilter, Prisma.ReservationChangeNoticeWhereInput> | null
   confirmationAudit?: Prisma.XOR<Prisma.AuditLogNullableScalarRelationFilter, Prisma.AuditLogWhereInput> | null
+  reservation?: Prisma.XOR<Prisma.ReservationNullableScalarRelationFilter, Prisma.ReservationWhereInput> | null
   attempts?: Prisma.EmailDeliveryAttemptListRelationFilter
 }
 
@@ -360,6 +381,8 @@ export type EmailDeliveryOrderByWithRelationInput = {
   kind?: Prisma.SortOrder
   tokenId?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenReferenceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reservationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reservationVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   noticeId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmationAuditId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -379,6 +402,7 @@ export type EmailDeliveryOrderByWithRelationInput = {
   token?: Prisma.AuthTokenOrderByWithRelationInput
   notice?: Prisma.ReservationChangeNoticeOrderByWithRelationInput
   confirmationAudit?: Prisma.AuditLogOrderByWithRelationInput
+  reservation?: Prisma.ReservationOrderByWithRelationInput
   attempts?: Prisma.EmailDeliveryAttemptOrderByRelationAggregateInput
 }
 
@@ -387,12 +411,15 @@ export type EmailDeliveryWhereUniqueInput = Prisma.AtLeast<{
   requestKey?: string
   tokenReferenceId_kind?: Prisma.EmailDeliveryTokenReferenceIdKindCompoundUniqueInput
   noticeId_kind?: Prisma.EmailDeliveryNoticeIdKindCompoundUniqueInput
+  reservationId_kind?: Prisma.EmailDeliveryReservationIdKindCompoundUniqueInput
   AND?: Prisma.EmailDeliveryWhereInput | Prisma.EmailDeliveryWhereInput[]
   OR?: Prisma.EmailDeliveryWhereInput[]
   NOT?: Prisma.EmailDeliveryWhereInput | Prisma.EmailDeliveryWhereInput[]
   kind?: Prisma.EnumEmailKindFilter<"EmailDelivery"> | $Enums.EmailKind
   tokenId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
   tokenReferenceId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  reservationId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  reservationVersion?: Prisma.IntNullableFilter<"EmailDelivery"> | number | null
   noticeId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
   confirmationAuditId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
   status?: Prisma.EnumEmailStatusFilter<"EmailDelivery"> | $Enums.EmailStatus
@@ -412,8 +439,9 @@ export type EmailDeliveryWhereUniqueInput = Prisma.AtLeast<{
   token?: Prisma.XOR<Prisma.AuthTokenNullableScalarRelationFilter, Prisma.AuthTokenWhereInput> | null
   notice?: Prisma.XOR<Prisma.ReservationChangeNoticeNullableScalarRelationFilter, Prisma.ReservationChangeNoticeWhereInput> | null
   confirmationAudit?: Prisma.XOR<Prisma.AuditLogNullableScalarRelationFilter, Prisma.AuditLogWhereInput> | null
+  reservation?: Prisma.XOR<Prisma.ReservationNullableScalarRelationFilter, Prisma.ReservationWhereInput> | null
   attempts?: Prisma.EmailDeliveryAttemptListRelationFilter
-}, "id" | "requestKey" | "tokenReferenceId_kind" | "noticeId_kind">
+}, "id" | "requestKey" | "tokenReferenceId_kind" | "noticeId_kind" | "reservationId_kind">
 
 export type EmailDeliveryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -421,6 +449,8 @@ export type EmailDeliveryOrderByWithAggregationInput = {
   kind?: Prisma.SortOrder
   tokenId?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenReferenceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reservationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reservationVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   noticeId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmationAuditId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -453,6 +483,8 @@ export type EmailDeliveryScalarWhereWithAggregatesInput = {
   kind?: Prisma.EnumEmailKindWithAggregatesFilter<"EmailDelivery"> | $Enums.EmailKind
   tokenId?: Prisma.UuidNullableWithAggregatesFilter<"EmailDelivery"> | string | null
   tokenReferenceId?: Prisma.UuidNullableWithAggregatesFilter<"EmailDelivery"> | string | null
+  reservationId?: Prisma.UuidNullableWithAggregatesFilter<"EmailDelivery"> | string | null
+  reservationVersion?: Prisma.IntNullableWithAggregatesFilter<"EmailDelivery"> | number | null
   noticeId?: Prisma.UuidNullableWithAggregatesFilter<"EmailDelivery"> | string | null
   confirmationAuditId?: Prisma.UuidNullableWithAggregatesFilter<"EmailDelivery"> | string | null
   status?: Prisma.EnumEmailStatusWithAggregatesFilter<"EmailDelivery"> | $Enums.EmailStatus
@@ -476,6 +508,7 @@ export type EmailDeliveryCreateInput = {
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationVersion?: number | null
   status?: $Enums.EmailStatus
   recipient?: string | null
   encryptedPayload?: runtime.Bytes | null
@@ -493,6 +526,7 @@ export type EmailDeliveryCreateInput = {
   token?: Prisma.AuthTokenCreateNestedOneWithoutDeliveriesInput
   notice?: Prisma.ReservationChangeNoticeCreateNestedOneWithoutDeliveriesInput
   confirmationAudit?: Prisma.AuditLogCreateNestedOneWithoutConfirmedDeliveriesInput
+  reservation?: Prisma.ReservationCreateNestedOneWithoutConfirmationDeliveriesInput
   attempts?: Prisma.EmailDeliveryAttemptCreateNestedManyWithoutDeliveryInput
 }
 
@@ -502,6 +536,8 @@ export type EmailDeliveryUncheckedCreateInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
@@ -526,6 +562,7 @@ export type EmailDeliveryUpdateInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
@@ -543,6 +580,7 @@ export type EmailDeliveryUpdateInput = {
   token?: Prisma.AuthTokenUpdateOneWithoutDeliveriesNestedInput
   notice?: Prisma.ReservationChangeNoticeUpdateOneWithoutDeliveriesNestedInput
   confirmationAudit?: Prisma.AuditLogUpdateOneWithoutConfirmedDeliveriesNestedInput
+  reservation?: Prisma.ReservationUpdateOneWithoutConfirmationDeliveriesNestedInput
   attempts?: Prisma.EmailDeliveryAttemptUpdateManyWithoutDeliveryNestedInput
 }
 
@@ -552,6 +590,8 @@ export type EmailDeliveryUncheckedUpdateInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
@@ -577,6 +617,8 @@ export type EmailDeliveryCreateManyInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
@@ -600,6 +642,7 @@ export type EmailDeliveryUpdateManyMutationInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
@@ -622,6 +665,8 @@ export type EmailDeliveryUncheckedUpdateManyInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
@@ -660,12 +705,19 @@ export type EmailDeliveryNoticeIdKindCompoundUniqueInput = {
   kind: $Enums.EmailKind
 }
 
+export type EmailDeliveryReservationIdKindCompoundUniqueInput = {
+  reservationId: string
+  kind: $Enums.EmailKind
+}
+
 export type EmailDeliveryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   requestKey?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   tokenId?: Prisma.SortOrder
   tokenReferenceId?: Prisma.SortOrder
+  reservationId?: Prisma.SortOrder
+  reservationVersion?: Prisma.SortOrder
   noticeId?: Prisma.SortOrder
   confirmationAuditId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -685,6 +737,7 @@ export type EmailDeliveryCountOrderByAggregateInput = {
 }
 
 export type EmailDeliveryAvgOrderByAggregateInput = {
+  reservationVersion?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   version?: Prisma.SortOrder
 }
@@ -695,6 +748,8 @@ export type EmailDeliveryMaxOrderByAggregateInput = {
   kind?: Prisma.SortOrder
   tokenId?: Prisma.SortOrder
   tokenReferenceId?: Prisma.SortOrder
+  reservationId?: Prisma.SortOrder
+  reservationVersion?: Prisma.SortOrder
   noticeId?: Prisma.SortOrder
   confirmationAuditId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -719,6 +774,8 @@ export type EmailDeliveryMinOrderByAggregateInput = {
   kind?: Prisma.SortOrder
   tokenId?: Prisma.SortOrder
   tokenReferenceId?: Prisma.SortOrder
+  reservationId?: Prisma.SortOrder
+  reservationVersion?: Prisma.SortOrder
   noticeId?: Prisma.SortOrder
   confirmationAuditId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -738,6 +795,7 @@ export type EmailDeliveryMinOrderByAggregateInput = {
 }
 
 export type EmailDeliverySumOrderByAggregateInput = {
+  reservationVersion?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
   version?: Prisma.SortOrder
 }
@@ -745,6 +803,48 @@ export type EmailDeliverySumOrderByAggregateInput = {
 export type EmailDeliveryScalarRelationFilter = {
   is?: Prisma.EmailDeliveryWhereInput
   isNot?: Prisma.EmailDeliveryWhereInput
+}
+
+export type EmailDeliveryCreateNestedManyWithoutReservationInput = {
+  create?: Prisma.XOR<Prisma.EmailDeliveryCreateWithoutReservationInput, Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput> | Prisma.EmailDeliveryCreateWithoutReservationInput[] | Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput[]
+  connectOrCreate?: Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput | Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput[]
+  createMany?: Prisma.EmailDeliveryCreateManyReservationInputEnvelope
+  connect?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+}
+
+export type EmailDeliveryUncheckedCreateNestedManyWithoutReservationInput = {
+  create?: Prisma.XOR<Prisma.EmailDeliveryCreateWithoutReservationInput, Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput> | Prisma.EmailDeliveryCreateWithoutReservationInput[] | Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput[]
+  connectOrCreate?: Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput | Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput[]
+  createMany?: Prisma.EmailDeliveryCreateManyReservationInputEnvelope
+  connect?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+}
+
+export type EmailDeliveryUpdateManyWithoutReservationNestedInput = {
+  create?: Prisma.XOR<Prisma.EmailDeliveryCreateWithoutReservationInput, Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput> | Prisma.EmailDeliveryCreateWithoutReservationInput[] | Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput[]
+  connectOrCreate?: Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput | Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput[]
+  upsert?: Prisma.EmailDeliveryUpsertWithWhereUniqueWithoutReservationInput | Prisma.EmailDeliveryUpsertWithWhereUniqueWithoutReservationInput[]
+  createMany?: Prisma.EmailDeliveryCreateManyReservationInputEnvelope
+  set?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  delete?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  connect?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  update?: Prisma.EmailDeliveryUpdateWithWhereUniqueWithoutReservationInput | Prisma.EmailDeliveryUpdateWithWhereUniqueWithoutReservationInput[]
+  updateMany?: Prisma.EmailDeliveryUpdateManyWithWhereWithoutReservationInput | Prisma.EmailDeliveryUpdateManyWithWhereWithoutReservationInput[]
+  deleteMany?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
+}
+
+export type EmailDeliveryUncheckedUpdateManyWithoutReservationNestedInput = {
+  create?: Prisma.XOR<Prisma.EmailDeliveryCreateWithoutReservationInput, Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput> | Prisma.EmailDeliveryCreateWithoutReservationInput[] | Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput[]
+  connectOrCreate?: Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput | Prisma.EmailDeliveryCreateOrConnectWithoutReservationInput[]
+  upsert?: Prisma.EmailDeliveryUpsertWithWhereUniqueWithoutReservationInput | Prisma.EmailDeliveryUpsertWithWhereUniqueWithoutReservationInput[]
+  createMany?: Prisma.EmailDeliveryCreateManyReservationInputEnvelope
+  set?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  delete?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  connect?: Prisma.EmailDeliveryWhereUniqueInput | Prisma.EmailDeliveryWhereUniqueInput[]
+  update?: Prisma.EmailDeliveryUpdateWithWhereUniqueWithoutReservationInput | Prisma.EmailDeliveryUpdateWithWhereUniqueWithoutReservationInput[]
+  updateMany?: Prisma.EmailDeliveryUpdateManyWithWhereWithoutReservationInput | Prisma.EmailDeliveryUpdateManyWithWhereWithoutReservationInput[]
+  deleteMany?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
 }
 
 export type EmailDeliveryCreateNestedManyWithoutTokenInput = {
@@ -899,11 +999,119 @@ export type EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditNestedInput 
   deleteMany?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
 }
 
+export type EmailDeliveryCreateWithoutReservationInput = {
+  id?: string
+  requestKey: string
+  kind: $Enums.EmailKind
+  tokenReferenceId?: string | null
+  reservationVersion?: number | null
+  status?: $Enums.EmailStatus
+  recipient?: string | null
+  encryptedPayload?: runtime.Bytes | null
+  payloadKeyId?: string | null
+  payloadExpiresAt?: Date | string | null
+  attemptCount?: number
+  nextAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  acceptedAt?: Date | string | null
+  closedAt?: Date | string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  token?: Prisma.AuthTokenCreateNestedOneWithoutDeliveriesInput
+  notice?: Prisma.ReservationChangeNoticeCreateNestedOneWithoutDeliveriesInput
+  confirmationAudit?: Prisma.AuditLogCreateNestedOneWithoutConfirmedDeliveriesInput
+  attempts?: Prisma.EmailDeliveryAttemptCreateNestedManyWithoutDeliveryInput
+}
+
+export type EmailDeliveryUncheckedCreateWithoutReservationInput = {
+  id?: string
+  requestKey: string
+  kind: $Enums.EmailKind
+  tokenId?: string | null
+  tokenReferenceId?: string | null
+  reservationVersion?: number | null
+  noticeId?: string | null
+  confirmationAuditId?: string | null
+  status?: $Enums.EmailStatus
+  recipient?: string | null
+  encryptedPayload?: runtime.Bytes | null
+  payloadKeyId?: string | null
+  payloadExpiresAt?: Date | string | null
+  attemptCount?: number
+  nextAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  acceptedAt?: Date | string | null
+  closedAt?: Date | string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  attempts?: Prisma.EmailDeliveryAttemptUncheckedCreateNestedManyWithoutDeliveryInput
+}
+
+export type EmailDeliveryCreateOrConnectWithoutReservationInput = {
+  where: Prisma.EmailDeliveryWhereUniqueInput
+  create: Prisma.XOR<Prisma.EmailDeliveryCreateWithoutReservationInput, Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput>
+}
+
+export type EmailDeliveryCreateManyReservationInputEnvelope = {
+  data: Prisma.EmailDeliveryCreateManyReservationInput | Prisma.EmailDeliveryCreateManyReservationInput[]
+  skipDuplicates?: boolean
+}
+
+export type EmailDeliveryUpsertWithWhereUniqueWithoutReservationInput = {
+  where: Prisma.EmailDeliveryWhereUniqueInput
+  update: Prisma.XOR<Prisma.EmailDeliveryUpdateWithoutReservationInput, Prisma.EmailDeliveryUncheckedUpdateWithoutReservationInput>
+  create: Prisma.XOR<Prisma.EmailDeliveryCreateWithoutReservationInput, Prisma.EmailDeliveryUncheckedCreateWithoutReservationInput>
+}
+
+export type EmailDeliveryUpdateWithWhereUniqueWithoutReservationInput = {
+  where: Prisma.EmailDeliveryWhereUniqueInput
+  data: Prisma.XOR<Prisma.EmailDeliveryUpdateWithoutReservationInput, Prisma.EmailDeliveryUncheckedUpdateWithoutReservationInput>
+}
+
+export type EmailDeliveryUpdateManyWithWhereWithoutReservationInput = {
+  where: Prisma.EmailDeliveryScalarWhereInput
+  data: Prisma.XOR<Prisma.EmailDeliveryUpdateManyMutationInput, Prisma.EmailDeliveryUncheckedUpdateManyWithoutReservationInput>
+}
+
+export type EmailDeliveryScalarWhereInput = {
+  AND?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
+  OR?: Prisma.EmailDeliveryScalarWhereInput[]
+  NOT?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
+  id?: Prisma.UuidFilter<"EmailDelivery"> | string
+  requestKey?: Prisma.UuidFilter<"EmailDelivery"> | string
+  kind?: Prisma.EnumEmailKindFilter<"EmailDelivery"> | $Enums.EmailKind
+  tokenId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  tokenReferenceId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  reservationId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  reservationVersion?: Prisma.IntNullableFilter<"EmailDelivery"> | number | null
+  noticeId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  confirmationAuditId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  status?: Prisma.EnumEmailStatusFilter<"EmailDelivery"> | $Enums.EmailStatus
+  recipient?: Prisma.StringNullableFilter<"EmailDelivery"> | string | null
+  encryptedPayload?: Prisma.BytesNullableFilter<"EmailDelivery"> | runtime.Bytes | null
+  payloadKeyId?: Prisma.StringNullableFilter<"EmailDelivery"> | string | null
+  payloadExpiresAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
+  attemptCount?: Prisma.IntFilter<"EmailDelivery"> | number
+  nextAttemptAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
+  leaseId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
+  leaseExpiresAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
+  acceptedAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
+  closedAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
+  version?: Prisma.IntFilter<"EmailDelivery"> | number
+  createdAt?: Prisma.DateTimeFilter<"EmailDelivery"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"EmailDelivery"> | Date | string
+}
+
 export type EmailDeliveryCreateWithoutTokenInput = {
   id?: string
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationVersion?: number | null
   status?: $Enums.EmailStatus
   recipient?: string | null
   encryptedPayload?: runtime.Bytes | null
@@ -920,6 +1128,7 @@ export type EmailDeliveryCreateWithoutTokenInput = {
   updatedAt?: Date | string
   notice?: Prisma.ReservationChangeNoticeCreateNestedOneWithoutDeliveriesInput
   confirmationAudit?: Prisma.AuditLogCreateNestedOneWithoutConfirmedDeliveriesInput
+  reservation?: Prisma.ReservationCreateNestedOneWithoutConfirmationDeliveriesInput
   attempts?: Prisma.EmailDeliveryAttemptCreateNestedManyWithoutDeliveryInput
 }
 
@@ -928,6 +1137,8 @@ export type EmailDeliveryUncheckedCreateWithoutTokenInput = {
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
@@ -973,38 +1184,12 @@ export type EmailDeliveryUpdateManyWithWhereWithoutTokenInput = {
   data: Prisma.XOR<Prisma.EmailDeliveryUpdateManyMutationInput, Prisma.EmailDeliveryUncheckedUpdateManyWithoutTokenInput>
 }
 
-export type EmailDeliveryScalarWhereInput = {
-  AND?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
-  OR?: Prisma.EmailDeliveryScalarWhereInput[]
-  NOT?: Prisma.EmailDeliveryScalarWhereInput | Prisma.EmailDeliveryScalarWhereInput[]
-  id?: Prisma.UuidFilter<"EmailDelivery"> | string
-  requestKey?: Prisma.UuidFilter<"EmailDelivery"> | string
-  kind?: Prisma.EnumEmailKindFilter<"EmailDelivery"> | $Enums.EmailKind
-  tokenId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
-  tokenReferenceId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
-  noticeId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
-  confirmationAuditId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
-  status?: Prisma.EnumEmailStatusFilter<"EmailDelivery"> | $Enums.EmailStatus
-  recipient?: Prisma.StringNullableFilter<"EmailDelivery"> | string | null
-  encryptedPayload?: Prisma.BytesNullableFilter<"EmailDelivery"> | runtime.Bytes | null
-  payloadKeyId?: Prisma.StringNullableFilter<"EmailDelivery"> | string | null
-  payloadExpiresAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
-  attemptCount?: Prisma.IntFilter<"EmailDelivery"> | number
-  nextAttemptAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
-  leaseId?: Prisma.UuidNullableFilter<"EmailDelivery"> | string | null
-  leaseExpiresAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
-  acceptedAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
-  closedAt?: Prisma.DateTimeNullableFilter<"EmailDelivery"> | Date | string | null
-  version?: Prisma.IntFilter<"EmailDelivery"> | number
-  createdAt?: Prisma.DateTimeFilter<"EmailDelivery"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"EmailDelivery"> | Date | string
-}
-
 export type EmailDeliveryCreateWithoutNoticeInput = {
   id?: string
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationVersion?: number | null
   status?: $Enums.EmailStatus
   recipient?: string | null
   encryptedPayload?: runtime.Bytes | null
@@ -1021,6 +1206,7 @@ export type EmailDeliveryCreateWithoutNoticeInput = {
   updatedAt?: Date | string
   token?: Prisma.AuthTokenCreateNestedOneWithoutDeliveriesInput
   confirmationAudit?: Prisma.AuditLogCreateNestedOneWithoutConfirmedDeliveriesInput
+  reservation?: Prisma.ReservationCreateNestedOneWithoutConfirmationDeliveriesInput
   attempts?: Prisma.EmailDeliveryAttemptCreateNestedManyWithoutDeliveryInput
 }
 
@@ -1030,6 +1216,8 @@ export type EmailDeliveryUncheckedCreateWithoutNoticeInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
   recipient?: string | null
@@ -1079,6 +1267,7 @@ export type EmailDeliveryCreateWithoutAttemptsInput = {
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationVersion?: number | null
   status?: $Enums.EmailStatus
   recipient?: string | null
   encryptedPayload?: runtime.Bytes | null
@@ -1096,6 +1285,7 @@ export type EmailDeliveryCreateWithoutAttemptsInput = {
   token?: Prisma.AuthTokenCreateNestedOneWithoutDeliveriesInput
   notice?: Prisma.ReservationChangeNoticeCreateNestedOneWithoutDeliveriesInput
   confirmationAudit?: Prisma.AuditLogCreateNestedOneWithoutConfirmedDeliveriesInput
+  reservation?: Prisma.ReservationCreateNestedOneWithoutConfirmationDeliveriesInput
 }
 
 export type EmailDeliveryUncheckedCreateWithoutAttemptsInput = {
@@ -1104,6 +1294,8 @@ export type EmailDeliveryUncheckedCreateWithoutAttemptsInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
@@ -1143,6 +1335,7 @@ export type EmailDeliveryUpdateWithoutAttemptsInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
@@ -1160,6 +1353,7 @@ export type EmailDeliveryUpdateWithoutAttemptsInput = {
   token?: Prisma.AuthTokenUpdateOneWithoutDeliveriesNestedInput
   notice?: Prisma.ReservationChangeNoticeUpdateOneWithoutDeliveriesNestedInput
   confirmationAudit?: Prisma.AuditLogUpdateOneWithoutConfirmedDeliveriesNestedInput
+  reservation?: Prisma.ReservationUpdateOneWithoutConfirmationDeliveriesNestedInput
 }
 
 export type EmailDeliveryUncheckedUpdateWithoutAttemptsInput = {
@@ -1168,6 +1362,8 @@ export type EmailDeliveryUncheckedUpdateWithoutAttemptsInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
@@ -1191,6 +1387,7 @@ export type EmailDeliveryCreateWithoutConfirmationAuditInput = {
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationVersion?: number | null
   status?: $Enums.EmailStatus
   recipient?: string | null
   encryptedPayload?: runtime.Bytes | null
@@ -1207,6 +1404,7 @@ export type EmailDeliveryCreateWithoutConfirmationAuditInput = {
   updatedAt?: Date | string
   token?: Prisma.AuthTokenCreateNestedOneWithoutDeliveriesInput
   notice?: Prisma.ReservationChangeNoticeCreateNestedOneWithoutDeliveriesInput
+  reservation?: Prisma.ReservationCreateNestedOneWithoutConfirmationDeliveriesInput
   attempts?: Prisma.EmailDeliveryAttemptCreateNestedManyWithoutDeliveryInput
 }
 
@@ -1216,6 +1414,8 @@ export type EmailDeliveryUncheckedCreateWithoutConfirmationAuditInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   status?: $Enums.EmailStatus
   recipient?: string | null
@@ -1260,11 +1460,115 @@ export type EmailDeliveryUpdateManyWithWhereWithoutConfirmationAuditInput = {
   data: Prisma.XOR<Prisma.EmailDeliveryUpdateManyMutationInput, Prisma.EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditInput>
 }
 
+export type EmailDeliveryCreateManyReservationInput = {
+  id?: string
+  requestKey: string
+  kind: $Enums.EmailKind
+  tokenId?: string | null
+  tokenReferenceId?: string | null
+  reservationVersion?: number | null
+  noticeId?: string | null
+  confirmationAuditId?: string | null
+  status?: $Enums.EmailStatus
+  recipient?: string | null
+  encryptedPayload?: runtime.Bytes | null
+  payloadKeyId?: string | null
+  payloadExpiresAt?: Date | string | null
+  attemptCount?: number
+  nextAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  acceptedAt?: Date | string | null
+  closedAt?: Date | string | null
+  version?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type EmailDeliveryUpdateWithoutReservationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestKey?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
+  tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
+  recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  payloadKeyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payloadExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  token?: Prisma.AuthTokenUpdateOneWithoutDeliveriesNestedInput
+  notice?: Prisma.ReservationChangeNoticeUpdateOneWithoutDeliveriesNestedInput
+  confirmationAudit?: Prisma.AuditLogUpdateOneWithoutConfirmedDeliveriesNestedInput
+  attempts?: Prisma.EmailDeliveryAttemptUpdateManyWithoutDeliveryNestedInput
+}
+
+export type EmailDeliveryUncheckedUpdateWithoutReservationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestKey?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
+  tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
+  recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  payloadKeyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payloadExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempts?: Prisma.EmailDeliveryAttemptUncheckedUpdateManyWithoutDeliveryNestedInput
+}
+
+export type EmailDeliveryUncheckedUpdateManyWithoutReservationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestKey?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
+  tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
+  recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  payloadKeyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payloadExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type EmailDeliveryCreateManyTokenInput = {
   id?: string
   requestKey: string
   kind: $Enums.EmailKind
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
@@ -1288,6 +1592,7 @@ export type EmailDeliveryUpdateWithoutTokenInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
@@ -1304,6 +1609,7 @@ export type EmailDeliveryUpdateWithoutTokenInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notice?: Prisma.ReservationChangeNoticeUpdateOneWithoutDeliveriesNestedInput
   confirmationAudit?: Prisma.AuditLogUpdateOneWithoutConfirmedDeliveriesNestedInput
+  reservation?: Prisma.ReservationUpdateOneWithoutConfirmationDeliveriesNestedInput
   attempts?: Prisma.EmailDeliveryAttemptUpdateManyWithoutDeliveryNestedInput
 }
 
@@ -1312,6 +1618,8 @@ export type EmailDeliveryUncheckedUpdateWithoutTokenInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
@@ -1336,6 +1644,8 @@ export type EmailDeliveryUncheckedUpdateManyWithoutTokenInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
@@ -1360,6 +1670,8 @@ export type EmailDeliveryCreateManyNoticeInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   confirmationAuditId?: string | null
   status?: $Enums.EmailStatus
   recipient?: string | null
@@ -1382,6 +1694,7 @@ export type EmailDeliveryUpdateWithoutNoticeInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
@@ -1398,6 +1711,7 @@ export type EmailDeliveryUpdateWithoutNoticeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   token?: Prisma.AuthTokenUpdateOneWithoutDeliveriesNestedInput
   confirmationAudit?: Prisma.AuditLogUpdateOneWithoutConfirmedDeliveriesNestedInput
+  reservation?: Prisma.ReservationUpdateOneWithoutConfirmationDeliveriesNestedInput
   attempts?: Prisma.EmailDeliveryAttemptUpdateManyWithoutDeliveryNestedInput
 }
 
@@ -1407,6 +1721,8 @@ export type EmailDeliveryUncheckedUpdateWithoutNoticeInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1431,6 +1747,8 @@ export type EmailDeliveryUncheckedUpdateManyWithoutNoticeInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   confirmationAuditId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1454,6 +1772,8 @@ export type EmailDeliveryCreateManyConfirmationAuditInput = {
   kind: $Enums.EmailKind
   tokenId?: string | null
   tokenReferenceId?: string | null
+  reservationId?: string | null
+  reservationVersion?: number | null
   noticeId?: string | null
   status?: $Enums.EmailStatus
   recipient?: string | null
@@ -1476,6 +1796,7 @@ export type EmailDeliveryUpdateWithoutConfirmationAuditInput = {
   requestKey?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   encryptedPayload?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
@@ -1492,6 +1813,7 @@ export type EmailDeliveryUpdateWithoutConfirmationAuditInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   token?: Prisma.AuthTokenUpdateOneWithoutDeliveriesNestedInput
   notice?: Prisma.ReservationChangeNoticeUpdateOneWithoutDeliveriesNestedInput
+  reservation?: Prisma.ReservationUpdateOneWithoutConfirmationDeliveriesNestedInput
   attempts?: Prisma.EmailDeliveryAttemptUpdateManyWithoutDeliveryNestedInput
 }
 
@@ -1501,6 +1823,8 @@ export type EmailDeliveryUncheckedUpdateWithoutConfirmationAuditInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1525,6 +1849,8 @@ export type EmailDeliveryUncheckedUpdateManyWithoutConfirmationAuditInput = {
   kind?: Prisma.EnumEmailKindFieldUpdateOperationsInput | $Enums.EmailKind
   tokenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenReferenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reservationVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   noticeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus
   recipient?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1579,6 +1905,8 @@ export type EmailDeliverySelect<ExtArgs extends runtime.Types.Extensions.Interna
   kind?: boolean
   tokenId?: boolean
   tokenReferenceId?: boolean
+  reservationId?: boolean
+  reservationVersion?: boolean
   noticeId?: boolean
   confirmationAuditId?: boolean
   status?: boolean
@@ -1598,6 +1926,7 @@ export type EmailDeliverySelect<ExtArgs extends runtime.Types.Extensions.Interna
   token?: boolean | Prisma.EmailDelivery$tokenArgs<ExtArgs>
   notice?: boolean | Prisma.EmailDelivery$noticeArgs<ExtArgs>
   confirmationAudit?: boolean | Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>
+  reservation?: boolean | Prisma.EmailDelivery$reservationArgs<ExtArgs>
   attempts?: boolean | Prisma.EmailDelivery$attemptsArgs<ExtArgs>
   _count?: boolean | Prisma.EmailDeliveryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["emailDelivery"]>
@@ -1608,6 +1937,8 @@ export type EmailDeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Types
   kind?: boolean
   tokenId?: boolean
   tokenReferenceId?: boolean
+  reservationId?: boolean
+  reservationVersion?: boolean
   noticeId?: boolean
   confirmationAuditId?: boolean
   status?: boolean
@@ -1627,6 +1958,7 @@ export type EmailDeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Types
   token?: boolean | Prisma.EmailDelivery$tokenArgs<ExtArgs>
   notice?: boolean | Prisma.EmailDelivery$noticeArgs<ExtArgs>
   confirmationAudit?: boolean | Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>
+  reservation?: boolean | Prisma.EmailDelivery$reservationArgs<ExtArgs>
 }, ExtArgs["result"]["emailDelivery"]>
 
 export type EmailDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1635,6 +1967,8 @@ export type EmailDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   kind?: boolean
   tokenId?: boolean
   tokenReferenceId?: boolean
+  reservationId?: boolean
+  reservationVersion?: boolean
   noticeId?: boolean
   confirmationAuditId?: boolean
   status?: boolean
@@ -1654,6 +1988,7 @@ export type EmailDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   token?: boolean | Prisma.EmailDelivery$tokenArgs<ExtArgs>
   notice?: boolean | Prisma.EmailDelivery$noticeArgs<ExtArgs>
   confirmationAudit?: boolean | Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>
+  reservation?: boolean | Prisma.EmailDelivery$reservationArgs<ExtArgs>
 }, ExtArgs["result"]["emailDelivery"]>
 
 export type EmailDeliverySelectScalar = {
@@ -1662,6 +1997,8 @@ export type EmailDeliverySelectScalar = {
   kind?: boolean
   tokenId?: boolean
   tokenReferenceId?: boolean
+  reservationId?: boolean
+  reservationVersion?: boolean
   noticeId?: boolean
   confirmationAuditId?: boolean
   status?: boolean
@@ -1680,11 +2017,12 @@ export type EmailDeliverySelectScalar = {
   updatedAt?: boolean
 }
 
-export type EmailDeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "requestKey" | "kind" | "tokenId" | "tokenReferenceId" | "noticeId" | "confirmationAuditId" | "status" | "recipient" | "encryptedPayload" | "payloadKeyId" | "payloadExpiresAt" | "attemptCount" | "nextAttemptAt" | "leaseId" | "leaseExpiresAt" | "acceptedAt" | "closedAt" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["emailDelivery"]>
+export type EmailDeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "requestKey" | "kind" | "tokenId" | "tokenReferenceId" | "reservationId" | "reservationVersion" | "noticeId" | "confirmationAuditId" | "status" | "recipient" | "encryptedPayload" | "payloadKeyId" | "payloadExpiresAt" | "attemptCount" | "nextAttemptAt" | "leaseId" | "leaseExpiresAt" | "acceptedAt" | "closedAt" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["emailDelivery"]>
 export type EmailDeliveryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   token?: boolean | Prisma.EmailDelivery$tokenArgs<ExtArgs>
   notice?: boolean | Prisma.EmailDelivery$noticeArgs<ExtArgs>
   confirmationAudit?: boolean | Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>
+  reservation?: boolean | Prisma.EmailDelivery$reservationArgs<ExtArgs>
   attempts?: boolean | Prisma.EmailDelivery$attemptsArgs<ExtArgs>
   _count?: boolean | Prisma.EmailDeliveryCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1692,11 +2030,13 @@ export type EmailDeliveryIncludeCreateManyAndReturn<ExtArgs extends runtime.Type
   token?: boolean | Prisma.EmailDelivery$tokenArgs<ExtArgs>
   notice?: boolean | Prisma.EmailDelivery$noticeArgs<ExtArgs>
   confirmationAudit?: boolean | Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>
+  reservation?: boolean | Prisma.EmailDelivery$reservationArgs<ExtArgs>
 }
 export type EmailDeliveryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   token?: boolean | Prisma.EmailDelivery$tokenArgs<ExtArgs>
   notice?: boolean | Prisma.EmailDelivery$noticeArgs<ExtArgs>
   confirmationAudit?: boolean | Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>
+  reservation?: boolean | Prisma.EmailDelivery$reservationArgs<ExtArgs>
 }
 
 export type $EmailDeliveryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1705,6 +2045,7 @@ export type $EmailDeliveryPayload<ExtArgs extends runtime.Types.Extensions.Inter
     token: Prisma.$AuthTokenPayload<ExtArgs> | null
     notice: Prisma.$ReservationChangeNoticePayload<ExtArgs> | null
     confirmationAudit: Prisma.$AuditLogPayload<ExtArgs> | null
+    reservation: Prisma.$ReservationPayload<ExtArgs> | null
     attempts: Prisma.$EmailDeliveryAttemptPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1713,6 +2054,8 @@ export type $EmailDeliveryPayload<ExtArgs extends runtime.Types.Extensions.Inter
     kind: $Enums.EmailKind
     tokenId: string | null
     tokenReferenceId: string | null
+    reservationId: string | null
+    reservationVersion: number | null
     noticeId: string | null
     confirmationAuditId: string | null
     status: $Enums.EmailStatus
@@ -2126,6 +2469,7 @@ export interface Prisma__EmailDeliveryClient<T, Null = never, ExtArgs extends ru
   token<T extends Prisma.EmailDelivery$tokenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmailDelivery$tokenArgs<ExtArgs>>): Prisma.Prisma__AuthTokenClient<runtime.Types.Result.GetResult<Prisma.$AuthTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notice<T extends Prisma.EmailDelivery$noticeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmailDelivery$noticeArgs<ExtArgs>>): Prisma.Prisma__ReservationChangeNoticeClient<runtime.Types.Result.GetResult<Prisma.$ReservationChangeNoticePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   confirmationAudit<T extends Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmailDelivery$confirmationAuditArgs<ExtArgs>>): Prisma.Prisma__AuditLogClient<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  reservation<T extends Prisma.EmailDelivery$reservationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmailDelivery$reservationArgs<ExtArgs>>): Prisma.Prisma__ReservationClient<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   attempts<T extends Prisma.EmailDelivery$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmailDelivery$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailDeliveryAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2161,6 +2505,8 @@ export interface EmailDeliveryFieldRefs {
   readonly kind: Prisma.FieldRef<"EmailDelivery", 'EmailKind'>
   readonly tokenId: Prisma.FieldRef<"EmailDelivery", 'String'>
   readonly tokenReferenceId: Prisma.FieldRef<"EmailDelivery", 'String'>
+  readonly reservationId: Prisma.FieldRef<"EmailDelivery", 'String'>
+  readonly reservationVersion: Prisma.FieldRef<"EmailDelivery", 'Int'>
   readonly noticeId: Prisma.FieldRef<"EmailDelivery", 'String'>
   readonly confirmationAuditId: Prisma.FieldRef<"EmailDelivery", 'String'>
   readonly status: Prisma.FieldRef<"EmailDelivery", 'EmailStatus'>
@@ -2632,6 +2978,25 @@ export type EmailDelivery$confirmationAuditArgs<ExtArgs extends runtime.Types.Ex
    */
   include?: Prisma.AuditLogInclude<ExtArgs> | null
   where?: Prisma.AuditLogWhereInput
+}
+
+/**
+ * EmailDelivery.reservation
+ */
+export type EmailDelivery$reservationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reservation
+   */
+  select?: Prisma.ReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reservation
+   */
+  omit?: Prisma.ReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationInclude<ExtArgs> | null
+  where?: Prisma.ReservationWhereInput
 }
 
 /**

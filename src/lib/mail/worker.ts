@@ -10,6 +10,10 @@ const retryDelay = [60_000, 5 * 60_000, 30 * 60_000];
 
 function targetIsCurrent(delivery: Awaited<ReturnType<typeof loadDelivery>>, now: Date): boolean {
   if (!delivery || !delivery.encryptedPayload || !delivery.payloadExpiresAt || delivery.payloadExpiresAt <= now) return false;
+  if (delivery.kind === "RESERVATION_CONFIRMED_MEMBER" || delivery.kind === "RESERVATION_CONFIRMED_ADMIN") {
+    const reservation = delivery.reservation;
+    return !!(reservation && reservation.status === "CONFIRMED" && reservation.version === delivery.reservationVersion && reservation.member.status === "ACTIVE" && !reservation.member.isDeleted && reservation.member.emailVerifiedAt);
+  }
   if (delivery.kind === "RESERVATION_CHANGE") {
     const notice = delivery.notice;
     const reservation = notice?.reservation;
@@ -24,7 +28,7 @@ function targetIsCurrent(delivery: Awaited<ReturnType<typeof loadDelivery>>, now
 }
 
 async function loadDelivery(tx: Prisma.TransactionClient, id: string) {
-  return tx.emailDelivery.findUniqueOrThrow({ where: { id }, include: { token: { include: { member: true } }, notice: { include: { reservation: { include: { member: true } } } } } });
+  return tx.emailDelivery.findUniqueOrThrow({ where: { id }, include: { reservation: { include: { member: true } }, token: { include: { member: true } }, notice: { include: { reservation: { include: { member: true } } } } } });
 }
 
 async function closeStaleLeases(db: PrismaClient) {
