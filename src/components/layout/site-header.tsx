@@ -52,9 +52,9 @@ export function SiteHeader() {
       }
     }}>
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="予約サンプル ホーム" onClick={() => setOpenFor(null)}>
+        <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="ほぐし日和 ホーム" onClick={() => setOpenFor(null)}>
           <span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-primary"><Waves aria-hidden="true" className="size-6" /></span>
-          <span className="text-base font-bold tracking-tight sm:text-lg">予約サンプル<span className="mt-0.5 block text-[10px] font-medium tracking-widest text-muted-foreground">WELLNESS & RELAXATION</span></span>
+          <span className="text-base font-bold tracking-tight sm:text-lg">ほぐし日和<span className="mt-0.5 block text-[10px] font-medium tracking-widest text-muted-foreground">WELLNESS & RELAXATION</span></span>
         </Link>
         <nav aria-label="グローバルメニュー" className="hidden items-center gap-1 lg:flex">
           {links.map(({ href, label }) => <Link key={href} href={href} aria-current={active(href) ? "page" : undefined} className={cn("rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary", active(href) && "bg-secondary text-primary")}>{label}</Link>)}

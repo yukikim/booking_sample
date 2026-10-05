@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "予約サンプル",
+  title: "ほぐし日和",
   description: "メニュー・空き検索と会員予約、店舗管理",
 };
 
