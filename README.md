@@ -2,6 +2,11 @@
 
 Next.js・PostgreSQL・Prismaを使用する、マッサージ・リラクゼーションサロン向けの会員制Web予約アプリです。入会したお客様による予約受付と、店舗側の予約・施術メニュー・設備・施術者の管理を行います。
 
+![デプロイイメージ](./docs/booking_sample_deploy_image.png)
+
+[サンプルページ(Vercel)](https://booking-sample.vercel.app/)
+
+
 **要件・設計方針と開発手順をまとめたREADMEです。業務機能は実装予定です。開発環境の手順は第10章、作業の進捗は第15章を参照してください。**
 
 ## 1. 目的
