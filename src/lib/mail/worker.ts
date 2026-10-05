@@ -14,6 +14,10 @@ function targetIsCurrent(delivery: Awaited<ReturnType<typeof loadDelivery>>, now
     const reservation = delivery.reservation;
     return !!(reservation && reservation.status === "CONFIRMED" && reservation.version === delivery.reservationVersion && reservation.member.status === "ACTIVE" && !reservation.member.isDeleted && reservation.member.emailVerifiedAt);
   }
+  if (delivery.kind === "RESERVATION_CANCELLED_MEMBER" || delivery.kind === "RESERVATION_CANCELLED_ADMIN") {
+    const reservation = delivery.reservation;
+    return !!(reservation && reservation.status === "CANCELLED" && reservation.cancellationKind === "NORMAL" && reservation.cancelledAt && reservation.version === delivery.reservationVersion && reservation.member.status === "ACTIVE" && !reservation.member.isDeleted && reservation.member.emailVerifiedAt);
+  }
   if (delivery.kind === "RESERVATION_CHANGE") {
     const notice = delivery.notice;
     const reservation = notice?.reservation;

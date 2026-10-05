@@ -13,7 +13,7 @@ import { parseBusinessDate } from "@/lib/schedules/calendar";
 import { cancellationDeadline } from "./deadline";
 import { parseAvailabilityRequest, revalidateAtSave, type AvailabilityRequest } from "./availability";
 import { lockBookingState } from "./lock";
-import { queueReservationConfirmation } from "@/lib/mail/reservation-confirmation";
+import { queueReservationConfirmation, queueReservationCancellation } from "@/lib/mail/reservation-confirmation";
 import { dispatchMailAfterResponse } from "@/lib/mail/immediate";
 import { resolveNoticesAfterReservation } from "@/lib/manage/adjustment-response";
 
@@ -240,7 +240,8 @@ export async function cancelReservation(request: Request, id: string, value: unk
   const input = parseCancel(value);
   checkMutationOrigin(request);
   const hash = digest({ id, ...input });
-  return getPrisma().$transaction(async tx => {
+  const deliveryIds: string[] = [];
+  const result = await getPrisma().$transaction(async tx => {
     await setTransactionSchema(tx);
     const actor = await authorize(tx, request, "RESERVATION_CANCEL", input.storeException);
     await lockBookingState(tx);
@@ -270,8 +271,14 @@ export async function cancelReservation(request: Request, id: string, value: unk
     if (updated.count !== 1) throw new BookingError(409, "VersionConflict");
     await tx.reservationSlot.deleteMany({ where: { reservationId: id } });
     await resolveNoticesAfterReservation(tx, id, actor, "cancelled");
+    if (actor.role === "MEMBER") {
+      const cancelled = await tx.reservation.findUniqueOrThrow({ where: { id }, include: { options: { orderBy: { optionId: "asc" } } } });
+      deliveryIds.push(...await queueReservationCancellation(tx, cancelled, cancelled.options.map(option => ({ name: option.optionNameSnapshot }))));
+    }
     return { reservationId: id, version: input.expectedVersion + 1, status: "CANCELLED" as const, replayed: false };
   }, { timeout: 20_000 });
+  for (const deliveryId of deliveryIds) dispatchMailAfterResponse(deliveryId);
+  return result;
 }
 
 export function bookingFailure(error: unknown) {

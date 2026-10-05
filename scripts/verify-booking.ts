@@ -225,8 +225,12 @@ async function main() {
     assert.equal(duplicates[0].result.reservationId, duplicates[1].result.reservationId);
     const duplicateId = duplicates[0].result.reservationId as string;
     assert.equal(await db.emailDelivery.count({ where: { reservationId: duplicateId } }), 2);
-    await send("DELETE", `/api/reservations/${duplicateId}`, { requestKey: randomUUID(), expectedVersion: 1 });
-    for (const stale of await db.emailDelivery.findMany({ where: { reservationId: duplicateId } })) {
+    const duplicateCancelBody = { requestKey: randomUUID(), expectedVersion: 1 };
+    const duplicateCancels = await Promise.all([send("DELETE", `/api/reservations/${duplicateId}`, duplicateCancelBody), send("DELETE", `/api/reservations/${duplicateId}`, duplicateCancelBody)]);
+    assert.deepEqual(duplicateCancels.map(row => row.status), [200, 200]);
+    assert.deepEqual(duplicateCancels.map(row => row.result.replayed).sort(), [false, true]);
+    assert.equal(await db.emailDelivery.count({ where: { reservationId: duplicateId, kind: { in: ["RESERVATION_CANCELLED_MEMBER", "RESERVATION_CANCELLED_ADMIN"] } } }), 2);
+    for (const stale of await db.emailDelivery.findMany({ where: { reservationId: duplicateId, kind: { in: ["RESERVATION_CONFIRMED_MEMBER", "RESERVATION_CONFIRMED_ADMIN"] } } })) {
       assert.equal((await runMailBatch(async () => { assert.fail("Cancelled reservation must not send confirmation"); }, 1, db, stale.id)).attempted, 0);
       assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: stale.id } })).status, "EXPIRED");
     }
@@ -240,10 +244,44 @@ async function main() {
     assert.deepEqual((await db.reservationSlot.findMany({ where: { reservationId: firstId } })).map(row => row.slotStartsAt.toISOString()), [iso(date, 10)]);
     assert.equal((await send("DELETE", `/api/reservations/${firstId}`, { requestKey: randomUUID(), expectedVersion: 2 }, otherCookie)).status, 403);
     const cancelBody = { requestKey: randomUUID(), expectedVersion: 2, reason: "予定変更" };
+    const beforeCancelDeliveries = await db.emailDelivery.count();
+    await pg.query(`CREATE FUNCTION "${schema}".reject_cancel_admin_mail() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.kind = 'RESERVATION_CANCELLED_ADMIN' THEN RAISE EXCEPTION 'test rollback'; END IF; RETURN NEW; END $$`);
+    await pg.query(`CREATE TRIGGER reject_cancel_admin_mail BEFORE INSERT ON "${schema}"."EmailDelivery" FOR EACH ROW EXECUTE FUNCTION "${schema}".reject_cancel_admin_mail()`);
+    assert.equal((await send("DELETE", `/api/reservations/${firstId}`, cancelBody)).status, 503);
+    assert.equal((await db.reservation.findUniqueOrThrow({ where: { id: firstId } })).status, "CONFIRMED");
+    assert.equal((await db.reservation.findUniqueOrThrow({ where: { id: firstId } })).version, 2);
+    assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 1);
+    assert.equal(await db.emailDelivery.count(), beforeCancelDeliveries);
+    assert.equal(await db.auditLog.count({ where: { requestKey: cancelBody.requestKey } }), 0);
+    await pg.query(`DROP TRIGGER reject_cancel_admin_mail ON "${schema}"."EmailDelivery"`);
+    await pg.query(`DROP FUNCTION "${schema}".reject_cancel_admin_mail()`);
     const cancelled = await send("DELETE", `/api/reservations/${firstId}`, cancelBody);
     assert.equal(cancelled.status, 200, JSON.stringify(cancelled.result));
     assert.equal((await send("DELETE", `/api/reservations/${firstId}`, cancelBody)).result.replayed, true);
+    const cancellationWhere = { reservationId: firstId, kind: { in: ["RESERVATION_CANCELLED_MEMBER", "RESERVATION_CANCELLED_ADMIN"] as ("RESERVATION_CANCELLED_MEMBER" | "RESERVATION_CANCELLED_ADMIN")[] } };
+    const cancellationMails = await db.emailDelivery.findMany({ where: cancellationWhere });
+    assert.equal(cancellationMails.length, 2);
+    const cancelMemberMail = cancellationMails.find(row => row.kind === "RESERVATION_CANCELLED_MEMBER")!;
+    const cancelAdminMail = cancellationMails.find(row => row.kind === "RESERVATION_CANCELLED_ADMIN")!;
+    assert.equal(cancelMemberMail.reservationVersion, 3);
+    const cancelPayload = decryptMailPayload(cancelMemberMail.encryptedPayload!);
+    assert.equal(cancelPayload.to, member.email);
+    assert.match(cancelPayload.subject, /キャンセルが完了/);
+    assert.match(cancelPayload.text, /キャンセル日時/);
+    assert(cancelPayload.text.includes(`${date.replaceAll("-", "/")} 10:00`));
+    assert(cancelPayload.text.includes(`/account/reservations/${firstId}`));
+    const cancelKeys: string[] = [];
+    await runMailBatch(async (_payload, key) => { cancelKeys.push(key); return { kind: "TRANSIENT", code: "RATE_LIMITED" }; }, 1, db, cancelMemberMail.id);
+    assert.equal((await db.emailDelivery.findUniqueOrThrow({ where: { id: cancelMemberMail.id } })).status, "RETRY_WAIT");
+    await runMailBatch(async payload => { assert.equal(payload.to, process.env.ADMIN_EMAIL); assert.match(payload.subject, /会員が予約をキャンセル/); assert(payload.text.includes(`/manage/reservations/${firstId}`)); return { kind: "ACCEPTED" }; }, 1, db, cancelAdminMail.id);
+    await db.emailDelivery.update({ where: { id: cancelMemberMail.id }, data: { nextAttemptAt: new Date() } });
+    await runMailBatch(async (_payload, key) => { cancelKeys.push(key); return { kind: "ACCEPTED" }; }, 1, db, cancelMemberMail.id);
+    assert.deepEqual(cancelKeys, [cancelMemberMail.requestKey, cancelMemberMail.requestKey]);
+    assert.equal((await runMailBatch(async () => { assert.fail("Accepted cancellation must not send again"); }, 1, db, cancelMemberMail.id)).attempted, 0);
+    assert.equal(await db.emailDelivery.count({ where: { ...cancellationWhere, status: "ACCEPTED", encryptedPayload: null } }), 2);
+
     assert.equal((await send("DELETE", `/api/reservations/${firstId}`, { requestKey: randomUUID(), expectedVersion: 2 })).status, 409);
+    assert.equal(await db.emailDelivery.count({ where: cancellationWhere }), 2);
     assert.equal((await read(`/api/reservations/${firstId}`).then(row => row.result.reservation as { canCancel: boolean })).canCancel, false);
     assert.equal(await db.reservationSlot.count({ where: { reservationId: firstId } }), 0);
     const history = await db.reservation.findUniqueOrThrow({ where: { id: firstId } });
@@ -503,6 +541,7 @@ async function main() {
     assert.equal(cancelledAdjustment.status, 200, JSON.stringify(cancelledAdjustment.result));
     assert.equal((await db.reservationChangeNotice.findUniqueOrThrow({ where: { id: noCandidateNotice.id } })).responseStatus, "RESOLVED");
     assert.equal(await db.reservationSlot.count({ where: { reservationId: noCandidateReservation } }), 0);
+    assert.equal(await db.emailDelivery.count({ where: { reservationId: noCandidateReservation, kind: { in: ["RESERVATION_CANCELLED_MEMBER", "RESERVATION_CANCELLED_ADMIN"] } } }), 0);
     const reviewAudit = await db.auditLog.create({ data: { requestKey: randomUUID(), actorType: "ADMIN", actorAdminId: ADMIN_ID, action: "TEST_SETTING_CHANGE", targetType: "Reservation", targetId: beforeSettingId, changes: { source: "isolated-test" } } });
     const pendingReview = await db.reservationChangeNotice.create({ data: { reservationId: beforeSettingId, changeAuditId: reviewAudit.id, reservationVersion: 3, reason: "RESOURCE_UNAVAILABLE", responseStatus: "IMPACT_RESOLVED_PENDING_REVIEW" } });
     assert.equal((await send("POST", `/api/manage/adjustments/${pendingReview.id}/response`, { requestKey: randomUUID(), expectedVersion: 1, status: "RESOLVED", note: "設定再変更による影響解消を確認" }, staffCookie)).status, 200);

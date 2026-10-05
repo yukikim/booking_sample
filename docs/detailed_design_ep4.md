@@ -87,3 +87,17 @@
 検証結果（2026-10-05）：`npm run check`（58単体テスト・lint・型検査・schema検証）、`npm run test:booking`、`npm run test:withdrawal`、`npm run build -- --webpack` が成功。追加migrationは隔離PostgreSQLスキーマで適用・検証済み。通常のローカルDBには同日 `npm run db:migrate` で適用し、migration状態・2カラム・通知種別と管理者／メール暗号化設定を確認済み。本番DBへは未適用。実Resend受信・本番Cron・実ブラウザ操作は未確認。
 
 ローカルで予約APIが503となり「予約結果を確認できませんでした。同じ内容で再試行してください。」と表示される場合、このmigrationの未適用が原因となる。`npm run db:migrate` でローカルDBへ適用後、`npm run dev` を再起動する。resetやseedは不要。同じ内容の再試行では既存の要求キーによる重複防止が働く。
+
+## 14. 会員キャンセル完了メール（Task 4.2.7）
+
+会員本人が `DELETE /api/reservations/{id}` で予約をキャンセルした際に、会員の `memberEmailSnapshot` と管理者の `ADMIN_EMAIL` へそれぞれ通知する。対象は所有者の通常キャンセルのみ。店舗の代理取消・店舗都合取消・退会に伴う自動取消は対象外。メールにはキャンセル完了の明示、元の予約日時（日本時間）、施術・予約時のオプション、料金、担当、キャンセル日時、ログインが必要な詳細URLを載せる。表示料金は元の予約料金で、キャンセル料の計算は追加しない。
+
+`queueReservationCancellation` が `RESERVATION_CANCELLED_MEMBER` / `RESERVATION_CANCELLED_ADMIN` の通知を既存 `EmailDelivery` へ登録する。取消状態・予約版・取消監査・占有枠解放・要調整の解消・2通の通知を同一トランザクションに保存し、通知登録の途中で失敗すれば全体をロールバックする。メール設定不備でも同様。取消要求を同じキーで再送した場合は保存済みの結果を返し、新たな通知は登録しない。別キーによる再取消は版・状態条件で拒否する。既存 `(reservationId, kind)` 一意制約でも重複登録を防ぐ。
+
+DB確定後に2通を個別に `dispatchMailAfterResponse` で配送する。配送失敗でも確定済み取消や枠解放を巻き戻さない。24時間の本文期限、初回＋最大3回の一時障害再試行、配送キーの維持、結果不明時の停止、Cron回収は予約確定通知と共通。送信直前に予約がCANCELLED・通常取消・取消日時あり・通知作成時と同じ版、会員がACTIVE・未削除・メール確認済みであることを確認する。対象不整合や期限切れでは配送を停止し、暗号化本文を消去する。
+
+追加migration `20261005010000_reservation_cancellation_mail` は2つのEmailKindとCHECK制約の許容対象を追加する。前回migrationは変更せず、既存履歴・データを保持する。ローカルは `npm run db:migrate`、Neonは接続先を照合して `npm run db:deployment -- --file .env.sample --expected-host HOST --action deploy` で適用する。現在のCI/CDはNeonのstatus確認のみで、自動適用はしない。
+
+`test:booking` で会員・管理者の宛先／本文、個別配送と再試行キー、成功後の再送抑止、逐次・並行の取消再送、通知登録途中失敗時の予約・枠・監査・メールの全体ロールバック、店舗取消が通知対象外であることを検証する。取消前の予約確定通知が送信されない既存検証も維持する。
+
+検証結果（2026-10-05）：`npm run check`（58単体テスト・lint・型検査・schema検証）、`npm run test:booking`、`npm run test:withdrawal`、`npm run build -- --webpack` が成功。追加migrationは隔離PostgreSQLで検証後、`npm run db:migrate` で通常のローカルDBにも適用し、status正常を確認した。既存データは保持。実Resend受信・本番Cron・実ブラウザ操作・Neonへの適用は未実施。ローカル開発サーバーはPrisma Clientの更新を反映するため再起動する。
