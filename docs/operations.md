@@ -22,6 +22,19 @@ npm run db:deployment -- --file .env.sample --expected-host HOST --action status
 
 DB操作は公開対象の確認後に担当者が実行する。既存DBのresetや全量上書きは不要。部屋・施術者・メニュー・営業時間・休憩は公開後に管理画面で設定する。ローカル専用 `db:seed` をNeonへ実行しない。
 
+サンプル用Neon DBへローカルと同じ初期カタログを投入する場合は、migration適用後に専用コマンドを使う。`DATABASE` はNeon画面で確認したdatabase名（URL末尾の名前）に置き換える。初回準備時またはアプリ・管理操作・他のseedが停止している間に実行する。
+
+```sh
+npm run db:generate
+npm run db:seed:remote -- --file .env.sample --expected-host HOST --expected-database DATABASE
+```
+
+指定ファイルだけを読み、公開設定の検証・directホスト名・DB名の照合を接続前に行う。管理者・部屋2室・施術者2名・メニュー3件・オプション3件・店舗設定状態と2026-09-01からの営業／休憩設定を1トランザクションで作成する。管理者のパスワードはDBへ投入せず公開環境変数で設定する。固定IDの既存行・既存の同種／対象／適用日の設定予定・訂正・取消は上書きしない。同名でもIDの違う行は統合しない。サンプル会員・予約は作成せず、migration・reset・メール送信も行わない。再実行は可能だが、営業設定が予約の可否に影響するため、実運用DBには開発用の初期設定を投入しない。CI/CDはこのコマンドを自動実行しない。
+
+リモートseedのSSL設定はメモリ内で `verify-full` に統一し、`uselibpqcompat` を除去する（設定ファイルは変更しない）。証明書・ホスト名検証を明示し、pgのSSL互換性警告を避ける。接続待ち・トランザクション取得待ちは15秒、トランザクション実行上限は60秒とし、ネットワーク越しの連続クエリに対応する。失敗時は秘密値を含まないPrismaエラーコードを表示する。`P2028` の場合は時間制限やDBロックを確認する。
+
+`db:deployment` は接続前に指定ファイルの全公開設定を検証する。`OPS_SECRET: required`、`CRON_SECRET: 32+ characters required`、`AUTH_URL: HTTPS origin required` などが出た場合は、指定ファイルを修正して `env:check` を再実行する。`AUTH_URL` はHTTPSの固定公開URL（パス・クエリ・フラグメントなし）、`CRON_SECRET` と `OPS_SECRET` は他の秘密値と異なる32文字以上の値を設定し、Vercelにも同じ値を登録する。`--expected-host` は `DEPLOYMENT_DB_HOST` と一致させる。検証エラーが出た時点ではDBへ接続していない。
+
 ### workflowの動作
 
 - `.github/workflows/ci-deploy.yml` はpush・PR・手動実行で、再利用workflow `ci.yml` のchecks / dependency-auditを呼び出す。専用PostgreSQLによる型・単体・DB・HTTP検証とビルド、依存監査がすべて成功するまで公開しない。同一checkout SHAを検査・公開する。

@@ -479,6 +479,7 @@ npm run start
 | `npm test` / `npm run test:watch` | 単発／継続テスト。現在は接続先ガード等の23件でDB不要 |
 | `npm run db:migrate` | ローカルDBへのmigration適用・適用状況確認。resetなし |
 | `npm run db:seed` | 固定IDで初期データ作成。既存の値は保持 |
+| `npm run db:seed:remote -- --file .env.sample --expected-host HOST --expected-database DATABASE` | サンプル用Neonへ同じ初期データを投入。指定ファイルと接続先を検証し、既存の値は保持。詳細は[公開手順](docs/operations.md#0-今回のサンプル公開単一環境) |
 | `npm run test:db` | 稼働中のローカルDBで再作成・制約・競合を検証。スキーマ作成権限が必要 |
 | `npm run db:check` | 稼働中のローカルDBへ`SELECT 1`。テーブル・業務機能の検証ではない |
 | `npm run build` | 本番ビルド。現在はGoogle Fonts取得にもネットワークが必要 |

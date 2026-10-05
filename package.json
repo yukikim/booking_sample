@@ -19,6 +19,7 @@
     "audit:dependencies": "npm audit --audit-level=high",
     "db:migrate": "node --import tsx scripts/migrate-local.ts",
     "db:seed": "node --import tsx prisma/seed.ts",
+    "db:seed:remote": "node --import tsx scripts/seed-remote.ts",
     "test:db": "node --conditions=react-server --import tsx scripts/verify-database.ts",
     "test:auth": "node --conditions=react-server --import tsx scripts/verify-auth.ts",
     "test:member": "node --conditions=react-server --import tsx scripts/verify-member.ts",
