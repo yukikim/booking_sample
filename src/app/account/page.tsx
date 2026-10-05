@@ -20,7 +20,7 @@ export default async function Page() {
         <h1 className="text-2xl font-bold">会員ページを表示できません</h1>
         <p>
           {error instanceof MemberAccessError && error.status === 403
-            ? "アカウント状態を確認してください。"
+            ? "会員ログインまたは新規入会を行ってください。"
             : "現在予約を取得できません。時間をおいて再試行してください。"}
         </p>
       </main>

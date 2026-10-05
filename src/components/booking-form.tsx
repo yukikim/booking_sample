@@ -41,7 +41,13 @@ const time = (value: string) =>
     hour12: false,
   }).format(new Date(value));
 
-export function BookingForm({ initialToday }: { initialToday: string }) {
+export function BookingForm({
+  initialToday,
+  isMemberLoggedIn,
+}: {
+  initialToday: string;
+  isMemberLoggedIn: boolean;
+}) {
   const [catalog, setCatalog] = useState<{
     treatments: Item[];
     options: Item[];
@@ -174,7 +180,7 @@ export function BookingForm({ initialToday }: { initialToday: string }) {
     } finally {
       if (version === searchVersion.current) {
         setSearching(false);
-        setCalendarRevision(value => value + 1);
+        setCalendarRevision((value) => value + 1);
       }
     }
   }
@@ -296,12 +302,32 @@ export function BookingForm({ initialToday }: { initialToday: string }) {
         </Link>
       </main>
     );
+  console.log("isMemberLoggedIn:", isMemberLoggedIn);
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-6">
       <h1 className="text-2xl font-bold">Web予約</h1>
-      <p>
-        メニューと空き時刻はどなたでも確認できます。予約の確定には会員ログインが必要です。
-      </p>
+      {isMemberLoggedIn ? (
+        <p>メニューと空き時刻はどなたでも確認できます。現在ログイン中です。予約を進めることができます。</p>
+      ) : (
+        <p>
+          メニューと空き時刻はどなたでも確認できます。
+          <strong>予約の確定</strong>には
+          <Link
+            className="ml-2 text-blue-700 underline"
+            href="/login?next=%2Fbook"
+          >
+            ログイン
+          </Link>{" "}
+          または
+          <Link
+            className="text-blue-700 underline"
+            href="/register?next=%2Fbook"
+          >
+            会員登録
+          </Link>
+          が必要です。
+        </p>
+      )}
       {!catalog && !catalogError && <p role="status">メニューを取得中です…</p>}
       {catalogError && (
         <p role="alert">
@@ -376,7 +402,13 @@ export function BookingForm({ initialToday }: { initialToday: string }) {
             )}
           </section>
           <section className="space-y-3">
-            <h2 id="booking-calendar-heading" tabIndex={-1} className="text-xl font-semibold">2. 日付・空き時刻</h2>
+            <h2
+              id="booking-calendar-heading"
+              tabIndex={-1}
+              className="text-xl font-semibold"
+            >
+              2. 日付・空き時刻
+            </h2>
             <BookingDatePicker
               initialToday={initialToday}
               treatmentId={treatmentId}
@@ -439,7 +471,7 @@ export function BookingForm({ initialToday }: { initialToday: string }) {
             )}
             {memberState === "blocked" && (
               <p role="alert">
-                現在の会員状態では予約できません。アカウント状態を確認してください。
+                現在の会員状態では予約できません。会員ログインまたは新規入会を行ってください。
               </p>
             )}
             {memberState === "error" && (
