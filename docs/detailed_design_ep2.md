@@ -193,7 +193,7 @@ Node.jsを`.nvmrc`で22.23.1に固定し、package.jsonのenginesで22.23.1以�
 | `npm run test:watch` | 開発中の継続テスト |
 | `npm run db:check` | 稼働中のローカルDBにSELECT 1。データ更新なし |
 | `npm run build` | 本番ビルド。現在はGoogle Fontsの取得にネットワークが必要 |
-| `npm run audit:dependencies` | 全依存の監査。high以上で失敗し、既知の指摘を黙って除外しない |
+| `npm run audit:dependencies` | 全依存の監査。high以上で失敗。第7.6章の期限付き例外だけを警告付きで許容する |
 
 ハンズオンは`.env`のローカル設定を確認したうえで次の順序とする。既存ファイルにサンプルを上書きしない。
 
@@ -331,6 +331,18 @@ GitHub Actionsの`dependency-audit`で、Next.jsのcriticalとfast-uriのmoderat
 `npm run build`はsandbox内でGoogle Fonts取得が失敗し、通信を許可した再実行ではTurbopackのポート作成が`Operation not permitted`で停止した。`npm run build -- --webpack`は通信を許可した環境で成功。既定TurbopackによるGitHub上のビルド成功は別途確認する。
 
 GitHub側の修正後の実行は未確認。この差分をcommit・pushした後の新しい実行で確認する。修正前のcommitに対する失敗ジョブの再実行では、更新したlockfileは使われない。
+
+### 7.6 2026-10-05：未修正bracesの期限付き監査例外
+
+`braces@3.0.3`の[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)がESLint設定・Vercel CLIの開発依存へ波及し、high 23件でCIが失敗した。公式の修正版がないため、利用者の明示承認により、このアドバイザリに限定した期限付き例外を採用する。脆弱性自体は未修正。
+
+`audit:dependencies`はNode.js標準APIだけを使う`scripts/audit-dependencies.mjs`へ変更する。監査jobには`npm ci`がないため、tsxなどのインストール済み依存を前提にしない。全依存のJSON監査結果をログへ出力し、`scripts/lib/dependency-audit.mjs`が原因の依存経路を再帰的に検査する。
+
+許容条件は対象アドバイザリURLの完全一致、bracesの版3.0.3、各波及先を含めたlockfile上の開発依存、highの重大度、2026-10-20T00:00:00+09:00未満。別原因との混在、critical、本番依存、循環・欠落した経路、監査APIエラー、不正な出力、期限切れは失敗させる。対象が消えた場合は期限後も正常に監査できる。実行時の期限変更オプションは設けない。
+
+解除時は修正版へ更新してlockfileを再生成し、例外を削除して通常の監査へ戻す。影響・期限・解除手順は[README](../README.md#2026-10-05未修正のbraces脆弱性と期限付き例外)にも記載する。ローカル検証と更新後のGitHub Actions実行は区別して確認する。
+
+ローカルの`npm run audit:dependencies`はhigh 23件のJSONと例外警告を出力して終了コード0。`npm test`は58件成功し、期限境界・別アドバイザリ・critical・本番依存・不正経路に加え、監査CLIの通信エラー／不正JSON／不明な終了コードも検証した。lint・型チェック・差分チェックも成功。更新後のGitHub Actionsは未確認で、commit・push後の新しい実行が必要。
 
 ## 8. Task 2.1.4：READMEへのセットアップ・起動・検証手順の統合
 

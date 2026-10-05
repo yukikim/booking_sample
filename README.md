@@ -483,9 +483,23 @@ npm run start
 | `npm run test:db` | 稼働中のローカルDBで再作成・制約・競合を検証。スキーマ作成権限が必要 |
 | `npm run db:check` | 稼働中のローカルDBへ`SELECT 1`。テーブル・業務機能の検証ではない |
 | `npm run build` | 本番ビルド。現在はGoogle Fonts取得にもネットワークが必要 |
-| `npm run audit:dependencies` | 全依存を監査し、high以上で失敗する。レジストリへの通信が必要 |
+| `npm run audit:dependencies` | 全依存を監査し、high以上で失敗する。下記の期限付き例外のみ許容。レジストリへの通信が必要 |
 
 GitHub Actionsはpush・pull request・手動実行で起動します。`checks`は専用PostgreSQLを使って`npm ci` → `check` → `db:migrate` → `db:seed` → `test:db` → `test:e2e:http` → `db:check` → `build`、`dependency-audit`は依存監査を実行します。ローカルの成功とGitHub上の成功は別に確認します。今回のDB検証追加後のGitHub実行は未確認です。
+
+### 2026-10-05：未修正のbraces脆弱性と期限付き例外
+
+`braces@3.0.3`には、深くネストしたパターンによってスタックを枯渇させ、Node.jsプロセスを停止させるhighの脆弱性があります（[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)）。2026-10-05時点では公式アドバイザリに修正版がなく、npmの最新版も3.0.3です。
+
+このリポジトリでは`eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch → braces`と、`vercel → @vercel/backends → ts-morph → @ts-morph/common → fast-glob`経由で含まれます。監査のhigh 23件は、この1件が依存先へ波及した結果です。現在のlockfileでは開発依存に限定され、`npm ls braces --omit=dev`では本番依存に含まれません。ただし、開発・ビルド・公開ツールの処理が停止するリスクは残ります。**脆弱性を修正した対応ではありません。**
+
+利用者の承認により、`scripts/audit-dependencies.mjs`で全依存の`npm audit --json --audit-level=high`を実行し、次の条件だけを一時的に許容します。CIの監査jobも同じコマンドを使います。監査のJSON全文と例外の警告はログに残します。
+
+- 期限は**2026-10-19 23:59:59.999（日本時間）まで**。10月20日0時以降、対象の脆弱性が残っていればCIを失敗させます。環境変数やCLIから期限を延長する機能はありません。
+- 対象は`braces@3.0.3`の上記アドバイザリと、それだけを原因とする依存先への波及です。各対象がlockfileで開発依存であることを必須とします。
+- 別のhigh以上の脆弱性、同じパッケージへの別の指摘、criticalへの昇格、本番依存への移動は失敗させます。レジストリ通信エラー・不正なJSON・監査形式の変更も失敗させます。
+
+修正版が公開されたら互換性を確認して依存・lockfileを更新し、例外判定を削除して通常の`npm audit --audit-level=high`へ戻します。期限到来時に修正版がなければ対応方針を再検討し、期限を自動延長しません。`npm audit fix --force`によるESLint設定やVercel CLIの旧版への変更は行いません。
 
 ### うまく動かない場合
 

@@ -16,7 +16,7 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "test:watch": "node --import tsx --test --watch tests/*.test.ts",
     "check": "npm run db:validate && npm run db:generate && npm run lint && npm run typecheck && npm test",
-    "audit:dependencies": "npm audit --audit-level=high",
+    "audit:dependencies": "node scripts/audit-dependencies.mjs",
     "db:migrate": "node --import tsx scripts/migrate-local.ts",
     "db:seed": "node --import tsx prisma/seed.ts",
     "db:seed:remote": "node --import tsx scripts/seed-remote.ts",
